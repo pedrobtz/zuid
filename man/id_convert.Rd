@@ -18,9 +18,10 @@ none. \code{NULL} keeps the prefixes of a TypeID and means \code{""} otherwise.}
 A zuid vector of format \code{to}.
 }
 \description{
-\code{id_convert()} moves values between formats that hold the same 128 bits:
-\code{"uuid"}, \code{"ulid"}, \code{"typeid"} and \code{"upid"}. The bytes are kept and the
-text is rewritten.
+\code{id_convert()} moves values between formats that hold the same bits:
+\code{"uuid"}, \code{"ulid"}, \code{"typeid"} and \code{"upid"} (128 bits), and \code{"xid"} and
+\code{"objectid"} (96 bits, laid out alike). The bytes are kept and the text is
+rewritten.
 }
 \details{
 \itemize{

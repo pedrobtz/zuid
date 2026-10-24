@@ -28,13 +28,18 @@
 #' either case on input; their reserved timestamps (the first and the last)
 #' pass `"syntax"` only. A KSUID is 27 base62 characters, case-sensitive,
 #' at most `aWgEPTl1tmebfsQzFP4bxwgy80V`. Strict also asks that a time is no
-#' later than now plus the tolerance. These formats have one text form each.
+#' later than now plus the tolerance. An XID is 20 lowercase base32hex
+#' characters, an ObjectId 24 hex digits (either case on input) and a
+#' Snowflake 1 to 20 decimal digits without leading zeros. These formats have
+#' one text form each.
 #'
 #' @param x A character vector.
 #' @param format The format, such as `"uuid"`. See [id_formats()]. Required
 #'   for now; detecting it from `x` is not available yet.
 #' @param form A text form of `format`, or `NULL` for its canonical text.
-#' @param layout Reserved for formats that need a layout.
+#' @param layout For `"snowflake"`, required, and for `"scru64"`, optional:
+#'   an [id_layout()]. It travels with the vector and says how to read its
+#'   fields. A Snowflake whose layout has a sign bit must have it clear.
 #' @param level The validation level elements must reach.
 #' @param strict If `TRUE`, an element that fails `level` is an error of
 #'   class `zuid_parse_error`. If `FALSE`, it becomes `NA`.
@@ -67,6 +72,9 @@ id_parse <- function(
       )
     }
     format <- zuid_format_of(x)
+    if (is.null(layout)) {
+      layout <- attr(x, "layout", exact = TRUE)
+    }
     x <- as.character(x)
   }
   check_character(x)
@@ -78,11 +86,12 @@ id_parse <- function(
   }
   check_format(format)
   check_form(form, format)
+  check_layout(layout, format)
   if (!isTRUE(strict) && !isFALSE(strict)) {
     zuid_abort("type", "`strict` must be `TRUE` or `FALSE`.")
   }
 
-  parsed <- parse_text(x, format, form)
+  parsed <- parse_text(x, format, form, layout)
   ok <- !is.na(parsed$level) & parsed$level >= level_number(level)
   if (strict && any(!ok & !is.na(x))) {
     bad <- which(!ok & !is.na(x))
@@ -103,7 +112,7 @@ id_parse <- function(
   text <- parsed$text
   text[!ok] <- NA_character_
   names(text) <- names(x)
-  new_zuid(text, format)
+  new_zuid(text, format, layout)
 }
 
 #' @rdname id_parse
@@ -122,7 +131,8 @@ id_valid <- function(
   check_character(x)
   check_format(format)
   check_form(form, format)
-  parsed <- parse_text(x, format, form)
+  check_layout(layout, format)
+  parsed <- parse_text(x, format, form, layout)
   out <- !is.na(parsed$level) & parsed$level >= level_number(level)
   out[is.na(x)] <- NA
   names(out) <- names(x)
@@ -152,17 +162,37 @@ format_forms <- function(forms) {
   })
 }
 
-parse_text <- function(x, format, form) {
-  out <- .Call(
-    zuid_c_parse,
-    x,
-    format,
-    form,
-    as.numeric(Sys.time()) * 1000,
-    time_tolerance() * 1000
-  )
+parse_text <- function(x, format, form, layout = NULL) {
+  now <- as.numeric(Sys.time()) * 1000
+  out <- .Call(zuid_c_parse, x, format, form, now, time_tolerance() * 1000)
   names(out) <- c("text", "level")
+  if (format == "snowflake") {
+    out$level <- layout_levels(out, layout, now)
+  }
   out
+}
+
+# A Snowflake's structure and strict levels are its layout's: the sign bit
+# clear when the layout has one, and the time no later than now plus the
+# tolerance.
+layout_levels <- function(parsed, layout, now) {
+  level <- parsed$level
+  ok <- which(!is.na(level) & level >= 2L)
+  if (!length(ok)) {
+    return(level)
+  }
+  bytes <- .Call(zuid_c_bytes, parsed$text[ok], "snowflake")
+  if (layout$sign_bit) {
+    signed <- as.integer(bytes[1L, ]) >= 128L
+    level[ok[signed]] <- 1L
+    ok <- ok[!signed]
+    bytes <- bytes[, !signed, drop = FALSE]
+  }
+  if (length(ok)) {
+    ms <- layout_time_ms(as.vector(bytes), layout)
+    level[ok] <- ifelse(ms <= now + time_tolerance() * 1000, 3L, 2L)
+  }
+  level
 }
 
 level_number <- function(level) {

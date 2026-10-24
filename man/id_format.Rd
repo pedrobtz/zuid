@@ -24,7 +24,8 @@ elements back to back.}
 
 \item{format}{The format the bytes are in. Required.}
 
-\item{layout}{Reserved for formats that need a layout.}
+\item{layout}{For \code{"snowflake"} (required) and \code{"scru64"} (optional), an
+\code{\link[=id_layout]{id_layout()}}.}
 }
 \value{
 \code{id_format()}: a character vector. \code{id_bytes()}: a raw matrix

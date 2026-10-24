@@ -17,7 +17,8 @@
 #'   vectors (`NULL` for a missing element), or one raw vector holding the
 #'   elements back to back.
 #' @param format The format the bytes are in. Required.
-#' @param layout Reserved for formats that need a layout.
+#' @param layout For `"snowflake"` (required) and `"scru64"` (optional), an
+#'   [id_layout()].
 #' @return `id_format()`: a character vector. `id_bytes()`: a raw matrix
 #'   with the format's width in rows and one column per element, big-endian,
 #'   with missing elements as columns of zeros listed in the attribute `na`.
@@ -62,6 +63,7 @@ id_from_bytes <- function(bytes, format, layout = NULL) {
     )
   }
   check_format(format)
+  check_layout(layout, format)
   width <- id_formats()$width[id_formats()$format == format] %/% 8L
   if (is.list(bytes)) {
     na <- vapply(bytes, is.null, logical(1))
@@ -105,7 +107,17 @@ id_from_bytes <- function(bytes, format, layout = NULL) {
     )
   }
   text <- .Call(zuid_c_from_bytes, flat, format, na)
-  new_zuid(text, format)
+  if (format == "snowflake" && layout$sign_bit) {
+    signed <- as.integer(flat[seq(1L, by = 8L, length.out = length(na))]) >=
+      128L
+    if (any(signed & !na)) {
+      zuid_abort(
+        "layout",
+        "A Snowflake with a sign bit in its layout must have the top bit clear."
+      )
+    }
+  }
+  new_zuid(text, format, layout)
 }
 
 #' The nil and max UUIDs

@@ -1,8 +1,9 @@
 #' Convert identifiers between formats
 #'
-#' `id_convert()` moves values between formats that hold the same 128 bits:
-#' `"uuid"`, `"ulid"`, `"typeid"` and `"upid"`. The bytes are kept and the
-#' text is rewritten.
+#' `id_convert()` moves values between formats that hold the same bits:
+#' `"uuid"`, `"ulid"`, `"typeid"` and `"upid"` (128 bits), and `"xid"` and
+#' `"objectid"` (96 bits, laid out alike). The bytes are kept and the text is
+#' rewritten.
 #'
 #' * A UUID becomes a TypeID under `prefix`, and a TypeID becomes a UUID by
 #'   dropping it.
@@ -32,7 +33,11 @@ id_convert <- function(x, to, prefix = NULL) {
   check_zuid(x)
   check_format(to)
   from <- zuid_format_of(x)
-  same_bits <- c("uuid", "ulid", "typeid", "upid")
+  same_bits <- if (from %in% c("xid", "objectid")) {
+    c("xid", "objectid")
+  } else {
+    c("uuid", "ulid", "typeid", "upid")
+  }
   if (!from %in% same_bits || !to %in% same_bits) {
     zuid_abort(
       "convert",

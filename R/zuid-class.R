@@ -40,7 +40,15 @@ check_zuid <- function(x, arg = "x", call = sys.call(-1L)) {
 # is, a character vector is parsed and must parse completely.
 as_zuid_like <- function(value, like, call = sys.call(-1L)) {
   format <- zuid_format_of(like)
+  layout <- attr(like, "layout", exact = TRUE)
   if (is_zuid(value)) {
+    if (!identical(attr(value, "layout", exact = TRUE), layout)) {
+      zuid_abort(
+        "layout",
+        "Can't combine zuid vectors with different layouts.",
+        call = call
+      )
+    }
     if (!identical(zuid_format_of(value), format)) {
       zuid_abort(
         "type",
@@ -55,7 +63,7 @@ as_zuid_like <- function(value, like, call = sys.call(-1L)) {
     return(value)
   }
   if (is.null(value)) {
-    return(new_zuid(character(), format))
+    return(new_zuid(character(), format, layout))
   }
   if (!is.character(value) && !all(is.na(value))) {
     zuid_abort(
@@ -68,7 +76,7 @@ as_zuid_like <- function(value, like, call = sys.call(-1L)) {
       call = call
     )
   }
-  id_parse(as.character(value), format = format, strict = TRUE)
+  id_parse(as.character(value), format = format, layout = layout, strict = TRUE)
 }
 
 #' @export
@@ -125,7 +133,11 @@ c.zuid <- function(...) {
   args <- list(...)
   first <- args[[1L]]
   parts <- lapply(args, function(a) as.character(as_zuid_like(a, first)))
-  new_zuid(unlist(parts, use.names = TRUE), zuid_format_of(first))
+  new_zuid(
+    unlist(parts, use.names = TRUE),
+    zuid_format_of(first),
+    attr(first, "layout", exact = TRUE)
+  )
 }
 
 #' @export
@@ -166,7 +178,11 @@ Ops.zuid <- function(e1, e2) {
     }
     # A string that does not parse cannot equal any identifier, so it is
     # kept as it is rather than turned into NA.
-    parsed <- as.character(id_parse(v, format = zuid_format_of(like)))
+    parsed <- as.character(id_parse(
+      v,
+      format = zuid_format_of(like),
+      layout = attr(like, "layout", exact = TRUE)
+    ))
     ifelse(is.na(parsed), v, parsed)
   }
   if (
