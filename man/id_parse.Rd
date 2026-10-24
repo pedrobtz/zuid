@@ -63,6 +63,14 @@ case is accepted, and \code{form} selects another of the RFC 9562 text forms:
 \code{"compact"} (32 hex digits), \code{"urn"} (\verb{urn:uuid:} prefix), \code{"braced"} or
 \code{"uppercase"}, or one of the encodings of \code{\link[=id_encode]{id_encode()}} over the 16 bytes,
 such as \code{"base32"}, \code{"base58"} or \code{"words"}.
+
+A ULID is 26 Crockford base32 characters, uppercase, either case on
+input, starting \code{0} to \code{7}. A TypeID is a lowercase prefix, \verb{_} and 26
+lowercase Crockford characters, or the 26 alone; strict asks what it asks
+of the UUID. A UPID is four prefix characters, \verb{_} and 22 lowercase
+characters, as the reference writes them; strict asks for the current
+version. Strict also asks that a time is no later than now plus the
+tolerance. These formats have one text form each.
 }
 \examples{
 x <- id_parse("018F6B1C-2D3E-7A4B-8C5D-6E7F8091A2B3", "uuid")

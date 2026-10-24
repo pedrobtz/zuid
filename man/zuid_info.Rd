@@ -17,8 +17,9 @@ and the number of \code{entries}.}
 \code{"getrandom"}, \code{"getentropy"}, \code{"BCryptGenRandom"} or
 \code{"arc4random_buf"}.}
 \item{\code{state}}{the session's monotonic generation state: the last
-version 7 millisecond and counter, and the last version 1 and 6 tick
-and clock sequence, \code{NA} before the first value.}
+version 7 millisecond and counter, the last version 1 and 6 tick
+and clock sequence, and the last ULID millisecond, \code{NA} before the
+first value.}
 }
 }
 \description{

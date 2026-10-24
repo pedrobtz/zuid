@@ -196,3 +196,122 @@ rollback_tolerance <- function() {
   }
   tol
 }
+
+#' Generate ULIDs, TypeIDs and UPIDs
+#'
+#' `id_ulid()` generates ULIDs: 48 bits of milliseconds and 80 random bits.
+#' Values from one session strictly increase, by the specification's rule:
+#' within a millisecond, the random component of the last value plus one.
+#' That overflows only after 2^80 values in one millisecond, which is a
+#' `zuid_overflow_error`.
+#'
+#' `id_typeid()` generates TypeIDs: a version 7 UUID, as [id_uuid()] makes
+#' it, under `prefix`.
+#'
+#' `id_upid()` generates UPIDs: 40 bits of time in 256 ms units, 64 random
+#' bits, the prefix and the current version, as the reference does. UPIDs
+#' are not monotonic within 256 ms.
+#'
+#' Entropy comes from the operating system, never from R's random number
+#' generator, and the clock rollback rule of [id_uuid()] applies to ULIDs.
+#'
+#' @inheritParams id_uuid
+#' @param prefix For `id_typeid()`, the type: up to 63 lowercase letters and
+#'   underscores, starting and ending with a letter, or `""` for none. For
+#'   `id_upid()`, one to four characters of `234567` and `a` to `z`, padded
+#'   on the right with `z` as the reference pads it.
+#' @param random `NULL` to draw from the operating system, or exactly the
+#'   bytes needed: 10 per value for ULIDs and TypeIDs, 8 for UPIDs.
+#' @return A zuid vector of `n` values.
+#' @examples
+#' id_ulid(2)
+#' id_typeid(2, "user")
+#' id_upid(2, "user")
+#' @export
+id_ulid <- function(n = 1, random = NULL, time = NULL) {
+  n <- check_count(n)
+  check_random(random, 10 * n)
+  time_us <- generation_time(time, n, 7L)
+  out <- .Call(zuid_c_ulid, n, time_us, random, rollback_tolerance() * 1000)
+  if (is.null(out)) {
+    zuid_abort("entropy", "The operating system's entropy source failed.")
+  }
+  if (is.integer(out)) {
+    zuid_abort(
+      "overflow",
+      sprintf(
+        "Value %d overflows the 80-bit random component within its millisecond.",
+        out
+      )
+    )
+  }
+  new_zuid(out, "ulid")
+}
+
+#' @rdname id_ulid
+#' @export
+id_typeid <- function(n = 1, prefix, random = NULL, time = NULL) {
+  if (missing(prefix)) {
+    zuid_abort("type", "`prefix` is required; use `\"\"` for none.")
+  }
+  check_typeid_prefix(prefix)
+  n <- check_count(n)
+  check_random(random, 10 * n)
+  id_convert(id_uuid(n, 7, random = random, time = time), "typeid", prefix)
+}
+
+#' @rdname id_ulid
+#' @export
+id_upid <- function(n = 1, prefix, random = NULL, time = NULL) {
+  if (missing(prefix)) {
+    zuid_abort("type", "`prefix` is required.")
+  }
+  check_string(prefix, "prefix")
+  if (!grepl("^[2-7a-z]{1,4}$", prefix)) {
+    zuid_abort(
+      "type",
+      "`prefix` must be 1 to 4 characters of `234567` and `a` to `z`."
+    )
+  }
+  n <- check_count(n)
+  check_random(random, 8 * n)
+  time_us <- generation_time(time, n, 7L)
+  out <- .Call(zuid_c_upid, n, time_us, random, upid_tail(prefix))
+  if (is.null(out)) {
+    zuid_abort("entropy", "The operating system's entropy source failed.")
+  }
+  new_zuid(out, "upid")
+}
+
+check_random <- function(random, need, call = sys.call(-1L)) {
+  if (!is.null(random) && (!is.raw(random) || length(random) != need)) {
+    zuid_abort(
+      "type",
+      sprintf("`random` must be %s raw bytes.", format(need)),
+      call = call
+    )
+  }
+}
+
+check_typeid_prefix <- function(prefix, call = sys.call(-1L)) {
+  check_string(prefix, "prefix", call = call)
+  if (!grepl("^([a-z]([a-z_]{0,61}[a-z])?)?$", prefix)) {
+    zuid_abort(
+      "type",
+      paste(
+        "`prefix` must be up to 63 lowercase letters and underscores,",
+        "starting and ending with a letter."
+      ),
+      call = call
+    )
+  }
+}
+
+# The last three bytes of a UPID: the prefix, padded to four characters
+# with "z", in 20 bits, then the version nibble, 6 ("a").
+upid_tail <- function(prefix) {
+  symbols <- strsplit("234567abcdefghijklmnopqrstuvwxyz", "")[[1L]]
+  chars <- strsplit(substr(paste0(prefix, "zzzz"), 1L, 4L), "")[[1L]]
+  v <- sum((match(chars, symbols) - 1) * 32^(3:0)) * 16 + 6
+  as.raw(c(v %/% 65536, (v %/% 256) %% 256, v %% 256))
+}

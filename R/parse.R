@@ -19,6 +19,14 @@
 #' `"uppercase"`, or one of the encodings of [id_encode()] over the 16 bytes,
 #' such as `"base32"`, `"base58"` or `"words"`.
 #'
+#' A ULID is 26 Crockford base32 characters, uppercase, either case on
+#' input, starting `0` to `7`. A TypeID is a lowercase prefix, `_` and 26
+#' lowercase Crockford characters, or the 26 alone; strict asks what it asks
+#' of the UUID. A UPID is four prefix characters, `_` and 22 lowercase
+#' characters, as the reference writes them; strict asks for the current
+#' version. Strict also asks that a time is no later than now plus the
+#' tolerance. These formats have one text form each.
+#'
 #' @param x A character vector.
 #' @param format The format, such as `"uuid"`. See [id_formats()]. Required
 #'   for now; detecting it from `x` is not available yet.
@@ -130,8 +138,15 @@ id_valid <- function(
 id_formats <- function() {
   cols <- .Call(zuid_c_formats)
   out <- as.data.frame(cols, stringsAsFactors = FALSE)
-  out$forms <- strsplit(out$forms, ",", fixed = TRUE)
+  out$forms <- format_forms(out$forms)
   out
+}
+
+# The comma-separated forms column as a list; NA for a format with none.
+format_forms <- function(forms) {
+  lapply(forms, function(f) {
+    if (is.na(f)) character() else strsplit(f, ",", fixed = TRUE)[[1L]]
+  })
 }
 
 parse_text <- function(x, format, form) {
@@ -191,12 +206,15 @@ check_form <- function(form, format, call = sys.call(-1L)) {
   }
   check_string(form, "form", call = call)
   formats <- .Call(zuid_c_formats)
-  forms <- strsplit(
-    formats$forms[formats$format == format],
-    ",",
-    fixed = TRUE
-  )[[1L]]
+  forms <- format_forms(formats$forms[formats$format == format])[[1L]]
   if (!form %in% forms) {
+    if (!length(forms)) {
+      zuid_abort(
+        "type",
+        sprintf("`%s` has one text form; `form` must be `NULL`.", format),
+        call = call
+      )
+    }
     zuid_abort(
       "type",
       sprintf(
