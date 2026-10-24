@@ -39,7 +39,13 @@ across all of them.
 
 ## Installation
 
-zuid is not on CRAN yet. Install the development version from GitHub:
+Install the released version from CRAN:
+
+``` r
+install.packages("zuid")
+```
+
+Or the development version from GitHub:
 
 ``` r
 # install.packages("pak")
@@ -121,11 +127,11 @@ call. Version 7 UUIDs and ULIDs are monotonic within a session:
 ``` r
 id_uuid(3)
 #> <zuid_uuid[3]>
-#> [1] 01a16fcf-47a5-744e-9fb9-2a38cba1579f 01a16fcf-47a5-744f-8be5-c30fd8528dec
-#> [3] 01a16fcf-47a5-7450-a003-dd53c4fdc313
+#> [1] 01a16ff6-c119-75e9-99de-dabb1581c624 01a16ff6-c119-75ea-af79-c40bd646988c
+#> [3] 01a16ff6-c119-75eb-8aed-1f58c8fc069e
 id_ulid(2)
 #> <zuid_ulid[2]>
-#> [1] 01M5QWYHX62P89YZKDGCTH935J 01M5QWYHX62P89YZKDGCTH935K
+#> [1] 01M5QZDG8T7HPF5DZRYSN82N5G 01M5QZDG8T7HPF5DZRYSN82N5H
 ```
 
 Every function starts with `id_` and takes the vector first. A function

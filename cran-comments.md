@@ -17,6 +17,13 @@
 
 * This is a new submission.
 
+## Method references
+
+The package implements published specifications rather than methods from
+the literature: RFC 9562 for UUIDs (cited in the Description), and the
+specifications of ULID, TypeID, UPID, SCRU128, SCRU64, KSUID, XID, BSON
+ObjectId, NanoID, Cuid2, Sqids, multiformats CID, Proquint and Niceware.
+
 ## Data sources and copyright
 
 The package vendors no code. Two tables are data taken unchanged from their
@@ -24,4 +31,5 @@ upstreams and compiled in: the Niceware word list (MIT, Copyright (c) 2016
 yan) and the Sqids blocklist (MIT, Copyright (c) 2023 Sqids).
 `inst/COPYRIGHTS` states their sources, pinned commits and licence, and the
 `Copyright` field points to it. The tests carry TypeID's specification
-fixtures (Apache-2.0, Jetify Inc.), with the licence beside them.
+fixtures (Apache-2.0, Jetify Inc.), with the licence beside them. The
+three copyright holders are listed in `Authors@R` with the `cph` role.
