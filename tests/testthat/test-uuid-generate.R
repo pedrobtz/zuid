@@ -124,10 +124,14 @@ test_that("a large rollback increments the version 1 clock sequence", {
 })
 
 test_that("set.seed() does not change generated values", {
-  set.seed(1)
-  a <- id_uuid(10, version = 4)
-  set.seed(1)
-  b <- id_uuid(10, version = 4)
+  a <- local({
+    withr::local_seed(1)
+    id_uuid(10, version = 4)
+  })
+  b <- local({
+    withr::local_seed(1)
+    id_uuid(10, version = 4)
+  })
   expect_false(any(a == b))
 })
 

@@ -256,7 +256,8 @@ id_snowflake <- function(
         )
       )
     }
-    worker <- stats::setNames(list(worker), nodes)
+    worker <- list(worker)
+    names(worker) <- nodes
   }
   if (!setequal(names(worker), nodes) || anyDuplicated(names(worker))) {
     zuid_abort(

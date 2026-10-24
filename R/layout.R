@@ -239,7 +239,7 @@ new_layout <- function(
       time_bits = as.integer(time_bits),
       unit = unit,
       epoch = epoch,
-      fields = stats::setNames(as.integer(fields), names(fields)),
+      fields = named_integers(fields, names(fields)),
       sequence = as.integer(sequence),
       sign_bit = sign_bit,
       order = order
@@ -277,7 +277,7 @@ layout_parts <- function(layout) {
     ifelse(layout$order == "sequence", 2L, 1L)
   )
   list(
-    widths = stats::setNames(as.integer(widths), layout$order),
+    widths = named_integers(widths, layout$order),
     kinds = as.integer(kinds)
   )
 }
@@ -349,4 +349,10 @@ layout_unpack <- function(bytes, layout) {
 
 layout_time_ms <- function(bytes, layout) {
   layout$epoch + layout_unpack(bytes, layout)$time * layout_units[[layout$unit]]
+}
+
+named_integers <- function(x, names) {
+  out <- as.integer(x)
+  names(out) <- names
+  out
 }
