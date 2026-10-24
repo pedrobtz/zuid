@@ -83,11 +83,11 @@ tick; further back is a `zuid_clock_error`.
 ``` r
 id_xid(2)
 #> <zuid_xid[2]>
-#> [1] dbeagdke0l3hlbmkl3ng dbeagdke0l3hlbmkl3o0
+#> [1] dbegiafbe41hjn84gfo0 dbegiafbe41hjn84gfog
 id_objectid(2)
 #> <zuid_objectid[2]>
-#> [1] 6adca8365249b8f6913d4dc3 6adca8365249b8f6913d4dc4
+#> [1] 6add0929d1140e394ef26190 6add0929d1140e394ef26191
 id_snowflake(2, id_layout("twitter"), list(datacenter = 1, worker = 7))
 #> <zuid_snowflake[2]>
-#> [1] 2113974948564463616 2113974948564463617
+#> [1] 2114079049289723904 2114079049289723905
 ```
