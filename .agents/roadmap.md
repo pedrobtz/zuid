@@ -31,7 +31,7 @@ unaffected. Design §12's Arrow criterion does not apply to v0.1.0.
 | 5 | [SCRU128, SCRU64 and KSUID](#stage-5--scru128-scru64-and-ksuid) | quick | [#8](https://github.com/pedrobtz/zuid/issues/8) | [#22](https://github.com/pedrobtz/zuid/pull/22) | 2026-10-24 |
 | 6 | [XID, ObjectId and Snowflake layouts](#stage-6--xid-objectid-and-snowflake-layouts) | quick | [#9](https://github.com/pedrobtz/zuid/issues/9) | [#23](https://github.com/pedrobtz/zuid/pull/23) | 2026-10-24 |
 | 7 | [NanoID, Cuid2, Sqids and CID](#stage-7--nanoid-cuid2-sqids-and-cid) | quick | [#10](https://github.com/pedrobtz/zuid/issues/10) | [#24](https://github.com/pedrobtz/zuid/pull/24) | 2026-10-24 |
-| 8 | [Detection](#stage-8--detection) | quick | [#11](https://github.com/pedrobtz/zuid/issues/11) | | 2026-10-24 |
+| 8 | [Detection](#stage-8--detection) | quick | [#11](https://github.com/pedrobtz/zuid/issues/11) | [#25](https://github.com/pedrobtz/zuid/pull/25) | 2026-10-24 |
 | 9 | [Fuzzing and benchmarks](#stage-9--fuzzing-and-benchmarks) | quick | [#12](https://github.com/pedrobtz/zuid/issues/12) | | |
 | 10 | [Full CI](#stage-10--full-ci) | full | [#13](https://github.com/pedrobtz/zuid/issues/13) | | |
 | 11 | [v0.1.0 readiness](#stage-11--v010-readiness) | full | [#14](https://github.com/pedrobtz/zuid/issues/14) | | |
