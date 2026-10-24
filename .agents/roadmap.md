@@ -33,7 +33,7 @@ unaffected. Design §12's Arrow criterion does not apply to v0.1.0.
 | 7 | [NanoID, Cuid2, Sqids and CID](#stage-7--nanoid-cuid2-sqids-and-cid) | quick | [#10](https://github.com/pedrobtz/zuid/issues/10) | [#24](https://github.com/pedrobtz/zuid/pull/24) | 2026-10-24 |
 | 8 | [Detection](#stage-8--detection) | quick | [#11](https://github.com/pedrobtz/zuid/issues/11) | [#25](https://github.com/pedrobtz/zuid/pull/25) | 2026-10-24 |
 | 9 | [Fuzzing and benchmarks](#stage-9--fuzzing-and-benchmarks) | quick | [#12](https://github.com/pedrobtz/zuid/issues/12) | [#26](https://github.com/pedrobtz/zuid/pull/26) | 2026-10-24 |
-| 10 | [Full CI](#stage-10--full-ci) | full | [#13](https://github.com/pedrobtz/zuid/issues/13) | | |
+| 10 | [Full CI](#stage-10--full-ci) | full | [#13](https://github.com/pedrobtz/zuid/issues/13) | | 2026-10-24 |
 | 11 | [v0.1.0 readiness](#stage-11--v010-readiness) | full | [#14](https://github.com/pedrobtz/zuid/issues/14) | | |
 
 ## Stage 0 — Package identity
@@ -482,6 +482,19 @@ when the evidence allows, and report ambiguity otherwise.
 - The same input gives byte-identical `zuid` vectors and `id_fields()`
   frames on the Linux, macOS and Windows legs.
 - The fuzz target has run one hour clean with sanitizers.
+
+**Deviations (2026-10-24).**
+
+- The full run on Stage 9's merge commit (3cc1b20) was green and this issue
+  had no comments, so the stage fixes nothing; it adds the two checks the
+  exit criteria name.
+- The hour of fuzzing runs in CI: the fuzz workflow fuzzes 3600 s nightly
+  and on a pull request labelled `full-ci`, with a 75-minute job timeout.
+- Byte identity across platforms is a golden file,
+  `tests/testthat/fixtures/determinism.txt`: every generator run on fixed
+  time and random input, the text, time and `id_fields()` of each, and the
+  encodings of one byte string in every form. Each R CMD check leg compares
+  against it.
 
 **Design.** §9; §12.
 
