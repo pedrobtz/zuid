@@ -12,5 +12,13 @@
 SEXP zuid_mkchar(const char *bytes, size_t len);
 
 SEXP zuid_c_table(SEXP name);
+SEXP zuid_c_parse(SEXP x, SEXP format, SEXP form, SEXP now_ms,
+                  SEXP tolerance_ms);
+SEXP zuid_c_format(SEXP x, SEXP format, SEXP form);
+SEXP zuid_c_bytes(SEXP x, SEXP format);
+SEXP zuid_c_from_bytes(SEXP bytes, SEXP format, SEXP na);
+SEXP zuid_c_fields(SEXP x, SEXP format);
+SEXP zuid_c_formats(void);
+SEXP zuid_c_key(SEXP x, SEXP format);
 
 #endif
