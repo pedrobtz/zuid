@@ -27,6 +27,7 @@ SEXP zuid_c_reset_state(void)
     memset(&ulid_state, 0, sizeof ulid_state);
     memset(&scru128_state, 0, sizeof scru128_state);
     memset(&scru64_state, 0, sizeof scru64_state);
+    zuid_layout_reset_state();
     session_clock_seq = -1;
     memset(session_node, 0, sizeof session_node);
     return R_NilValue;

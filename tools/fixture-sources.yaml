@@ -97,6 +97,25 @@ fixtures:
     retrieved: 2026-10-24
     # The README's inspected KSUIDs, the minimum and maximum strings and
     # the parse rejections, written into tests/testthat/test-ksuid.R.
+  xid:
+    repo: rs/xid
+    commit: 34d39051ca0d70f40a8cd8c5491ef835e624b71d
+    path: id_test.go
+    retrieved: 2026-10-24
+    # Its IDParts vectors, 9m4e2mr0ui3e8a215n4g and the rejected
+    # c6e52g2mrqcjl44hf179, written into tests/testthat/test-xid.R.
+  objectid:
+    repo: mongodb/specifications
+    commit: 49b3079c1ef74a3a685ed32c4ffd178b8ee83843
+    path: source/bson-corpus/tests/oid.json
+    retrieved: 2026-10-24
+    # Its three ObjectIds, written into tests/testthat/test-objectid.R.
+  snowflake:
+    # Discord's documented 175928847299117063 (2016-04-30T11:18:25.796Z,
+    # discord.com/developers/docs/reference#snowflakes) and Tweet
+    # 1050118621198921728 (2018-10-10T20:19:24Z, the Twitter API's example
+    # Tweet object), written into tests/testthat/test-snowflake.R.
+    retrieved: 2026-10-24
   encodings:
     path: tests/testthat/fixtures/encodings.csv
     generator: tools/gen-fixtures

@@ -34,6 +34,11 @@ vec_ptype2_zuid <- function(x, y, ...) {
   if (!identical(zuid_format_of(x), zuid_format_of(y))) {
     zuid_abort("type", "Can't combine zuid vectors of different formats.")
   }
+  if (
+    !identical(attr(x, "layout", exact = TRUE), attr(y, "layout", exact = TRUE))
+  ) {
+    zuid_abort("layout", "Can't combine zuid vectors with different layouts.")
+  }
   x[0L]
 }
 
@@ -50,7 +55,12 @@ vec_cast_to_chr <- function(x, to, ...) {
 }
 
 vec_cast_from_chr <- function(x, to, ...) {
-  id_parse(x, format = zuid_format_of(to), strict = TRUE)
+  id_parse(
+    x,
+    format = zuid_format_of(to),
+    layout = attr(to, "layout", exact = TRUE),
+    strict = TRUE
+  )
 }
 
 vec_ptype_abbr_zuid <- function(x, ...) {

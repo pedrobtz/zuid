@@ -10,6 +10,9 @@ const zuid_format *const zuid_formats[] = {
     &zuid_fmt_scru128,
     &zuid_fmt_scru64,
     &zuid_fmt_ksuid,
+    &zuid_fmt_xid,
+    &zuid_fmt_objectid,
+    &zuid_fmt_snowflake,
 };
 const int zuid_n_formats = (int) (sizeof zuid_formats / sizeof zuid_formats[0]);
 
@@ -32,6 +35,7 @@ void zuid_fields_clear(zuid_fields *f)
     f->version = -1;
     f->variant = NULL;
     f->node[0] = '\0';
+    f->process = -1;
     f->sequence = -1;
     f->random[0] = '\0';
     f->has_prefix = 0;

@@ -238,12 +238,12 @@ SEXP zuid_c_fields(SEXP x, SEXP format)
     R_xlen_t n = XLENGTH(x);
     const char *names[] = {"time_s",  "time_ns",  "time_unit",
                            "version", "variant",  "node",
-                           "sequence", "random", "prefix"};
-    SEXP out = PROTECT(Rf_allocVector(VECSXP, 9));
-    SEXP nms = PROTECT(Rf_allocVector(STRSXP, 9));
+                           "sequence", "random", "prefix", "process"};
+    SEXP out = PROTECT(Rf_allocVector(VECSXP, 10));
+    SEXP nms = PROTECT(Rf_allocVector(STRSXP, 10));
     SEXPTYPE types[] = {REALSXP, REALSXP, STRSXP, INTSXP, STRSXP,
-                        STRSXP,  INTSXP,  STRSXP, STRSXP};
-    for (int j = 0; j < 9; j++) {
+                        STRSXP,  INTSXP,  STRSXP, STRSXP, INTSXP};
+    for (int j = 0; j < 10; j++) {
         SET_VECTOR_ELT(out, j, Rf_allocVector(types[j], n));
         SET_STRING_ELT(nms, j, Rf_mkChar(names[j]));
     }
@@ -273,6 +273,7 @@ SEXP zuid_c_fields(SEXP x, SEXP format)
                        f.has_prefix
                            ? zuid_mkchar(f.prefix, strlen(f.prefix))
                            : NA_STRING);
+        INTEGER(VECTOR_ELT(out, 9))[i] = f.process < 0 ? NA_INTEGER : f.process;
     }
     UNPROTECT(2);
     return out;

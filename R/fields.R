@@ -19,9 +19,14 @@
 #'
 #' A SCRU128 has its millisecond time, `counter_hi` in `node` (as hex),
 #' `counter_lo` in `sequence` and its 32 entropy bits in `random`. A SCRU64
-#' has its time at 256 ms; its node and counter need the generator's
-#' `node_bits`, so they are `NA`. A KSUID has its time in seconds and its
-#' 128-bit payload in `random`.
+#' has its time at 256 ms, and its `node` and counter in `sequence` when it
+#' was parsed with `id_layout("scru64", node_bits = )`. A KSUID has its time
+#' in seconds and its 128-bit payload in `random`. An XID has its time in
+#' seconds, its machine id in `node`, its `process` and its counter in
+#' `sequence`; an ObjectId the same, but its middle five bytes are `random`,
+#' as the current BSON specification makes them. A Snowflake has what its
+#' layout says: the time at the layout's unit and epoch, the node fields in
+#' `node` as `name=value` pairs, and the `sequence`.
 #'
 #' The nil and max UUIDs report versions 0 and 15 and no variant. `random`
 #' is the random bits joined in order, as hex, left-padded with zero bits to
@@ -49,7 +54,7 @@
 id_fields <- function(x) {
   check_zuid(x)
   format <- zuid_format_of(x)
-  cols <- .Call(zuid_c_fields, as.character(x), format)
+  cols <- field_columns(x)
   n <- length(x)
   na_chr <- rep(NA_character_, n)
   data.frame(
@@ -59,7 +64,7 @@ id_fields <- function(x) {
     version = cols$version,
     variant = cols$variant,
     node = cols$node,
-    process = rep(NA_integer_, n),
+    process = cols$process,
     sequence = cols$sequence,
     random = cols$random,
     prefix = cols$prefix,
@@ -76,7 +81,7 @@ id_fields <- function(x) {
 id_time <- function(x, class = c("POSIXct", "ms")) {
   check_zuid(x)
   class <- match.arg(class)
-  cols <- .Call(zuid_c_fields, as.character(x), zuid_format_of(x))
+  cols <- field_columns(x)
   out <- switch(
     class,
     POSIXct = as_posixct(cols$time_s, cols$time_ns),
@@ -93,6 +98,34 @@ id_version <- function(x) {
   out <- .Call(zuid_c_fields, as.character(x), zuid_format_of(x))$version
   names(out) <- names(x)
   out
+}
+
+# The C fields, completed from the layout for Snowflake and SCRU64.
+field_columns <- function(x) {
+  cols <- .Call(zuid_c_fields, as.character(x), zuid_format_of(x))
+  layout <- attr(x, "layout", exact = TRUE)
+  if (is.null(layout)) {
+    return(cols)
+  }
+  ok <- !is.na(x)
+  bytes <- .Call(zuid_c_bytes, as.character(x)[ok], zuid_format_of(x))
+  parts <- layout_unpack(as.vector(bytes), layout)
+  ms <- layout$epoch + parts$time * layout_units[[layout$unit]]
+  cols$time_s[ok] <- floor(ms / 1000)
+  cols$time_ns[ok] <- (ms - floor(ms / 1000) * 1000) * 1e6
+  cols$time_unit[ok] <- layout$unit
+  nodes <- names(layout$fields)
+  cols$node[ok] <- do.call(
+    paste,
+    c(
+      lapply(nodes, function(f) {
+        paste0(f, "=", format(parts[[f]], scientific = FALSE, trim = TRUE))
+      }),
+      sep = ","
+    )
+  )
+  cols$sequence[ok] <- as.integer(parts$sequence)
+  cols
 }
 
 as_posixct <- function(seconds, nanoseconds) {

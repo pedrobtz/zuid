@@ -29,7 +29,7 @@ unaffected. Design §12's Arrow criterion does not apply to v0.1.0.
 | 3 | [Encodings](#stage-3--encodings) | quick | [#6](https://github.com/pedrobtz/zuid/issues/6) | [#20](https://github.com/pedrobtz/zuid/pull/20) | 2026-10-24 |
 | 4 | [ULID, TypeID and UPID](#stage-4--ulid-typeid-and-upid) | quick | [#7](https://github.com/pedrobtz/zuid/issues/7) | [#21](https://github.com/pedrobtz/zuid/pull/21) | 2026-10-24 |
 | 5 | [SCRU128, SCRU64 and KSUID](#stage-5--scru128-scru64-and-ksuid) | quick | [#8](https://github.com/pedrobtz/zuid/issues/8) | [#22](https://github.com/pedrobtz/zuid/pull/22) | 2026-10-24 |
-| 6 | [XID, ObjectId and Snowflake layouts](#stage-6--xid-objectid-and-snowflake-layouts) | quick | [#9](https://github.com/pedrobtz/zuid/issues/9) | | |
+| 6 | [XID, ObjectId and Snowflake layouts](#stage-6--xid-objectid-and-snowflake-layouts) | quick | [#9](https://github.com/pedrobtz/zuid/issues/9) | [#23](https://github.com/pedrobtz/zuid/pull/23) | 2026-10-24 |
 | 7 | [NanoID, Cuid2, Sqids and CID](#stage-7--nanoid-cuid2-sqids-and-cid) | quick | [#10](https://github.com/pedrobtz/zuid/issues/10) | | |
 | 8 | [Detection](#stage-8--detection) | quick | [#11](https://github.com/pedrobtz/zuid/issues/11) | | |
 | 9 | [Fuzzing and benchmarks](#stage-9--fuzzing-and-benchmarks) | quick | [#12](https://github.com/pedrobtz/zuid/issues/12) | | |
@@ -322,6 +322,24 @@ read fields and generate.
 - Oracles §7.7 and §7.8 pass.
 - Layouts round-trip through `id_layout()` and the `layout` attribute.
 - `R CMD check` passes on the quick r-actions profile.
+
+**Deviations (2026-10-24).**
+
+- A Snowflake sequence overflow moves to the next tick instead of waiting
+  for it (§6.7), as SCRU64's does (Stage 5): waiting would read the clock
+  inside the generator (D6). Ticks moved ahead this way are not counted as
+  a clock rollback; only the clock's own readings are.
+- `zuid.clock_tolerance` is in seconds, 0.01 by default, like the other
+  tolerance options, rather than in milliseconds.
+- `id_snowflake()` has no `random`: the sequence starts at zero each tick,
+  as Twitter's does. `id_xid()` and `id_objectid()` take `random` (D6).
+- A layout's parts are at most 53 bits each, so that every field reads
+  exactly as a double, and a layout has one to six node fields.
+- The SCRU64 layout is optional, so a SCRU64 still parses without one;
+  with `id_layout("scru64", node_bits = )` its node and counter are read,
+  which finishes what Stage 5 deferred.
+- An XID in uppercase is rejected, as `rs/xid` rejects it; a Snowflake with
+  leading zeros is rejected, so each value has one text.
 
 **Design.** §6.1, §6.4, §6.6, §6.8; D12, D13.
 

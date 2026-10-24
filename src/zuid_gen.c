@@ -261,3 +261,80 @@ void zuid_gen_ksuid(size_t n, const int64_t *ms, const uint8_t *random,
         memcpy(b + 4, random + ZUID_KSUID_RANDOM * i, 16);
     }
 }
+
+static uint64_t mask_bits(int w)
+{
+    return w >= 64 ? UINT64_MAX : (UINT64_C(1) << w) - 1;
+}
+
+long zuid_gen_snowflake(size_t n, const int64_t *ticks,
+                        const zuid_layout_spec *spec, const uint64_t *node,
+                        int64_t tolerance_ticks, zuid_snowflake_state *state,
+                        uint8_t *out)
+{
+    int time_w = 0, seq_w = 0;
+    for (int k = 0; k < spec->nparts; k++) {
+        if (spec->kind[k] == ZUID_PART_TIME) time_w = spec->width[k];
+        if (spec->kind[k] == ZUID_PART_SEQUENCE) seq_w = spec->width[k];
+    }
+    if (!state->has || memcmp(&state->spec, spec, sizeof *spec) != 0 ||
+        memcmp(state->node, node, sizeof state->node) != 0) {
+        memset(state, 0, sizeof *state);
+        state->spec = *spec;
+        memcpy(state->node, node, sizeof state->node);
+        state->last_tick = -1;
+        state->last_clock = -1;
+        state->has = 1;
+    }
+    for (size_t i = 0; i < n; i++) {
+        int64_t t = ticks[i];
+        if (t < state->last_clock - tolerance_ticks) return (long) i + 1;
+        if (t > state->last_clock) state->last_clock = t;
+        if (t > state->last_tick) {
+            state->last_tick = t;
+            state->sequence = 0;
+        } else if (++state->sequence > mask_bits(seq_w)) {
+            state->last_tick++;
+            state->sequence = 0;
+        }
+        if ((uint64_t) state->last_tick > mask_bits(time_w)) {
+            return -((long) i + 1);
+        }
+        uint64_t v = 0;
+        for (int k = 0; k < spec->nparts; k++) {
+            uint64_t part = spec->kind[k] == ZUID_PART_TIME
+                                ? (uint64_t) state->last_tick
+                            : spec->kind[k] == ZUID_PART_SEQUENCE
+                                ? state->sequence
+                                : node[k];
+            v = (spec->width[k] >= 64 ? 0 : v << spec->width[k]) |
+                (part & mask_bits(spec->width[k]));
+        }
+        store_be(out + 8 * i, v, 8);
+    }
+    return 0;
+}
+
+void zuid_layout_unpack(const uint8_t *bytes, const zuid_layout_spec *spec,
+                        uint64_t *parts)
+{
+    uint64_t v = 0;
+    for (int i = 0; i < 8; i++) v = v << 8 | bytes[i];
+    for (int k = spec->nparts - 1; k >= 0; k--) {
+        int w = spec->width[k];
+        parts[k] = v & mask_bits(w);
+        v = w >= 64 ? 0 : v >> w;
+    }
+}
+
+void zuid_gen_xid(size_t n, const int64_t *secs, const uint8_t middle[5],
+                  zuid_counter_state *counter, uint8_t *out)
+{
+    for (size_t i = 0; i < n; i++) {
+        uint8_t *b = out + 12 * i;
+        store_be(b, (uint64_t) secs[i], 4);
+        memcpy(b + 4, middle, 5);
+        store_be(b + 9, counter->counter, 3);
+        counter->counter = (counter->counter + 1) & MAX24;
+    }
+}

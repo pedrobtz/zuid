@@ -30,7 +30,9 @@ for now; detecting it from \code{x} is not available yet.}
 
 \item{form}{A text form of \code{format}, or \code{NULL} for its canonical text.}
 
-\item{layout}{Reserved for formats that need a layout.}
+\item{layout}{For \code{"snowflake"}, required, and for \code{"scru64"}, optional:
+an \code{\link[=id_layout]{id_layout()}}. It travels with the vector and says how to read its
+fields. A Snowflake whose layout has a sign bit must have it clear.}
 
 \item{level}{The validation level elements must reach.}
 
@@ -73,7 +75,10 @@ version. SCRU128 is 25 base36 characters and SCRU64 12, lowercase,
 either case on input; their reserved timestamps (the first and the last)
 pass \code{"syntax"} only. A KSUID is 27 base62 characters, case-sensitive,
 at most \code{aWgEPTl1tmebfsQzFP4bxwgy80V}. Strict also asks that a time is no
-later than now plus the tolerance. These formats have one text form each.
+later than now plus the tolerance. An XID is 20 lowercase base32hex
+characters, an ObjectId 24 hex digits (either case on input) and a
+Snowflake 1 to 20 decimal digits without leading zeros. These formats have
+one text form each.
 }
 \examples{
 x <- id_parse("018F6B1C-2D3E-7A4B-8C5D-6E7F8091A2B3", "uuid")
