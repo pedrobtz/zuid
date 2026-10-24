@@ -1,5 +1,9 @@
 # zuid 0.0.0.9000
 
+* `id_detect()` names each element's format, or `NA` with its candidates
+  when the evidence does not settle it; only structured formats are tried
+  without a `hint`. `id_parse(format = NULL)` detects one format for the
+  whole vector, or raises `zuid_ambiguous_error` or `zuid_mixed_error`.
 * NanoID, Cuid2, Sqids and CID parse and validate, and `id_nanoid()` and
   `id_sqids()` generate. `id_parse()` and `id_valid()` take `alphabet` and
   `min_length` for NanoID and Sqids, and the parameters travel with the
