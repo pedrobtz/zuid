@@ -8,7 +8,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define ZUID_MAX_WIDTH 32  /* bytes; the widest fixed-width format is 20 */
+#define ZUID_MAX_WIDTH 32  /* bytes; the widest fixed-width format, KSUID, is 20 */
 #define ZUID_TEXT_BUF 256  /* bytes; longer than any form of any format */
 #define ZUID_PREFIX_MAX 63 /* a TypeID prefix, the longest text outside the bytes */
 
@@ -108,5 +108,8 @@ extern const zuid_format zuid_fmt_uuid;
 extern const zuid_format zuid_fmt_ulid;
 extern const zuid_format zuid_fmt_typeid;
 extern const zuid_format zuid_fmt_upid;
+extern const zuid_format zuid_fmt_scru128;
+extern const zuid_format zuid_fmt_scru64;
+extern const zuid_format zuid_fmt_ksuid;
 
 #endif

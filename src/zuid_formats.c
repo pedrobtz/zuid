@@ -7,6 +7,9 @@ const zuid_format *const zuid_formats[] = {
     &zuid_fmt_ulid,
     &zuid_fmt_typeid,
     &zuid_fmt_upid,
+    &zuid_fmt_scru128,
+    &zuid_fmt_scru64,
+    &zuid_fmt_ksuid,
 };
 const int zuid_n_formats = (int) (sizeof zuid_formats / sizeof zuid_formats[0]);
 
