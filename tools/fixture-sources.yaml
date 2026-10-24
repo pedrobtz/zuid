@@ -33,6 +33,43 @@ tables:
 # Conformance fixtures under tests/testthat/fixtures/, added by the stages
 # that use them (design.md section 7).
 fixtures:
+  typeid_valid:
+    repo: jetify-com/typeid
+    commit: be8ff0daf5dc1f6d40c62a03cfc89945263a69af
+    path: spec/valid.yml
+    stored: tests/testthat/fixtures/typeid/valid.yml
+    retrieved: 2026-10-24
+    sha256: 2b712a1323875eceb00a4cfd574d865e95d6aa17070e40f5a7ec783aaa9fd4df
+    entries: 9
+    licence: Apache-2.0
+  typeid_invalid:
+    repo: jetify-com/typeid
+    commit: be8ff0daf5dc1f6d40c62a03cfc89945263a69af
+    path: spec/invalid.yml
+    stored: tests/testthat/fixtures/typeid/invalid.yml
+    retrieved: 2026-10-24
+    sha256: ab01bad4be62eda6783805cfcf9644acdfab02ce57a3b061d54653361dde0759
+    entries: 21
+    licence: Apache-2.0
+  ulid_spec:
+    repo: ulid/spec
+    commit: d0c7170df4517939e70129b4d6462cc162f2d5bf
+    path: README.md
+    retrieved: 2026-10-24
+    # Its vectors are written into tests/testthat/test-ulid.R: the maximum
+    # 7ZZZZZZZZZZZZZZZZZZZZZZZZZ, the overflow rejection and the monotonic
+    # sequences 01BX5ZZKBKACTAV9WEVGEMMVRY... and ...ZZZZZZZZZZZZZZX.
+  upid:
+    repo: carderne/upid
+    commit: d820a74227adb803d378d89da9eacba78c1a5e09
+    path: tests/testthat/fixtures/upid.csv
+    generator: tools/gen-encoding-fixtures
+    retrieved: 2026-10-24
+    sha256: 2e6ddb778d7890a87d843a2c1739668d5de453fc066f0baa616b4eb7baadf713
+    # The Python reference, upid 0.3.1, over random bytes; the README's
+    # user_2accvpp5guht4dts56je5a is checked in tests/testthat/test-upid.R.
+    python:
+      upid: 0.3.1
   encodings:
     path: tests/testthat/fixtures/encodings.csv
     generator: tools/gen-encoding-fixtures
