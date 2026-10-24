@@ -1,0 +1,35 @@
+# Pinned upstream sources for zuid's generated tables and test fixtures.
+# design.md D8 and section 7. tools/gen-tables reads the `tables` entries,
+# downloads each file at its commit, checks the SHA-256 and writes
+# R/sysdata.rda and src/zuid_tables.{c,h}. A bump changes `commit`,
+# `retrieved` and `sha256` together, then reruns tools/gen-tables.
+
+tables:
+  sqids_blocklist:
+    repo: sqids/sqids-blocklist
+    commit: 084d15864ce0d102fd1aa0e752edb2d78e073e9f
+    path: output/blocklist.json
+    format: json
+    retrieved: 2026-10-24
+    sha256: 757018526eaa1af57b9ccc9439fe672345b3ae85cf8162b74af45c0d6f5a9b1a
+    entries: 560
+    licence: MIT
+    copyright: Copyright (c) 2023 Sqids
+  niceware_words:
+    repo: diracdeltas/niceware
+    tag: v4.0.0
+    commit: 0d48914236f1d026affc33efb6caa81cdf1bf715
+    path: lib/wordlist.js
+    format: js-array
+    retrieved: 2026-10-24
+    sha256: 8d874a859a6795f164eff11951724012cb9332965df3488a490126522c29da34
+    entries: 65536
+    licence: MIT
+    copyright: Copyright (c) 2016 yan
+    # The reference's own warning: the list is derived from a general English
+    # word list and has not been checked for offensive words. It is used
+    # unchanged so that encodings decode in every Niceware implementation.
+
+# Conformance fixtures under tests/testthat/fixtures/, added by the stages
+# that use them (design.md section 7).
+fixtures: {}
