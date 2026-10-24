@@ -495,6 +495,9 @@ when the evidence allows, and report ambiguity otherwise.
   time and random input, the text, time and `id_fields()` of each, and the
   encodings of one byte string in every form. Each R CMD check leg compares
   against it.
+- The `nosuggests` and `nold` jobs are opt-in in r-actions and were off, so
+  the first full run on this pull request skipped them. The R-CMD-check
+  caller now turns both on.
 
 **Design.** §9; §12.
 
