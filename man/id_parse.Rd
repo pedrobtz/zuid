@@ -61,7 +61,8 @@ day by default).
 A UUID's canonical text is lowercase and hyphenated. On input, either
 case is accepted, and \code{form} selects another of the RFC 9562 text forms:
 \code{"compact"} (32 hex digits), \code{"urn"} (\verb{urn:uuid:} prefix), \code{"braced"} or
-\code{"uppercase"}.
+\code{"uppercase"}, or one of the encodings of \code{\link[=id_encode]{id_encode()}} over the 16 bytes,
+such as \code{"base32"}, \code{"base58"} or \code{"words"}.
 }
 \examples{
 x <- id_parse("018F6B1C-2D3E-7A4B-8C5D-6E7F8091A2B3", "uuid")

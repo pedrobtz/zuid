@@ -1,5 +1,11 @@
 # zuid 0.0.0.9000
 
+* `id_encode()` and `id_decode()` write and read bytes of any length in
+  hex, Crockford base32, RFC 4648 base32 and base32hex, base36, base58,
+  base62, base64url, the sortable base62 and base64 of the IETF draft, a
+  caller's alphabet (ShortUUID's by default), Proquint and Niceware words.
+  Each form writes what the mainstream Go and Python libraries write. Every
+  encoding is also a UUID form in `id_format()` and `id_parse()`.
 * `id_uuid()` generates UUID versions 1, 4, 6, 7 (the default) and 8 from
   the operating system's entropy source, never R's random number generator.
   Version 7 values from one session strictly increase, and `random` and

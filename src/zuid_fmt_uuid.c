@@ -1,10 +1,21 @@
 /* UUIDs, RFC 9562 (design.md sections 6.1, 6.3 to 6.5). */
 
 #include "zuid_formats.h"
+#include "zuid_enc.h"
 
 #include <string.h>
 
-enum { FORM_HEX, FORM_COMPACT, FORM_URN, FORM_BRACED, FORM_UPPERCASE };
+enum { FORM_HEX, FORM_COMPACT, FORM_URN, FORM_BRACED, FORM_UPPERCASE,
+       FORM_ENC_FIRST };
+
+/* The encodings of section 6.5 are forms too: form FORM_ENC_FIRST + i is
+ * uuid_encodings[i] over the 16 bytes. Proquint and words use '-'. */
+static const int uuid_encodings[] = {
+    ZUID_ENC_BASE32,     ZUID_ENC_BASE32RFC, ZUID_ENC_BASE32HEX,
+    ZUID_ENC_BASE36,     ZUID_ENC_BASE58,    ZUID_ENC_BASE62,
+    ZUID_ENC_BASE62SORT, ZUID_ENC_BASE64URL, ZUID_ENC_BASE64SORT,
+    ZUID_ENC_ALPHABET,   ZUID_ENC_PROQUINT,  ZUID_ENC_WORDS};
+#define N_ENCODINGS ((int) (sizeof uuid_encodings / sizeof uuid_encodings[0]))
 
 /* 100 ns ticks between the Gregorian epoch, 1582-10-15, and 1970-01-01. */
 #define GREGORIAN_OFFSET INT64_C(0x01B21DD213814000)
@@ -16,6 +27,11 @@ static int uuid_form_index(const char *form)
     for (int i = 0; i < 5; i++) {
         if (strcmp(form, names[i]) == 0) {
             return i;
+        }
+    }
+    for (int i = 0; i < N_ENCODINGS; i++) {
+        if (strcmp(form, zuid_enc_name(uuid_encodings[i])) == 0) {
+            return FORM_ENC_FIRST + i;
         }
     }
     return -2; /* unknown */
@@ -76,7 +92,13 @@ static int ascii_ieq(const char *s, const char *lower, size_t n)
 static zuid_level uuid_parse(const char *s, size_t len, int form, uint8_t *out)
 {
     int ok;
+    uint8_t buf[ZUID_TEXT_BUF + 8];
     switch (form) {
+    case -1:
+    case FORM_HEX:
+    case FORM_UPPERCASE: /* RFC 9562 accepts either case */
+        ok = len == 36 && parse_digits(s, 1, out);
+        break;
     case FORM_COMPACT:
         ok = len == 32 && parse_digits(s, 0, out);
         break;
@@ -88,8 +110,11 @@ static zuid_level uuid_parse(const char *s, size_t len, int form, uint8_t *out)
         ok = len == 38 && s[0] == '{' && s[37] == '}' &&
              parse_digits(s + 1, 1, out);
         break;
-    default: /* canonical, hex, uppercase: RFC 9562 accepts either case */
-        ok = len == 36 && parse_digits(s, 1, out);
+    default: /* an encoding of the 16 bytes */
+        ok = len <= ZUID_TEXT_BUF &&
+             zuid_decode(uuid_encodings[form - FORM_ENC_FIRST], s, len, NULL,
+                         16, buf) == 16;
+        if (ok) memcpy(out, buf, 16);
         break;
     }
     if (!ok) return ZUID_LEVEL_NONE;
@@ -216,6 +241,11 @@ static size_t write_digits(const uint8_t *b, int hyphens, int upper, char *out)
 
 static size_t uuid_format(const uint8_t *b, int form, char *out)
 {
+    if (form >= FORM_ENC_FIRST) {
+        long m = zuid_encode(uuid_encodings[form - FORM_ENC_FIRST], b, 16, NULL,
+                             "-", 1, out);
+        return m > 0 ? (size_t) m : 0;
+    }
     switch (form) {
     case FORM_COMPACT:
         return write_digits(b, 0, 0, out);
@@ -243,7 +273,8 @@ const zuid_format zuid_fmt_uuid = {
     "lower; either case on input",
     "100ns (versions 1, 6), ms (version 7)",
     "1582-10-15T00:00:00Z (versions 1, 6), 1970-01-01T00:00:00Z (version 7)",
-    "hex,compact,urn,braced,uppercase",
+    "hex,compact,urn,braced,uppercase,base32,base32rfc,base32hex,base36,"
+    "base58,base62,base62sort,base64url,base64sort,alphabet,proquint,words",
     uuid_form_index,
     uuid_parse,
     uuid_strict,

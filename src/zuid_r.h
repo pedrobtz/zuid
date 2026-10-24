@@ -24,5 +24,7 @@ SEXP zuid_c_uuid(SEXP n, SEXP version, SEXP time_us, SEXP random, SEXP node,
                  SEXP tolerance_ms);
 SEXP zuid_c_state(void);
 SEXP zuid_c_reset_state(void);
+SEXP zuid_c_encode(SEXP bytes, SEXP form, SEXP alphabet, SEXP sep);
+SEXP zuid_c_decode(SEXP text, SEXP form, SEXP alphabet, SEXP width);
 
 #endif

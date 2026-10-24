@@ -26,7 +26,7 @@ unaffected. Design §12's Arrow criterion does not apply to v0.1.0.
 | 0 | [Package identity](#stage-0--package-identity) | quick | [#3](https://github.com/pedrobtz/zuid/issues/3) | [#17](https://github.com/pedrobtz/zuid/pull/17) | 2026-10-24 |
 | 1 | [Vector class, descriptors and UUID parsing](#stage-1--vector-class-descriptors-and-uuid-parsing) | full | [#4](https://github.com/pedrobtz/zuid/issues/4) | [#18](https://github.com/pedrobtz/zuid/pull/18) | 2026-10-24 |
 | 2 | [UUID generation](#stage-2--uuid-generation) | full | [#5](https://github.com/pedrobtz/zuid/issues/5) | [#19](https://github.com/pedrobtz/zuid/pull/19) | 2026-10-24 |
-| 3 | [Encodings](#stage-3--encodings) | quick | [#6](https://github.com/pedrobtz/zuid/issues/6) | | |
+| 3 | [Encodings](#stage-3--encodings) | quick | [#6](https://github.com/pedrobtz/zuid/issues/6) | [#20](https://github.com/pedrobtz/zuid/pull/20) | 2026-10-24 |
 | 4 | [ULID, TypeID and UPID](#stage-4--ulid-typeid-and-upid) | quick | [#7](https://github.com/pedrobtz/zuid/issues/7) | | |
 | 5 | [SCRU128, SCRU64 and KSUID](#stage-5--scru128-scru64-and-ksuid) | quick | [#8](https://github.com/pedrobtz/zuid/issues/8) | | |
 | 6 | [XID, ObjectId and Snowflake layouts](#stage-6--xid-objectid-and-snowflake-layouts) | quick | [#9](https://github.com/pedrobtz/zuid/issues/9) | | |
@@ -199,7 +199,24 @@ each of them.
 - The order-preserving forms sort 10⁴ encoded strings as their bytes sort.
 - `R CMD check` passes on the quick r-actions profile.
 
-**Design.** §4 layer 2; §6.5; D17; §15 Q2.
+**Deviations (2026-10-24).**
+
+- The oracle is the output of the mainstream Go and Python libraries, by the
+  maintainer's decision (design.md D21), and the IETF draft's vectors only
+  where they agree. The Crockford draft's left-aligned vectors are not
+  followed; ULID's, TypeID's and every library's are.
+- `base58` is base58btc, one `1` per leading zero byte, so 16 bytes take up
+  to 22 characters rather than exactly 22.
+- The RFC 4648 forms put the spare bits at the end, as RFC 4648 says, not at
+  the front as §6.5 first had it.
+- The Niceware oracle is the JavaScript reference 4.0.0, whose word list zuid
+  ships; Python's `niceware` 0.2.1 has an older list.
+- `legacy = TRUE` for ShortUUID before 1.0.0 is deferred: no pinned
+  reference was found for those strings.
+- The 10⁴-string sort criterion covers 16-byte values, the case §6.5 calls
+  order-preserving.
+
+**Design.** §4 layer 2; §6.5; D17; D21; §15 Q2.
 
 ## Stage 4 — ULID, TypeID and UPID
 

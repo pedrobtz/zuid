@@ -57,7 +57,7 @@ test_that("id_format() writes every hex form", {
     id_format(x, "uppercase")[1],
     "017F22E2-79B0-7CC3-98C4-DC0C0C07398F"
   )
-  expect_error(id_format(x, "base62"), class = "zuid_type_error")
+  expect_error(id_format(x, "base99"), class = "zuid_type_error")
   expect_error(id_format("x"), class = "zuid_type_error")
 })
 
