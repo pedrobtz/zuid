@@ -35,6 +35,15 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.0.9000" id="zuid-0009000">zuid 0.0.0.9000<a class="anchor" aria-label="anchor" href="#zuid-0009000"></a></h2>
 <ul><li>
+<code><a href="../reference/id_parse.html">id_parse()</a></code> and <code><a href="../reference/id_parse.html">id_valid()</a></code> read UUIDs in every RFC 9562 text form (canonical, compact, URN, braced, uppercase) and validate them at three levels: syntax, structure and strict.</li>
+<li>
+<code><a href="../reference/id_fields.html">id_fields()</a></code>, <code><a href="../reference/id_fields.html">id_time()</a></code> and <code><a href="../reference/id_fields.html">id_version()</a></code> read the version, variant, time, clock sequence, node and random bits of every UUID version.</li>
+<li>
+<code><a href="../reference/id_format.html">id_format()</a></code>, <code><a href="../reference/id_format.html">id_bytes()</a></code> and <code><a href="../reference/id_format.html">id_from_bytes()</a></code> move between text forms and bytes; <code><a href="../reference/id_format.html">id_from_bytes()</a></code> has no default format.</li>
+<li>
+<code><a href="../reference/id_nil.html">id_nil()</a></code>, <code><a href="../reference/id_nil.html">id_max()</a></code> and <code><a href="../reference/id_formats.html">id_formats()</a></code>.</li>
+<li>zuid vectors keep their class through subsetting, assignment, <code><a href="https://rdrr.io/r/base/c.html" class="external-link">c()</a></code>, <code><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep()</a></code>, <code><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique()</a></code> and data frames, compare by value, sort by bytes, and combine with vctrs when it is loaded.</li>
+<li>
 <code><a href="../reference/zuid_info.html">zuid_info()</a></code> reports the package version and the generated tables compiled into it, the Niceware word list and the Sqids blocklist, with their pinned upstream sources.</li>
 </ul></div>
   </main></div>

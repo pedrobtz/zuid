@@ -29,6 +29,22 @@ library(zuid)
 
 ## All functions
 
+- [`id_fields()`](https://pedrobtz.github.io/zuid/reference/id_fields.md)
+  [`id_time()`](https://pedrobtz.github.io/zuid/reference/id_fields.md)
+  [`id_version()`](https://pedrobtz.github.io/zuid/reference/id_fields.md)
+  : Read the fields of identifiers
+- [`id_format()`](https://pedrobtz.github.io/zuid/reference/id_format.md)
+  [`id_bytes()`](https://pedrobtz.github.io/zuid/reference/id_format.md)
+  [`id_from_bytes()`](https://pedrobtz.github.io/zuid/reference/id_format.md)
+  : Text forms and bytes
+- [`id_formats()`](https://pedrobtz.github.io/zuid/reference/id_formats.md)
+  : The identifier formats zuid knows
+- [`id_nil()`](https://pedrobtz.github.io/zuid/reference/id_nil.md)
+  [`id_max()`](https://pedrobtz.github.io/zuid/reference/id_nil.md) :
+  The nil and max UUIDs
+- [`id_parse()`](https://pedrobtz.github.io/zuid/reference/id_parse.md)
+  [`id_valid()`](https://pedrobtz.github.io/zuid/reference/id_parse.md)
+  : Parse and validate identifiers
 - [`zuid_info()`](https://pedrobtz.github.io/zuid/reference/zuid_info.md)
   : Describe this build of zuid
 

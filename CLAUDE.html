@@ -92,11 +92,11 @@
 <li>
 <strong>Generators are pure functions of <code>(n, time, random, node)</code></strong> (D6). The clock and entropy are read once in the R entry point. Reading them inside a generator makes the fuzz target and the cross-platform byte-identity tests impossible.</li>
 <li>
-<strong>128 bits do not make a UUID</strong> (D3, D9). <code>id_from_bytes()</code> has no default format, and only <code>uuid</code> exports to Arrow as <code>arrow.uuid</code>; every other format uses <code>zuid.&lt;format&gt;</code>. A ULID arriving as <code>arrow.uuid</code> is the bug this prevents.</li>
+<strong>128 bits do not make a UUID</strong> (D3, D9). <code><a href="reference/id_format.html">id_from_bytes()</a></code> has no default format, and only <code>uuid</code> exports to Arrow as <code>arrow.uuid</code>; every other format uses <code>zuid.&lt;format&gt;</code>. A ULID arriving as <code>arrow.uuid</code> is the bug this prevents.</li>
 <li>
 <strong>Detection never guesses</strong> (D10). An encoding or syntactic format needs a hint; ambiguity among structured formats is <code>NA</code> with candidates.</li>
 <li>
-<strong>Inspection never raises on input.</strong> <code>id_detect()</code>, <code>id_valid()</code>, <code>id_fields()</code>, <code>id_time()</code> and <code>id_parse(strict = FALSE)</code> return <code>NA</code>.</li>
+<strong>Inspection never raises on input.</strong> <code>id_detect()</code>, <code><a href="reference/id_parse.html">id_valid()</a></code>, <code><a href="reference/id_fields.html">id_fields()</a></code>, <code><a href="reference/id_fields.html">id_time()</a></code> and <code>id_parse(strict = FALSE)</code> return <code>NA</code>.</li>
 <li>
 <strong>The only place a <code>CHARSXP</code> is made from bytes is one function</strong> in <code>src/zuid_r.c</code>, and the shared object exports <code>R_init_zuid</code> only.</li>
 <li>

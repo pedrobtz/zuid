@@ -112,15 +112,19 @@ These are fixed by the design before any code exists.
   The clock and entropy are read once in the R entry point. Reading them
   inside a generator makes the fuzz target and the cross-platform
   byte-identity tests impossible.
-- **128 bits do not make a UUID** (D3, D9). `id_from_bytes()` has no
-  default format, and only `uuid` exports to Arrow as `arrow.uuid`;
-  every other format uses `zuid.<format>`. A ULID arriving as
-  `arrow.uuid` is the bug this prevents.
+- **128 bits do not make a UUID** (D3, D9).
+  [`id_from_bytes()`](https://pedrobtz.github.io/zuid/reference/id_format.md)
+  has no default format, and only `uuid` exports to Arrow as
+  `arrow.uuid`; every other format uses `zuid.<format>`. A ULID arriving
+  as `arrow.uuid` is the bug this prevents.
 - **Detection never guesses** (D10). An encoding or syntactic format
   needs a hint; ambiguity among structured formats is `NA` with
   candidates.
-- **Inspection never raises on input.** `id_detect()`, `id_valid()`,
-  `id_fields()`, `id_time()` and `id_parse(strict = FALSE)` return `NA`.
+- **Inspection never raises on input.** `id_detect()`,
+  [`id_valid()`](https://pedrobtz.github.io/zuid/reference/id_parse.md),
+  [`id_fields()`](https://pedrobtz.github.io/zuid/reference/id_fields.md),
+  [`id_time()`](https://pedrobtz.github.io/zuid/reference/id_fields.md)
+  and `id_parse(strict = FALSE)` return `NA`.
 - **The only place a `CHARSXP` is made from bytes is one function** in
   `src/zuid_r.c`, and the shared object exports `R_init_zuid` only.
 - **No vendored code** (D7). The Sqids blocklist and the Niceware word
