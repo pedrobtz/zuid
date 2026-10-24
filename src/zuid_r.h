@@ -31,6 +31,12 @@ SEXP zuid_c_scru128(SEXP n, SEXP time_us, SEXP random, SEXP tolerance_ms,
 SEXP zuid_c_scru64(SEXP n, SEXP time_us, SEXP random, SEXP node,
                    SEXP node_bits, SEXP tolerance_ms, SEXP reset);
 SEXP zuid_c_ksuid(SEXP n, SEXP time_us, SEXP random);
+SEXP zuid_c_layout_unpack(SEXP bytes, SEXP widths, SEXP kinds);
+SEXP zuid_c_snowflake(SEXP ticks, SEXP widths, SEXP kinds, SEXP node,
+                      SEXP tolerance_ticks);
+SEXP zuid_c_xid(SEXP secs, SEXP machine, SEXP process, SEXP random);
+SEXP zuid_c_objectid(SEXP secs, SEXP random);
+void zuid_layout_reset_state(void);
 SEXP zuid_c_encode(SEXP bytes, SEXP form, SEXP alphabet, SEXP sep);
 SEXP zuid_c_decode(SEXP text, SEXP form, SEXP alphabet, SEXP width);
 

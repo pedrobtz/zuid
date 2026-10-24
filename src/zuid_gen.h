@@ -68,6 +68,31 @@ typedef struct {
     uint32_t node_ctr;   /* node << counter bits | counter */
 } zuid_scru64_state;
 
+/* A 64-bit layout (design.md 6.8): parts most significant first, each a
+ * time, node or sequence field. Bits above them (64 minus their sum) are
+ * the sign bit, always zero. */
+#define ZUID_LAYOUT_PARTS 8
+enum { ZUID_PART_TIME, ZUID_PART_NODE, ZUID_PART_SEQUENCE };
+typedef struct {
+    int nparts;
+    int width[ZUID_LAYOUT_PARTS];
+    int kind[ZUID_LAYOUT_PARTS];
+} zuid_layout_spec;
+
+typedef struct {
+    int has;
+    zuid_layout_spec spec;
+    uint64_t node[ZUID_LAYOUT_PARTS];
+    int64_t last_tick;  /* of the last value, which overflow can move ahead */
+    int64_t last_clock; /* the latest tick the clock gave */
+    uint64_t sequence;
+} zuid_snowflake_state;
+
+typedef struct {
+    int has;
+    uint32_t counter; /* 24 bits */
+} zuid_counter_state;
+
 #define ZUID_SCRU128_RANDOM 10 /* 4 entropy, 3 counter_lo, 3 counter_hi */
 #define ZUID_SCRU64_RANDOM 3
 #define ZUID_KSUID_RANDOM 16
@@ -110,5 +135,25 @@ long zuid_gen_scru64(size_t n, const int64_t *ms, const uint8_t *random,
 /* KSUID at `ms[i]`: seconds since 1400000000 and 16 random bytes. */
 void zuid_gen_ksuid(size_t n, const int64_t *ms, const uint8_t *random,
                     uint8_t *out);
+
+/* Snowflake at `ticks[i]` (time units since the layout's epoch), with
+ * `node[k]` for each node part. The sequence starts at zero each tick and
+ * increments within it; an overflow moves to the next tick. A clock back
+ * by more than `tolerance_ticks` from the latest tick it gave (not from a
+ * tick an overflow moved to) returns 1 + its index (zuid_clock_error);
+ * a tick past the time field's range returns -(1 + its index). */
+long zuid_gen_snowflake(size_t n, const int64_t *ticks,
+                        const zuid_layout_spec *spec, const uint64_t *node,
+                        int64_t tolerance_ticks, zuid_snowflake_state *state,
+                        uint8_t *out);
+
+/* Splits each 8-byte value into the layout's parts. */
+void zuid_layout_unpack(const uint8_t *bytes, const zuid_layout_spec *spec,
+                        uint64_t *parts);
+
+/* XID and ObjectId at `secs[i]`: the seconds, the five middle bytes, then
+ * the 24-bit counter, incremented for each value and wrapping. */
+void zuid_gen_xid(size_t n, const int64_t *secs, const uint8_t middle[5],
+                  zuid_counter_state *counter, uint8_t *out);
 
 #endif
