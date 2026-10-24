@@ -1,5 +1,10 @@
 # zuid 0.0.0.9000
 
+* XID, ObjectId and Snowflake: parsing, fields and `id_xid()`,
+  `id_objectid()` and `id_snowflake()`. `id_layout()` gives the Twitter,
+  Discord, Instagram, Sonyflake and SCRU64 layouts and builds custom ones; a
+  Snowflake is read and generated only under a layout, which travels with
+  the vector. `id_convert()` moves between `xid` and `objectid`.
 * SCRU128, SCRU64 and KSUID parse, validate and read their fields, and
   `id_scru128()`, `id_scru64()` and `id_ksuid()` generate them. The SCRU
   generators follow their references: monotonic, with counter overflow
