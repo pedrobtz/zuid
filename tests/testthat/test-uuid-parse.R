@@ -129,7 +129,7 @@ test_that("names survive parsing and validation", {
 
 test_that("arguments are checked with classed errors", {
   expect_error(id_parse(1, "uuid"), class = "zuid_type_error")
-  expect_error(id_parse("x"), class = "zuid_type_error")
+  expect_error(id_parse("x"), class = "zuid_parse_error")
   expect_error(id_parse("x", "nope"), class = "zuid_type_error")
   expect_error(
     id_parse("x", "uuid", form = "base99"),
