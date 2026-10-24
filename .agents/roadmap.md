@@ -34,7 +34,7 @@ unaffected. Design §12's Arrow criterion does not apply to v0.1.0.
 | 8 | [Detection](#stage-8--detection) | quick | [#11](https://github.com/pedrobtz/zuid/issues/11) | [#25](https://github.com/pedrobtz/zuid/pull/25) | 2026-10-24 |
 | 9 | [Fuzzing and benchmarks](#stage-9--fuzzing-and-benchmarks) | quick | [#12](https://github.com/pedrobtz/zuid/issues/12) | [#26](https://github.com/pedrobtz/zuid/pull/26) | 2026-10-24 |
 | 10 | [Full CI](#stage-10--full-ci) | full | [#13](https://github.com/pedrobtz/zuid/issues/13) | [#27](https://github.com/pedrobtz/zuid/pull/27) | 2026-10-24 |
-| 11 | [v0.1.0 readiness](#stage-11--v010-readiness) | full | [#14](https://github.com/pedrobtz/zuid/issues/14) | | 2026-10-25 |
+| 11 | [v0.1.0 readiness](#stage-11--v010-readiness) | full | [#14](https://github.com/pedrobtz/zuid/issues/14) | [#72](https://github.com/pedrobtz/zuid/pull/72) | 2026-10-25 |
 
 ## Stage 0 — Package identity
 
