@@ -25,6 +25,12 @@ typedef struct {
     int64_t last_ticks; /* 100 ns since 1582-10-15 */
 } zuid_uuid1_state;
 
+typedef struct {
+    int has;
+    int64_t last_ms;
+    uint8_t random[10]; /* the last 80-bit random component */
+} zuid_ulid_state;
+
 #define ZUID_UUID7_RANDOM 10 /* bytes per value: 2 counter seed, 8 rand_b */
 
 /* Versions 4 and 8: 16 bytes of `random` per value, version and variant set. */
@@ -46,5 +52,22 @@ void zuid_gen_uuid_time(size_t n, int version, const int64_t *ticks,
                         int *clock_seq, const uint8_t node[6],
                         int64_t tolerance_ticks, zuid_uuid1_state *state,
                         uint8_t *out);
+
+#define ZUID_ULID_RANDOM 10
+#define ZUID_UPID_RANDOM 8
+
+/* ULID at `ms[i]`, monotonic by the specification: at or before the last
+ * millisecond (back by up to `tolerance_ms`), the last random component
+ * plus one. Returns 0, or 1 + the index of the value whose increment
+ * overflowed 80 bits; values before it are written. */
+size_t zuid_gen_ulid(size_t n, const int64_t *ms, const uint8_t *random,
+                     int64_t tolerance_ms, zuid_ulid_state *state,
+                     uint8_t *out);
+
+/* UPID at `ms[i]`: the time in 256 ms units, 8 random bytes per value, then
+ * `tail`, the 20-bit prefix and 4-bit version. Not monotonic, as in the
+ * reference. */
+void zuid_gen_upid(size_t n, const int64_t *ms, const uint8_t *random,
+                   const uint8_t tail[3], uint8_t *out);
 
 #endif
