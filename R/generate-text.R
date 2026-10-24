@@ -71,40 +71,27 @@ id_sqids <- function(
   blocklist = NULL
 ) {
   if (is.list(numbers)) {
-    elements <- numbers
+    elements <- lapply(numbers, check_sqids_numbers)
   } else if (is.numeric(numbers) || all(is.na(numbers))) {
-    elements <- as.list(as.numeric(numbers))
+    # One Sqid per number: checked as one vector, then split.
+    v <- as.numeric(numbers)
+    check_sqids_numbers(v[!is.na(v)])
+    elements <- as.list(v)
+    elements[is.na(v)] <- list(NULL)
   } else {
     zuid_abort(
       "type",
       "`numbers` must be numeric or a list of numeric vectors."
     )
   }
-  elements <- lapply(elements, function(v) {
-    if (is.null(v) || anyNA(v)) {
-      return(NULL)
-    }
-    if (!is.numeric(v) || any(v < 0) || any(v != trunc(v))) {
-      zuid_abort(
-        "type",
-        "Sqids encode non-negative whole numbers."
-      )
-    }
-    if (any(v > 2^53 - 1)) {
-      zuid_abort(
-        "encode",
-        "Sqids numbers above 2^53 - 1 need 64-bit integers, which zuid does not use yet."
-      )
-    }
-    as.numeric(v)
-  })
   if (is.null(alphabet)) {
     alphabet <- sqids_alphabet
   }
   check_text_alphabet(alphabet, "sqids")
   if (!is.null(blocklist)) {
     check_character(blocklist, "blocklist")
-    blocklist <- blocklist[!is.na(blocklist)]
+    # The reference lowercases its words, and the C side expects it.
+    blocklist <- tolower(blocklist[!is.na(blocklist)])
   }
   params <- check_params(
     list(alphabet = alphabet, min_length = min_length, blocklist = blocklist),
@@ -128,4 +115,21 @@ id_sqids <- function(
   }
   names(out) <- names(numbers)
   new_zuid(out, "sqids", params = params)
+}
+
+check_sqids_numbers <- function(v, call = sys.call(-1L)) {
+  if (is.null(v) || anyNA(v)) {
+    return(NULL)
+  }
+  if (!is.numeric(v) || any(v < 0) || any(v != trunc(v))) {
+    zuid_abort("type", "Sqids encode non-negative whole numbers.", call = call)
+  }
+  if (any(v > 2^53 - 1)) {
+    zuid_abort(
+      "encode",
+      "Sqids numbers above 2^53 - 1 need 64-bit integers, which zuid does not use yet.",
+      call = call
+    )
+  }
+  as.numeric(v)
 }
