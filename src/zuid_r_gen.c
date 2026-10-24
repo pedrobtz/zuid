@@ -15,6 +15,8 @@
 static zuid_uuid7_state uuid7_state;
 static zuid_uuid1_state uuid1_state;
 static zuid_ulid_state ulid_state;
+static zuid_scru128_state scru128_state;
+static zuid_scru64_state scru64_state;
 static int session_clock_seq = -1; /* -1 until first drawn */
 static uint8_t session_node[6];
 
@@ -23,6 +25,8 @@ SEXP zuid_c_reset_state(void)
     memset(&uuid7_state, 0, sizeof uuid7_state);
     memset(&uuid1_state, 0, sizeof uuid1_state);
     memset(&ulid_state, 0, sizeof ulid_state);
+    memset(&scru128_state, 0, sizeof scru128_state);
+    memset(&scru64_state, 0, sizeof scru64_state);
     session_clock_seq = -1;
     memset(session_node, 0, sizeof session_node);
     return R_NilValue;
@@ -184,8 +188,9 @@ static SEXP canonical_strings(const zuid_format *fmt, const uint8_t *bytes,
 {
     SEXP out = PROTECT(Rf_allocVector(STRSXP, (R_xlen_t) un));
     char buf[ZUID_TEXT_BUF];
+    size_t w = (size_t) fmt->width;
     for (size_t i = 0; i < un; i++) {
-        size_t m = fmt->format(bytes + 16 * i, -1, NULL, buf);
+        size_t m = fmt->format(bytes + w * i, -1, NULL, buf);
         SET_STRING_ELT(out, (R_xlen_t) i, zuid_mkchar(buf, m));
     }
     UNPROTECT(1);
@@ -225,4 +230,66 @@ SEXP zuid_c_upid(SEXP n_, SEXP time_us, SEXP random, SEXP tail)
     uint8_t *bytes = (uint8_t *) R_alloc(un ? un : 1, 16);
     zuid_gen_upid(un, ms, r, RAW(tail), bytes);
     return canonical_strings(&zuid_fmt_upid, bytes, un);
+}
+
+static size_t arg_count(SEXP n_)
+{
+    double dn = Rf_asReal(n_);
+    if (!(dn >= 0)) Rf_error("zuid: `n` must be non-negative");
+    return (size_t) dn;
+}
+
+/* NULL when the entropy source failed; an integer, the position of the
+ * value, on a rollback beyond the tolerance (zuid_clock_error). */
+SEXP zuid_c_scru128(SEXP n_, SEXP time_us, SEXP random, SEXP tolerance_ms,
+                    SEXP reset)
+{
+    size_t un = arg_count(n_);
+    int64_t *ms = value_ms(time_us, un);
+    uint8_t *r = (uint8_t *) R_alloc(un ? un : 1, ZUID_SCRU128_RANDOM);
+    if (take_random(random, ZUID_SCRU128_RANDOM * un, r) != 0) {
+        return R_NilValue;
+    }
+    uint8_t *bytes = (uint8_t *) R_alloc(un ? un : 1, 16);
+    size_t bad = zuid_gen_scru128(un, ms, r, (int64_t) Rf_asReal(tolerance_ms),
+                                  Rf_asLogical(reset) == TRUE, &scru128_state,
+                                  bytes);
+    if (bad) return Rf_ScalarInteger((int) bad);
+    return canonical_strings(&zuid_fmt_scru128, bytes, un);
+}
+
+/* As zuid_c_scru128(); a negative integer is a timestamp past the largest
+ * SCRU64 can hold (zuid_overflow_error). */
+SEXP zuid_c_scru64(SEXP n_, SEXP time_us, SEXP random, SEXP node,
+                   SEXP node_bits, SEXP tolerance_ms, SEXP reset)
+{
+    size_t un = arg_count(n_);
+    int bits = Rf_asInteger(node_bits);
+    double nd = Rf_asReal(node);
+    if (bits < 1 || bits > 23 || !(nd >= 0) || nd >= (double) (1 << bits)) {
+        Rf_error("zuid: `node` must fit `node_bits`, 1 to 23");
+    }
+    int64_t *ms = value_ms(time_us, un);
+    uint8_t *r = (uint8_t *) R_alloc(un ? un : 1, ZUID_SCRU64_RANDOM);
+    if (take_random(random, ZUID_SCRU64_RANDOM * un, r) != 0) {
+        return R_NilValue;
+    }
+    uint8_t *bytes = (uint8_t *) R_alloc(un ? un : 1, 8);
+    long bad = zuid_gen_scru64(un, ms, r, (uint32_t) nd, bits,
+                               (int64_t) Rf_asReal(tolerance_ms),
+                               Rf_asLogical(reset) == TRUE, &scru64_state,
+                               bytes);
+    if (bad) return Rf_ScalarInteger((int) bad);
+    return canonical_strings(&zuid_fmt_scru64, bytes, un);
+}
+
+SEXP zuid_c_ksuid(SEXP n_, SEXP time_us, SEXP random)
+{
+    size_t un = arg_count(n_);
+    int64_t *ms = value_ms(time_us, un);
+    uint8_t *r = (uint8_t *) R_alloc(un ? un : 1, ZUID_KSUID_RANDOM);
+    if (take_random(random, ZUID_KSUID_RANDOM * un, r) != 0) return R_NilValue;
+    uint8_t *bytes = (uint8_t *) R_alloc(un ? un : 1, 20);
+    zuid_gen_ksuid(un, ms, r, bytes);
+    return canonical_strings(&zuid_fmt_ksuid, bytes, un);
 }

@@ -145,3 +145,119 @@ void zuid_gen_upid(size_t n, const int64_t *ms, const uint8_t *random,
         memcpy(b + 13, tail, 3);
     }
 }
+
+static uint32_t load24(const uint8_t *r)
+{
+    return (uint32_t) r[0] << 16 | (uint32_t) r[1] << 8 | r[2];
+}
+
+static void store_be(uint8_t *b, uint64_t v, int n)
+{
+    for (int k = 0; k < n; k++) b[k] = (uint8_t) (v >> (8 * (n - 1 - k)));
+}
+
+#define MAX24 UINT32_C(0xffffff)
+
+size_t zuid_gen_scru128(size_t n, const int64_t *ms, const uint8_t *random,
+                        int64_t tolerance_ms, int reset,
+                        zuid_scru128_state *state, uint8_t *out)
+{
+    for (size_t i = 0; i < n; i++) {
+        const uint8_t *r = random + ZUID_SCRU128_RANDOM * i;
+        uint64_t t = (uint64_t) ms[i];
+        if (!state->has) {
+            memset(state, 0, sizeof *state);
+            state->has = 1;
+        }
+        if (t > state->timestamp) {
+            state->timestamp = t;
+            state->counter_lo = load24(r + 4);
+        } else if (t + (uint64_t) tolerance_ms >= state->timestamp) {
+            /* A small rollback keeps the last timestamp. */
+            if (++state->counter_lo > MAX24) {
+                state->counter_lo = 0;
+                if (++state->counter_hi > MAX24) {
+                    state->counter_hi = 0;
+                    state->timestamp++;
+                    state->counter_lo = load24(r + 4);
+                }
+            }
+        } else if (reset) {
+            memset(state, 0, sizeof *state);
+            state->has = 1;
+            state->timestamp = t;
+            state->counter_lo = load24(r + 4);
+        } else {
+            return i + 1;
+        }
+        if (state->timestamp - state->ts_counter_hi >= 1000 ||
+            state->ts_counter_hi < 1) {
+            state->ts_counter_hi = state->timestamp;
+            state->counter_hi = load24(r + 7);
+        }
+        uint8_t *b = out + 16 * i;
+        store_be(b, state->timestamp, 6);
+        store_be(b + 6, state->counter_hi, 3);
+        store_be(b + 9, state->counter_lo, 3);
+        memcpy(b + 12, r, 4);
+    }
+    return 0;
+}
+
+#define SCRU64_MAX_TS UINT64_C(282429536480)
+
+long zuid_gen_scru64(size_t n, const int64_t *ms, const uint8_t *random,
+                     uint32_t node, int node_bits, int64_t tolerance_ms,
+                     int reset, zuid_scru64_state *state, uint8_t *out)
+{
+    int counter_bits = 24 - node_bits;
+    uint32_t mask = (UINT32_C(1) << counter_bits) - 1;
+    /* The reference keeps one bit back as an overflow guard when the
+     * counter has four bits or fewer. */
+    int guard = counter_bits <= 4 ? 1 : 0;
+    uint64_t allowance = (uint64_t) tolerance_ms >> 8;
+    if (!state->has || state->node != node || state->node_bits != node_bits) {
+        state->has = 1;
+        state->node = node;
+        state->node_bits = node_bits;
+        state->timestamp = 0;
+        state->node_ctr = node << counter_bits;
+    }
+    for (size_t i = 0; i < n; i++) {
+        uint32_t renew = load24(random + ZUID_SCRU64_RANDOM * i) &
+                         (mask >> guard);
+        uint64_t t = (uint64_t) ms[i] >> 8;
+        if (t > state->timestamp) {
+            state->timestamp = t;
+            state->node_ctr = node << counter_bits | renew;
+        } else if (t + allowance >= state->timestamp) {
+            if ((state->node_ctr & mask) < mask) {
+                state->node_ctr++;
+            } else {
+                state->timestamp++;
+                state->node_ctr = node << counter_bits | renew;
+            }
+        } else if (reset) {
+            state->timestamp = t;
+            state->node_ctr = node << counter_bits | renew;
+        } else {
+            return (long) i + 1;
+        }
+        if (state->timestamp > SCRU64_MAX_TS) return -((long) i + 1);
+        store_be(out + 8 * i, state->timestamp << 24 | state->node_ctr, 8);
+    }
+    return 0;
+}
+
+#define KSUID_EPOCH INT64_C(1400000000)
+
+void zuid_gen_ksuid(size_t n, const int64_t *ms, const uint8_t *random,
+                    uint8_t *out)
+{
+    for (size_t i = 0; i < n; i++) {
+        int64_t s = ms[i] / 1000 - (ms[i] % 1000 < 0);
+        uint8_t *b = out + 20 * i;
+        store_be(b, (uint64_t) (s - KSUID_EPOCH), 4);
+        memcpy(b + 4, random + ZUID_KSUID_RANDOM * i, 16);
+    }
+}

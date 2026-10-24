@@ -29,3 +29,17 @@ upid_fixture <- function() {
     colClasses = c("character", "character", "character", "numeric")
   )
 }
+
+scru128_fixture <- function() {
+  utils::read.csv(
+    test_path("fixtures", "scru128.csv"),
+    colClasses = c("character", "character", rep("numeric", 4))
+  )
+}
+
+scru64_fixture <- function() {
+  utils::read.csv(
+    test_path("fixtures", "scru64.csv"),
+    colClasses = c("character", "character", "numeric", "numeric")
+  )
+}

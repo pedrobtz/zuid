@@ -28,7 +28,7 @@ unaffected. Design §12's Arrow criterion does not apply to v0.1.0.
 | 2 | [UUID generation](#stage-2--uuid-generation) | full | [#5](https://github.com/pedrobtz/zuid/issues/5) | [#19](https://github.com/pedrobtz/zuid/pull/19) | 2026-10-24 |
 | 3 | [Encodings](#stage-3--encodings) | quick | [#6](https://github.com/pedrobtz/zuid/issues/6) | [#20](https://github.com/pedrobtz/zuid/pull/20) | 2026-10-24 |
 | 4 | [ULID, TypeID and UPID](#stage-4--ulid-typeid-and-upid) | quick | [#7](https://github.com/pedrobtz/zuid/issues/7) | [#21](https://github.com/pedrobtz/zuid/pull/21) | 2026-10-24 |
-| 5 | [SCRU128, SCRU64 and KSUID](#stage-5--scru128-scru64-and-ksuid) | quick | [#8](https://github.com/pedrobtz/zuid/issues/8) | | |
+| 5 | [SCRU128, SCRU64 and KSUID](#stage-5--scru128-scru64-and-ksuid) | quick | [#8](https://github.com/pedrobtz/zuid/issues/8) | [#22](https://github.com/pedrobtz/zuid/pull/22) | 2026-10-24 |
 | 6 | [XID, ObjectId and Snowflake layouts](#stage-6--xid-objectid-and-snowflake-layouts) | quick | [#9](https://github.com/pedrobtz/zuid/issues/9) | | |
 | 7 | [NanoID, Cuid2, Sqids and CID](#stage-7--nanoid-cuid2-sqids-and-cid) | quick | [#10](https://github.com/pedrobtz/zuid/issues/10) | | |
 | 8 | [Detection](#stage-8--detection) | quick | [#11](https://github.com/pedrobtz/zuid/issues/11) | | |
@@ -279,6 +279,24 @@ fields and generate.
   timestamps.
 - Each format round-trips over 10⁴ generated values.
 - `R CMD check` passes on the quick r-actions profile.
+
+**Deviations (2026-10-24).**
+
+- SCRU64's node and counter fields need `node_bits`, which is a layout
+  (§6.8, Stage 6). Until then `id_fields()` reads its time only, and
+  `id_parse()` and `id_from_bytes()` take a SCRU64 without a layout.
+- `id_scru64()` takes `random` (3 bytes per value, the counter's seed), as
+  D6 needs and the API sketch omits.
+- A SCRU64 counter overflow advances the tick, as the specification and its
+  reference recommend, rather than waiting for it (§6.7): waiting would read
+  the clock inside the generator (D6).
+- `id_scru128()` and `id_scru64()` both take `rollback = c("error",
+  "reset")`, D18's rule for SCRU128 applied to SCRU64 as well, whose
+  reference has the same two modes.
+- A KSUID above its maximum fails `syntax`, not only `structure`, as ULID's
+  does: it has no bytes.
+- The SCRU oracles are the Python references' output (`tools/gen-fixtures`)
+  plus the vectors and rejections of their tests.
 
 **Design.** §6.1, §6.4, §6.6, §6.7 for these formats; D13, D18.
 

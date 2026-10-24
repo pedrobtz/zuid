@@ -93,7 +93,7 @@ id_uuid <- function(
       )
     }
   }
-  time_us <- generation_time(time, n, version)
+  time_us <- generation_time(time, n, uuid_time_range(version), "UUID")
 
   out <- .Call(
     zuid_c_uuid,
@@ -144,7 +144,8 @@ check_uuid_version <- function(version, call = sys.call(-1L)) {
 }
 
 # Microseconds since 1970 per value, as whole doubles, or NULL for the clock.
-generation_time <- function(time, n, version, call = sys.call(-1L)) {
+# `range_us` is what the format's time field can hold.
+generation_time <- function(time, n, range_us, what, call = sys.call(-1L)) {
   if (is.null(time)) {
     return(NULL)
   }
@@ -166,21 +167,26 @@ generation_time <- function(time, n, version, call = sys.call(-1L)) {
       call = call
     )
   }
-  # The range each version's time field can hold.
-  range_us <- if (version == 7L) {
-    c(0, (2^48 - 1) * 1e3)
-  } else {
-    c(-12219292800 * 1e6, (2^60 - 1) / 10 - 12219292800 * 1e6)
-  }
   if (any(us < range_us[1] | us > range_us[2])) {
     zuid_abort(
       "type",
-      sprintf("`time` is outside what a version %d UUID can hold.", version),
+      sprintf("`time` is outside what a %s can hold.", what),
       call = call
     )
   }
   rep_len(us, n)
 }
+
+uuid_time_range <- function(version) {
+  if (version == 7L) {
+    c(0, (2^48 - 1) * 1e3)
+  } else {
+    c(-12219292800 * 1e6, (2^60 - 1) / 10 - 12219292800 * 1e6)
+  }
+}
+
+# 48 bits of milliseconds: ULID, and UPID's 40 bits of 256 ms.
+ms48_range <- c(0, (2^48 - 1) * 1e3)
 
 # Seconds. The option may be a number of seconds or a difftime.
 rollback_tolerance <- function() {
@@ -231,7 +237,7 @@ rollback_tolerance <- function() {
 id_ulid <- function(n = 1, random = NULL, time = NULL) {
   n <- check_count(n)
   check_random(random, 10 * n)
-  time_us <- generation_time(time, n, 7L)
+  time_us <- generation_time(time, n, ms48_range, "ULID")
   out <- .Call(zuid_c_ulid, n, time_us, random, rollback_tolerance() * 1000)
   if (is.null(out)) {
     zuid_abort("entropy", "The operating system's entropy source failed.")
@@ -275,7 +281,7 @@ id_upid <- function(n = 1, prefix, random = NULL, time = NULL) {
   }
   n <- check_count(n)
   check_random(random, 8 * n)
-  time_us <- generation_time(time, n, 7L)
+  time_us <- generation_time(time, n, ms48_range, "UPID")
   out <- .Call(zuid_c_upid, n, time_us, random, upid_tail(prefix))
   if (is.null(out)) {
     zuid_abort("entropy", "The operating system's entropy source failed.")

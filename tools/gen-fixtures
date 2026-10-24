@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Write tests/testthat/fixtures/encodings.csv from the Python reference
 libraries (design.md section 7, oracles 2, 10 and 11; section 15 Q2), and
-tests/testthat/fixtures/upid.csv from the UPID reference (oracle 5).
+tests/testthat/fixtures/{upid,scru128,scru64}.csv from the UPID, SCRU128 and
+SCRU64 Python references (oracle 5).
 
 Each row is a form, the bytes in hex, and the text the reference library
 writes for them. zuid follows what mainstream Go and Python libraries emit
@@ -12,10 +13,11 @@ tools/fixture-sources.yaml (fixtures: encodings):
 
     python3 -m venv /tmp/zuid-enc && /tmp/zuid-enc/bin/pip install \
       base58==2.1.1 pybase62==1.0.0 python-ulid==4.0.1 uuid25==0.1.4 \
-      base32-crockford==0.3.0 shortuuid==1.0.13 proquint==0.2.1 upid==0.3.1
+      base32-crockford==0.3.0 shortuuid==1.0.13 proquint==0.2.1 upid==0.3.1 \
+      scru128==3.0.4 scru64==1.0.2
     (cd /tmp/zuid-enc && npm install --ignore-scripts niceware@4.0.0)
     NICEWARE_JS=/tmp/zuid-enc/node_modules/niceware \
-      /tmp/zuid-enc/bin/python -I tools/gen-encoding-fixtures
+      /tmp/zuid-enc/bin/python -I tools/gen-fixtures
 
 Niceware comes from the JavaScript reference, 4.0.0, whose word list zuid
 ships. Python's niceware 0.2.1 has an older list and does not interoperate.
@@ -36,6 +38,8 @@ import base62
 import proquint
 import shortuuid
 import shortuuid.main
+import scru128
+import scru64
 import ulid
 import upid
 import uuid25
@@ -174,6 +178,35 @@ def main():
             u = upid.UPID(b)
             w.writerow([b.hex(), u.to_str(), u.prefix, u.milliseconds])
     print(f"wrote {OUT_UPID}", file=sys.stderr)
+
+    # SCRU128: the reference's text and fields for random values and the
+    # field boundaries of its own tests.
+    m48, m24, m32 = 2**48 - 1, 2**24 - 1, 2**32 - 1
+    fields = [(0, 0, 0, 0), (m48, 0, 0, 0), (0, m24, 0, 0), (0, 0, m24, 0),
+              (0, 0, 0, m32), (m48, m24, m24, m32), (1, 0, 0, 0)]
+    rng = random.Random(20261026)
+    fields += [(rng.randrange(1, m48), rng.randrange(m24 + 1),
+                rng.randrange(m24 + 1), rng.randrange(m32 + 1))
+               for _ in range(200)]
+    with open("tests/testthat/fixtures/scru128.csv", "w", newline="") as f:
+        w = csv.writer(f, lineterminator="\n")
+        w.writerow(["hex", "text", "timestamp", "counter_hi", "counter_lo", "entropy"])
+        for t in fields:
+            x = scru128.Scru128Id.from_fields(*t)
+            w.writerow([int(x).to_bytes(16, "big").hex(), str(x), *t])
+
+    # SCRU64: the reference's text, timestamp and node_ctr for random values
+    # below 36^12 and the boundaries.
+    top = 36**12 - 1
+    nums = [0, 2**24 - 1, top, top >> 24 << 24, 1 << 24, 109959589539758421]
+    nums += [rng.randrange(top + 1) for _ in range(200)]
+    with open("tests/testthat/fixtures/scru64.csv", "w", newline="") as f:
+        w = csv.writer(f, lineterminator="\n")
+        w.writerow(["hex", "text", "timestamp", "node_ctr"])
+        for v in nums:
+            x = scru64.Scru64Id(v)
+            w.writerow([v.to_bytes(8, "big").hex(), str(x), x.timestamp, x.node_ctr])
+    print("wrote scru128.csv and scru64.csv", file=sys.stderr)
 
 
 if __name__ == "__main__":

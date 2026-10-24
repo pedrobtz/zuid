@@ -1,4 +1,4 @@
-# The Go/Python oracle (tools/gen-encoding-fixtures): form, hex, text.
+# The Go/Python oracle (tools/gen-fixtures): form, hex, text.
 encoding_fixtures <- function() {
   utils::read.csv(
     test_path("fixtures", "encodings.csv"),

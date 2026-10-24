@@ -1,5 +1,10 @@
 # zuid 0.0.0.9000
 
+* SCRU128, SCRU64 and KSUID parse, validate and read their fields, and
+  `id_scru128()`, `id_scru64()` and `id_ksuid()` generate them. The SCRU
+  generators follow their references: monotonic, with counter overflow
+  moving the timestamp forward, and a clock rollback beyond the tolerance a
+  `zuid_clock_error` unless `rollback = "reset"`.
 * ULID, TypeID and UPID: `id_parse()`, `id_valid()`, `id_fields()` and the
   rest read them, and `id_ulid()`, `id_typeid()` and `id_upid()` generate
   them. ULIDs from one session strictly increase, by the specification's
