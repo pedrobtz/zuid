@@ -70,7 +70,7 @@ void zuid_bitbuf_hex(const zuid_bitbuf *b, char *out);
 typedef struct zuid_format {
     const char *name;
     zuid_class cls;
-    int width;             /* bytes */
+    int width;             /* bytes; 0 for a variable-width format */
     int text_min, text_max; /* canonical text length */
     const char *alphabet;
     const char *case_rule;
@@ -115,5 +115,9 @@ extern const zuid_format zuid_fmt_ksuid;
 extern const zuid_format zuid_fmt_xid;
 extern const zuid_format zuid_fmt_objectid;
 extern const zuid_format zuid_fmt_snowflake;
+extern const zuid_format zuid_fmt_nanoid;
+extern const zuid_format zuid_fmt_cuid2;
+extern const zuid_format zuid_fmt_sqids;
+extern const zuid_format zuid_fmt_cid;
 
 #endif

@@ -37,6 +37,15 @@ SEXP zuid_c_snowflake(SEXP ticks, SEXP widths, SEXP kinds, SEXP node,
 SEXP zuid_c_xid(SEXP secs, SEXP machine, SEXP process, SEXP random);
 SEXP zuid_c_objectid(SEXP secs, SEXP random);
 void zuid_layout_reset_state(void);
+SEXP zuid_c_charset(SEXP x, SEXP alphabet);
+SEXP zuid_c_cuid2(SEXP x);
+SEXP zuid_c_nanoid(SEXP n, SEXP size, SEXP alphabet, SEXP random);
+SEXP zuid_c_sqids_encode(SEXP numbers, SEXP alphabet, SEXP min_length,
+                         SEXP blocklist);
+SEXP zuid_c_sqids_parse(SEXP x, SEXP alphabet, SEXP min_length,
+                        SEXP blocklist);
+SEXP zuid_c_cid_parse(SEXP x);
+SEXP zuid_c_cid_text(SEXP bytes);
 SEXP zuid_c_encode(SEXP bytes, SEXP form, SEXP alphabet, SEXP sep);
 SEXP zuid_c_decode(SEXP text, SEXP form, SEXP alphabet, SEXP width);
 
