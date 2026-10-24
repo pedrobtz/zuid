@@ -6,7 +6,11 @@
 # * https://r-pkgs.org/testing-design.html#sec-tests-files-overview
 # * https://testthat.r-lib.org/articles/special-files.html
 
-library(testthat)
-library(zuid)
+# testthat is a Suggests: without it, as under CRAN's NOSUGGESTS check, the
+# tests are skipped rather than failed.
+if (requireNamespace("testthat", quietly = TRUE)) {
+  library(testthat)
+  library(zuid)
 
-test_check("zuid")
+  test_check("zuid")
+}

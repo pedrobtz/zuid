@@ -497,7 +497,9 @@ when the evidence allows, and report ambiguity otherwise.
   against it.
 - The `nosuggests` and `nold` jobs are opt-in in r-actions and were off, so
   the first full run on this pull request skipped them. The R-CMD-check
-  caller now turns both on.
+  caller now turns both on. `nosuggests` then failed on `library(testthat)`
+  in `tests/testthat.R`, which now runs the tests only when testthat is
+  installed.
 
 **Design.** §9; §12.
 
