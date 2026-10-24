@@ -1,5 +1,10 @@
 # zuid 0.0.0.9000
 
+* `id_uuid()` generates UUID versions 1, 4, 6, 7 (the default) and 8 from
+  the operating system's entropy source, never R's random number generator.
+  Version 7 values from one session strictly increase, and `random` and
+  `time` give reproducible output. `zuid_info()` reports the entropy source
+  and the generator state.
 * `id_parse()` and `id_valid()` read UUIDs in every RFC 9562 text form
   (canonical, compact, URN, braced, uppercase) and validate them at three
   levels: syntax, structure and strict.
