@@ -1,5 +1,8 @@
-# zuid 0.0.0.9000
+# zuid 0.1.0
 
+* Initial CRAN submission.
+* A README and two articles, "Reading what an identifier knows" and "A UUID
+  in every alphabet".
 * `id_detect()` names each element's format, or `NA` with its candidates
   when the evidence does not settle it; only structured formats are tried
   without a `hint`. `id_parse(format = NULL)` detects one format for the
