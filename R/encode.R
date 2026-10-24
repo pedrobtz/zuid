@@ -44,8 +44,8 @@
 #' @param alphabet For `form = "alphabet"`, its symbols in digit order: 2 to
 #'   94 distinct printable ASCII characters other than space. `NULL` for
 #'   ShortUUID's.
-#' @param sep The separator between units for `"proquint"` and `"words"`.
-#'   It must not contain letters.
+#' @param sep The separator between units for `"proquint"` and `"words"`:
+#'   ASCII characters other than letters.
 #' @param width `NULL`, or the number of bytes each element must decode to.
 #' @return `id_encode()`: a character vector, `NA` where `bytes` is `NULL`.
 #'   `id_decode()`: a list of raw vectors, with `NULL` where `text` is `NA`
@@ -63,10 +63,11 @@ id_encode <- function(bytes, form, alphabet = NULL, sep = "-") {
   check_encoding_form(form)
   check_alphabet(alphabet, form)
   check_string(sep, "sep")
-  if (grepl("[A-Za-z]", sep) || (form == "words" && !nzchar(sep))) {
+  ascii <- !grepl("[^\x01-\x7f]", sep, useBytes = TRUE)
+  if (!ascii || grepl("[A-Za-z]", sep) || (form == "words" && !nzchar(sep))) {
     zuid_abort(
       "type",
-      "`sep` must not contain letters, and `\"words\"` needs one."
+      "`sep` must be ASCII without letters, and `\"words\"` needs one."
     )
   }
   bytes <- bytes_list(bytes)

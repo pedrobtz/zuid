@@ -86,3 +86,10 @@ test_that("id_parse(format = NULL) detects one format or says why not", {
   expect_s3_class(s, "zuid_snowflake")
   expect_identical(attr(s, "layout"), id_layout("discord"))
 })
+
+test_that("id_parse() without a format needs an element to detect (D24)", {
+  expect_error(id_parse(character()), class = "zuid_parse_error")
+  expect_error(id_parse(NA_character_), class = "zuid_parse_error")
+  expect_identical(length(id_parse(character(), "uuid")), 0L)
+  expect_true(is.na(id_parse(NA_character_, "uuid")))
+})
