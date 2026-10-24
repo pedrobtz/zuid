@@ -25,7 +25,7 @@ unaffected. Design §12's Arrow criterion does not apply to v0.1.0.
 | --- | --- | --- | --- | --- | --- |
 | 0 | [Package identity](#stage-0--package-identity) | quick | [#3](https://github.com/pedrobtz/zuid/issues/3) | [#17](https://github.com/pedrobtz/zuid/pull/17) | 2026-10-24 |
 | 1 | [Vector class, descriptors and UUID parsing](#stage-1--vector-class-descriptors-and-uuid-parsing) | full | [#4](https://github.com/pedrobtz/zuid/issues/4) | [#18](https://github.com/pedrobtz/zuid/pull/18) | 2026-10-24 |
-| 2 | [UUID generation](#stage-2--uuid-generation) | full | [#5](https://github.com/pedrobtz/zuid/issues/5) | | 2026-10-24 |
+| 2 | [UUID generation](#stage-2--uuid-generation) | full | [#5](https://github.com/pedrobtz/zuid/issues/5) | [#19](https://github.com/pedrobtz/zuid/pull/19) | 2026-10-24 |
 | 3 | [Encodings](#stage-3--encodings) | quick | [#6](https://github.com/pedrobtz/zuid/issues/6) | | |
 | 4 | [ULID, TypeID and UPID](#stage-4--ulid-typeid-and-upid) | quick | [#7](https://github.com/pedrobtz/zuid/issues/7) | | |
 | 5 | [SCRU128, SCRU64 and KSUID](#stage-5--scru128-scru64-and-ksuid) | quick | [#8](https://github.com/pedrobtz/zuid/issues/8) | | |
