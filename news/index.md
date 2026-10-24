@@ -2,6 +2,11 @@
 
 ## zuid 0.0.0.9000
 
+- [`id_detect()`](https://pedrobtz.github.io/zuid/reference/id_detect.md)
+  names each element’s format, or `NA` with its candidates when the
+  evidence does not settle it; only structured formats are tried without
+  a `hint`. `id_parse(format = NULL)` detects one format for the whole
+  vector, or raises `zuid_ambiguous_error` or `zuid_mixed_error`.
 - NanoID, Cuid2, Sqids and CID parse and validate, and
   [`id_nanoid()`](https://pedrobtz.github.io/zuid/reference/id_nanoid.md)
   and

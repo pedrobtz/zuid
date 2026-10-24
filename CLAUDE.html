@@ -96,7 +96,7 @@
 <li>
 <strong>Detection never guesses</strong> (D10). An encoding or syntactic format needs a hint; ambiguity among structured formats is <code>NA</code> with candidates.</li>
 <li>
-<strong>Inspection never raises on input.</strong> <code>id_detect()</code>, <code><a href="reference/id_parse.html">id_valid()</a></code>, <code><a href="reference/id_fields.html">id_fields()</a></code>, <code><a href="reference/id_fields.html">id_time()</a></code> and <code>id_parse(strict = FALSE)</code> return <code>NA</code>.</li>
+<strong>Inspection never raises on input.</strong> <code><a href="reference/id_detect.html">id_detect()</a></code>, <code><a href="reference/id_parse.html">id_valid()</a></code>, <code><a href="reference/id_fields.html">id_fields()</a></code>, <code><a href="reference/id_fields.html">id_time()</a></code> and <code>id_parse(strict = FALSE)</code> return <code>NA</code>.</li>
 <li>
 <strong>The only place a <code>CHARSXP</code> is made from bytes is one function</strong> in <code>src/zuid_r.c</code>, and the shared object exports <code>R_init_zuid</code> only.</li>
 <li>

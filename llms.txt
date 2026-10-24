@@ -31,6 +31,8 @@ library(zuid)
 
 - [`id_convert()`](https://pedrobtz.github.io/zuid/reference/id_convert.md)
   : Convert identifiers between formats
+- [`id_detect()`](https://pedrobtz.github.io/zuid/reference/id_detect.md)
+  : Detect the format of identifiers
 - [`id_encode()`](https://pedrobtz.github.io/zuid/reference/id_encode.md)
   [`id_decode()`](https://pedrobtz.github.io/zuid/reference/id_encode.md)
   : Encode and decode bytes

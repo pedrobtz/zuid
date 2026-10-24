@@ -120,7 +120,8 @@ These are fixed by the design before any code exists.
 - **Detection never guesses** (D10). An encoding or syntactic format
   needs a hint; ambiguity among structured formats is `NA` with
   candidates.
-- **Inspection never raises on input.** `id_detect()`,
+- **Inspection never raises on input.**
+  [`id_detect()`](https://pedrobtz.github.io/zuid/reference/id_detect.md),
   [`id_valid()`](https://pedrobtz.github.io/zuid/reference/id_parse.md),
   [`id_fields()`](https://pedrobtz.github.io/zuid/reference/id_fields.md),
   [`id_time()`](https://pedrobtz.github.io/zuid/reference/id_fields.md)

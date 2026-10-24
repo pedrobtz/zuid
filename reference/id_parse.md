@@ -38,7 +38,12 @@ id_valid(
 
   The format, such as `"uuid"`. See
   [`id_formats()`](https://pedrobtz.github.io/zuid/reference/id_formats.md).
-  Required for now; detecting it from `x` is not available yet.
+  `NULL` detects it with
+  [`id_detect()`](https://pedrobtz.github.io/zuid/reference/id_detect.md):
+  every element that is not missing must resolve to the same format, or
+  the call is a `zuid_ambiguous_error` naming the candidates or a
+  `zuid_mixed_error` naming the formats found. Elements that fit no
+  format are `NA`, or an error with `strict = TRUE`.
 
 - form:
 
