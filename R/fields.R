@@ -26,7 +26,11 @@
 #' `sequence`; an ObjectId the same, but its middle five bytes are `random`,
 #' as the current BSON specification makes them. A Snowflake has what its
 #' layout says: the time at the layout's unit and epoch, the node fields in
-#' `node` as `name=value` pairs, and the `sequence`.
+#' `node` as `name=value` pairs, and the `sequence`. A CID has its CID
+#' `version`, its content `codec` and `hash` function by multicodec name (or
+#' `0x` and the code when zuid does not know the name) and its `digest` as
+#' hex. A Sqid has its `numbers`. NanoID and Cuid2 have no fields: a Cuid2's
+#' time is hashed in and cannot be read back.
 #'
 #' The nil and max UUIDs report versions 0 and 15 and no variant. `random`
 #' is the random bits joined in order, as hex, left-padded with zero bits to
@@ -68,10 +72,10 @@ id_fields <- function(x) {
     sequence = cols$sequence,
     random = cols$random,
     prefix = cols$prefix,
-    codec = na_chr,
-    hash = na_chr,
-    digest = na_chr,
-    numbers = I(vector("list", n)),
+    codec = if (is.null(cols$codec)) na_chr else cols$codec,
+    hash = if (is.null(cols$hash)) na_chr else cols$hash,
+    digest = if (is.null(cols$digest)) na_chr else cols$digest,
+    numbers = I(if (is.null(cols$numbers)) vector("list", n) else cols$numbers),
     stringsAsFactors = FALSE
   )
 }
@@ -95,13 +99,16 @@ id_time <- function(x, class = c("POSIXct", "ms")) {
 #' @export
 id_version <- function(x) {
   check_zuid(x)
-  out <- .Call(zuid_c_fields, as.character(x), zuid_format_of(x))$version
+  out <- field_columns(x)$version
   names(out) <- names(x)
   out
 }
 
 # The C fields, completed from the layout for Snowflake and SCRU64.
 field_columns <- function(x) {
+  if (zuid_format_of(x) %in% text_formats) {
+    return(text_format_fields(x, zuid_format_of(x), stored_params(x)))
+  }
   cols <- .Call(zuid_c_fields, as.character(x), zuid_format_of(x))
   layout <- attr(x, "layout", exact = TRUE)
   if (is.null(layout)) {

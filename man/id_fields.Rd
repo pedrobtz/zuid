@@ -56,7 +56,11 @@ seconds, its machine id in \code{node}, its \code{process} and its counter in
 \code{sequence}; an ObjectId the same, but its middle five bytes are \code{random},
 as the current BSON specification makes them. A Snowflake has what its
 layout says: the time at the layout's unit and epoch, the node fields in
-\code{node} as \code{name=value} pairs, and the \code{sequence}.
+\code{node} as \code{name=value} pairs, and the \code{sequence}. A CID has its CID
+\code{version}, its content \code{codec} and \code{hash} function by multicodec name (or
+\verb{0x} and the code when zuid does not know the name) and its \code{digest} as
+hex. A Sqid has its \code{numbers}. NanoID and Cuid2 have no fields: a Cuid2's
+time is hashed in and cannot be read back.
 
 The nil and max UUIDs report versions 0 and 15 and no variant. \code{random}
 is the random bits joined in order, as hex, left-padded with zero bits to
