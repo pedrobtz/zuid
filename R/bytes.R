@@ -4,6 +4,9 @@
 #' form. `id_bytes()` returns their bytes, and `id_from_bytes()` reads them
 #' back.
 #'
+#' Every encoding of [id_encode()] is a form of a UUID too: `id_format(x,
+#' "base62")` is `id_encode(id_bytes(x), "base62")`.
+#'
 #' `id_from_bytes()` has no default `format`: sixteen bytes are not a UUID
 #' until the caller says so.
 #'
@@ -23,6 +26,7 @@
 #' x <- id_parse("018f6b1c-2d3e-7a4b-8c5d-6e7f8091a2b3", "uuid")
 #' id_format(x, "urn")
 #' id_format(x, "compact")
+#' id_format(x, "base32")
 #' b <- id_bytes(x)
 #' b[, 1]
 #' id_from_bytes(b, "uuid")

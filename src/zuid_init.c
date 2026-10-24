@@ -15,6 +15,8 @@ static const R_CallMethodDef call_methods[] = {
     {"zuid_c_uuid", (DL_FUNC) &zuid_c_uuid, 6},
     {"zuid_c_state", (DL_FUNC) &zuid_c_state, 0},
     {"zuid_c_reset_state", (DL_FUNC) &zuid_c_reset_state, 0},
+    {"zuid_c_encode", (DL_FUNC) &zuid_c_encode, 4},
+    {"zuid_c_decode", (DL_FUNC) &zuid_c_decode, 4},
     {NULL, NULL, 0}
 };
 

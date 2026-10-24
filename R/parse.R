@@ -16,7 +16,8 @@
 #' A UUID's canonical text is lowercase and hyphenated. On input, either
 #' case is accepted, and `form` selects another of the RFC 9562 text forms:
 #' `"compact"` (32 hex digits), `"urn"` (`urn:uuid:` prefix), `"braced"` or
-#' `"uppercase"`.
+#' `"uppercase"`, or one of the encodings of [id_encode()] over the 16 bytes,
+#' such as `"base32"`, `"base58"` or `"words"`.
 #'
 #' @param x A character vector.
 #' @param format The format, such as `"uuid"`. See [id_formats()]. Required
