@@ -32,4 +32,26 @@ tables:
 
 # Conformance fixtures under tests/testthat/fixtures/, added by the stages
 # that use them (design.md section 7).
-fixtures: {}
+fixtures:
+  encodings:
+    path: tests/testthat/fixtures/encodings.csv
+    generator: tools/gen-encoding-fixtures
+    retrieved: 2026-10-24
+    # Output of the reference libraries, design.md D21. The Go libraries
+    # (oklog/ulid v2.1.2, go.jetify.com/typeid v1.3.0, btcutil/base58 v1.2.0,
+    # mr-tron/base58 v1.3.0, LiosK/go-uuid25 v0.1.2, segmentio/ksuid v1.0.4,
+    # lithammer/shortuuid v4.3.0) were checked to agree where both exist.
+    python:
+      base58: 2.1.1
+      pybase62: 1.0.0
+      python-ulid: 4.0.1
+      uuid25: 0.1.4
+      base32-crockford: 0.3.0
+      shortuuid: 1.0.13
+      proquint: 0.2.1
+    javascript:
+      niceware: 4.0.0
+    # Python's own base64 module gives base32rfc, base32hex and base64url;
+    # base64sort is base64url translated to the alphabet of
+    # draft-davis-uuidrev-alt-uuid-encoding-methods-00, whose vector for
+    # RFC 9562's example UUID tests/testthat/test-encode.R checks.
