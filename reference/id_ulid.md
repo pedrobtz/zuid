@@ -63,11 +63,11 @@ applies to ULIDs.
 ``` r
 id_ulid(2)
 #> <zuid_ulid[2]>
-#> [1] 01M5PTVWGPNP5PZQ68TV968B7J 01M5PTVWGPNP5PZQ68TV968B7K
+#> [1] 01M5PW76F7FJEARH8Y7NN92JKM 01M5PW76F7FJEARH8Y7NN92JKN
 id_typeid(2, "user")
 #> <zuid_typeid[2]>
-#> [1] user_01m5ptvwgqek7v64ksq0hs6hg8 user_01m5ptvwgqek89bp7n9c8nmfm2
+#> [1] user_01m5pw76f8ezzryy5rg06794qm user_01m5pw76f8f008n053y9ezxydj
 id_upid(2, "user")
 #> <zuid_upid[2]>
-#> [1] user_2akqvfjms5iuyazcgzrk6a user_2akqvfjmi6lonjplph3uha
+#> [1] user_2akqvkwtsmduwju3fdzqia user_2akqvkwtrplzypq66icpca
 ```

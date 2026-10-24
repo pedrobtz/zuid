@@ -77,11 +77,11 @@ specifications recommend. Further back, `rollback = "error"` raises
 ``` r
 id_scru128(2)
 #> <zuid_scru128[2]>
-#> [1] 03h3wia8kq9pb1gtx203aafc8 03h3wia8kq9pb1gtx2201217b
+#> [1] 03h3wmwkwu2x0edxu2il17n06 03h3wmwkwu2x0edxu2l09dhtu
 id_scru64(2, node = 42, node_bits = 8)
 #> <zuid_scru64[2]>
-#> [1] 0w4wqgnap1e0 0w4wqgnap1e1
+#> [1] 0w4wrndk5jbt 0w4wrndk5jbu
 id_ksuid(2)
 #> <zuid_ksuid[2]>
-#> [1] 3L8hCwjmQqP4t55KB3Eofron0nT 3L8hD2ajUThUb2NaY1GgUkP3bNu
+#> [1] 3L8k5IfjdlaNq78LYXctNKsdrBh 3L8k5I2HcmADROD8mQHHfuaWhvd
 ```

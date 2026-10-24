@@ -12,7 +12,9 @@ id_parse(
   form = NULL,
   layout = NULL,
   level = c("structure", "syntax", "strict"),
-  strict = FALSE
+  strict = FALSE,
+  alphabet = NULL,
+  min_length = 0
 )
 
 id_valid(
@@ -20,7 +22,9 @@ id_valid(
   format,
   form = NULL,
   layout = NULL,
-  level = c("structure", "syntax", "strict")
+  level = c("structure", "syntax", "strict"),
+  alphabet = NULL,
+  min_length = 0
 )
 ```
 
@@ -55,6 +59,17 @@ id_valid(
 
   If `TRUE`, an element that fails `level` is an error of class
   `zuid_parse_error`. If `FALSE`, it becomes `NA`.
+
+- alphabet:
+
+  For `"nanoid"` and `"sqids"`, the alphabet the values were made with,
+  or `NULL` for the format's default. It travels with the vector.
+
+- min_length:
+
+  For `"sqids"`, the `min_length` the values were made with. A Sqids
+  string is valid only when its numbers encode back to it, which depends
+  on the alphabet, `min_length` and the blocklist.
 
 ## Value
 
@@ -95,8 +110,14 @@ pass `"syntax"` only. A KSUID is 27 base62 characters, case-sensitive,
 at most `aWgEPTl1tmebfsQzFP4bxwgy80V`. Strict also asks that a time is
 no later than now plus the tolerance. An XID is 20 lowercase base32hex
 characters, an ObjectId 24 hex digits (either case on input) and a
-Snowflake 1 to 20 decimal digits without leading zeros. These formats
-have one text form each.
+Snowflake 1 to 20 decimal digits without leading zeros. A NanoID is one
+or more symbols of its alphabet; a Cuid2 is 2 to 32 of `0-9a-z`, and
+strict asks that it starts with a letter, as generated ones do. A Sqid
+is valid when it decodes and its numbers encode back to it under the
+alphabet, `min_length` and blocklist. A CID is version 0 (`Qm` and 44
+base58btc characters) or version 1 in one of 17 multibases; structure
+checks its varints, and the digest length of a hash function zuid knows.
+These formats have one text form each.
 
 ## Examples
 

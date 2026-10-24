@@ -64,6 +64,10 @@ epoch of its time field; and the text <code>forms</code> <code><a href="id_forma
 <span class="r-out co"><span class="r-pr">#&gt;</span> 8        xid structured    96       20       20</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 9   objectid structured    96       24       24</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 10 snowflake structured    64        1       20</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11    nanoid  syntactic    NA        1       NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12     cuid2  syntactic    NA        2       32</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13     sqids   encoding    NA        1       NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14       cid structured    NA        2       NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                            alphabet                        case</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1                                            0-9a-f lower; either case on input</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2                      0-9A-HJKMNP-TV-Z (Crockford) upper; either case on input</span>
@@ -75,6 +79,10 @@ epoch of its time field; and the text <code>forms</code> <code><a href="id_forma
 <span class="r-out co"><span class="r-pr">#&gt;</span> 8                                0-9a-v (base32hex)                       lower</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 9                                            0-9a-f lower; either case on input</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 10                                              0-9   decimal, no leading zeros</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11                    A-Za-z0-9_- (or the caller's)              case-sensitive</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12                                           0-9a-z                       lower</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13                      a-zA-Z0-9 (or the caller's)              case-sensitive</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14                                      a multibase             the multibase's</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                time_unit</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1  100ns (versions 1, 6), ms (version 7)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2                                     ms</span>
@@ -86,6 +94,10 @@ epoch of its time field; and the text <code>forms</code> <code><a href="id_forma
 <span class="r-out co"><span class="r-pr">#&gt;</span> 8                                      s</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 9                                      s</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 10                          the layout's</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11                                  &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12                                  &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13                                  &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14                                  &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                     epoch</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1  1582-10-15T00:00:00Z (versions 1, 6), 1970-01-01T00:00:00Z (version 7)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2                                                    1970-01-01T00:00:00Z</span>
@@ -97,6 +109,10 @@ epoch of its time field; and the text <code>forms</code> <code><a href="id_forma
 <span class="r-out co"><span class="r-pr">#&gt;</span> 8                                                    1970-01-01T00:00:00Z</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 9                                                    1970-01-01T00:00:00Z</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 10                                                           the layout's</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11                                                                   &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12                                                                   &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13                                                                   &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14                                                                   &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                                                                                       forms</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1  hex, compact, urn, braced, uppercase, base32, base32rfc, base32hex, base36, base58, base62, base62sort, base64url, base64sort, alphabet, proquint, words</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2                                                                                                                                                          </span>
@@ -108,6 +124,10 @@ epoch of its time field; and the text <code>forms</code> <code><a href="id_forma
 <span class="r-out co"><span class="r-pr">#&gt;</span> 8                                                                                                                                                          </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 9                                                                                                                                                          </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 10                                                                                                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11                                                                                                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12                                                                                                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13                                                                                                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14                                                                                                                                                         </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

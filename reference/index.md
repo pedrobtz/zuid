@@ -21,6 +21,9 @@
   [`print(`*`<zuid_layout>`*`)`](https://pedrobtz.github.io/zuid/reference/id_layout.md)
   [`format(`*`<zuid_layout>`*`)`](https://pedrobtz.github.io/zuid/reference/id_layout.md)
   : Snowflake and SCRU64 layouts
+- [`id_nanoid()`](https://pedrobtz.github.io/zuid/reference/id_nanoid.md)
+  [`id_sqids()`](https://pedrobtz.github.io/zuid/reference/id_nanoid.md)
+  : Generate NanoIDs and Sqids
 - [`id_nil()`](https://pedrobtz.github.io/zuid/reference/id_nil.md)
   [`id_max()`](https://pedrobtz.github.io/zuid/reference/id_nil.md) :
   The nil and max UUIDs

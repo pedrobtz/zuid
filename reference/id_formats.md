@@ -32,6 +32,10 @@ id_formats()
 #> 8        xid structured    96       20       20
 #> 9   objectid structured    96       24       24
 #> 10 snowflake structured    64        1       20
+#> 11    nanoid  syntactic    NA        1       NA
+#> 12     cuid2  syntactic    NA        2       32
+#> 13     sqids   encoding    NA        1       NA
+#> 14       cid structured    NA        2       NA
 #>                                            alphabet                        case
 #> 1                                            0-9a-f lower; either case on input
 #> 2                      0-9A-HJKMNP-TV-Z (Crockford) upper; either case on input
@@ -43,6 +47,10 @@ id_formats()
 #> 8                                0-9a-v (base32hex)                       lower
 #> 9                                            0-9a-f lower; either case on input
 #> 10                                              0-9   decimal, no leading zeros
+#> 11                    A-Za-z0-9_- (or the caller's)              case-sensitive
+#> 12                                           0-9a-z                       lower
+#> 13                      a-zA-Z0-9 (or the caller's)              case-sensitive
+#> 14                                      a multibase             the multibase's
 #>                                time_unit
 #> 1  100ns (versions 1, 6), ms (version 7)
 #> 2                                     ms
@@ -54,6 +62,10 @@ id_formats()
 #> 8                                      s
 #> 9                                      s
 #> 10                          the layout's
+#> 11                                  <NA>
+#> 12                                  <NA>
+#> 13                                  <NA>
+#> 14                                  <NA>
 #>                                                                     epoch
 #> 1  1582-10-15T00:00:00Z (versions 1, 6), 1970-01-01T00:00:00Z (version 7)
 #> 2                                                    1970-01-01T00:00:00Z
@@ -65,6 +77,10 @@ id_formats()
 #> 8                                                    1970-01-01T00:00:00Z
 #> 9                                                    1970-01-01T00:00:00Z
 #> 10                                                           the layout's
+#> 11                                                                   <NA>
+#> 12                                                                   <NA>
+#> 13                                                                   <NA>
+#> 14                                                                   <NA>
 #>                                                                                                                                                       forms
 #> 1  hex, compact, urn, braced, uppercase, base32, base32rfc, base32hex, base36, base58, base62, base62sort, base64url, base64sort, alphabet, proquint, words
 #> 2                                                                                                                                                          
@@ -76,4 +92,8 @@ id_formats()
 #> 8                                                                                                                                                          
 #> 9                                                                                                                                                          
 #> 10                                                                                                                                                         
+#> 11                                                                                                                                                         
+#> 12                                                                                                                                                         
+#> 13                                                                                                                                                         
+#> 14                                                                                                                                                         
 ```

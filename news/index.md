@@ -2,6 +2,21 @@
 
 ## zuid 0.0.0.9000
 
+- NanoID, Cuid2, Sqids and CID parse and validate, and
+  [`id_nanoid()`](https://pedrobtz.github.io/zuid/reference/id_nanoid.md)
+  and
+  [`id_sqids()`](https://pedrobtz.github.io/zuid/reference/id_nanoid.md)
+  generate.
+  [`id_parse()`](https://pedrobtz.github.io/zuid/reference/id_parse.md)
+  and
+  [`id_valid()`](https://pedrobtz.github.io/zuid/reference/id_parse.md)
+  take `alphabet` and `min_length` for NanoID and Sqids, and the
+  parameters travel with the vector.
+  [`id_fields()`](https://pedrobtz.github.io/zuid/reference/id_fields.md)
+  reads a Sqid’s numbers and a CID’s version, codec, hash function and
+  digest, and
+  [`id_bytes()`](https://pedrobtz.github.io/zuid/reference/id_format.md)
+  gives a CID’s binary form.
 - XID, ObjectId and Snowflake: parsing, fields and
   [`id_xid()`](https://pedrobtz.github.io/zuid/reference/id_xid.md),
   [`id_objectid()`](https://pedrobtz.github.io/zuid/reference/id_xid.md)

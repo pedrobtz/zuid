@@ -93,7 +93,11 @@ seconds, its machine id in <code>node</code>, its <code>process</code> and its c
 <code>sequence</code>; an ObjectId the same, but its middle five bytes are <code>random</code>,
 as the current BSON specification makes them. A Snowflake has what its
 layout says: the time at the layout's unit and epoch, the node fields in
-<code>node</code> as <code>name=value</code> pairs, and the <code>sequence</code>.</p>
+<code>node</code> as <code>name=value</code> pairs, and the <code>sequence</code>. A CID has its CID
+<code>version</code>, its content <code>codec</code> and <code>hash</code> function by multicodec name (or
+<code>0x</code> and the code when zuid does not know the name) and its <code>digest</code> as
+hex. A Sqid has its <code>numbers</code>. NanoID and Cuid2 have no fields: a Cuid2's
+time is hashed in and cannot be read back.</p>
 <p>The nil and max UUIDs report versions 0 and 15 and no variant. <code>random</code>
 is the random bits joined in order, as hex, left-padded with zero bits to
 a whole number of hex digits.</p>
