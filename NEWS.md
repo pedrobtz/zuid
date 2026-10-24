@@ -1,5 +1,10 @@
 # zuid 0.0.0.9000
 
+* NanoID, Cuid2, Sqids and CID parse and validate, and `id_nanoid()` and
+  `id_sqids()` generate. `id_parse()` and `id_valid()` take `alphabet` and
+  `min_length` for NanoID and Sqids, and the parameters travel with the
+  vector. `id_fields()` reads a Sqid's numbers and a CID's version, codec,
+  hash function and digest, and `id_bytes()` gives a CID's binary form.
 * XID, ObjectId and Snowflake: parsing, fields and `id_xid()`,
   `id_objectid()` and `id_snowflake()`. `id_layout()` gives the Twitter,
   Discord, Instagram, Sonyflake and SCRU64 layouts and builds custom ones; a
