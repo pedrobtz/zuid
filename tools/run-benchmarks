@@ -1,0 +1,53 @@
+#!/usr/bin/env Rscript
+# Time the operations of design.md section 10 over 10^6 elements, and the
+# baselines they are compared with. Prints Markdown rows for
+# .agents/benchmarks.md.
+#
+#   tools/run-benchmarks              every benchmark whose code exists
+#   tools/run-benchmarks baseline     the uuid and ulid baselines only
+#
+# Needs bench, uuid and ulid. None is a package dependency: this is
+# maintainer tooling, and design.md D15 makes the targets a record, not a
+# gate.
+
+args <- commandArgs(trailingOnly = TRUE)
+only_baseline <- "baseline" %in% args
+
+for (pkg in c("bench", "uuid", "ulid")) {
+  if (!requireNamespace(pkg, quietly = TRUE)) {
+    stop("tools/run-benchmarks needs the ", pkg, " package", call. = FALSE)
+  }
+}
+
+n <- 1e6
+iterations <- 5L
+
+time_it <- function(label, expr_fn) {
+  gc()
+  result <- bench::mark(expr_fn(), iterations = iterations, check = FALSE,
+                        filter_gc = FALSE)
+  median_ms <- as.numeric(result$median) * 1000
+  cat(sprintf("| %s | %.0f ms |\n", label, median_ms))
+  invisible(median_ms)
+}
+
+set.seed(1)
+uuid_text <- uuid::UUIDgenerate(n = n)
+
+cat(sprintf("Run %s on %s, R %s, %d iterations, median.\n\n",
+            format(Sys.Date()), utils::sessionInfo()$running,
+            getRversion(), iterations))
+cat("| Operation, 10^6 elements | Median |\n| --- | --- |\n")
+
+time_it("`uuid::UUIDgenerate(use.time = FALSE, n = )` (version 4)",
+        function() uuid::UUIDgenerate(use.time = FALSE, n = n))
+time_it("`uuid::UUIDgenerate(use.time = TRUE, n = )` (version 1)",
+        function() uuid::UUIDgenerate(use.time = TRUE, n = n))
+time_it("`uuid::UUIDparse()`", function() uuid::UUIDparse(uuid_text))
+time_it("`ulid::ULIDgenerate()`", function() ulid::ULIDgenerate(n))
+
+if (!only_baseline) {
+  # zuid's rows of design section 10 are added here by the stages that build
+  # each operation.
+  invisible(NULL)
+}
