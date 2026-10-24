@@ -12,7 +12,8 @@ hex_raw <- function(hex) {
   ))
 }
 
+# Over the bytes, so it holds for any format.
 strictly_increasing <- function(x) {
-  key <- id_format(x, "compact")
+  key <- id_encode(id_bytes(x), "hex")
   all(key[-1L] > key[-length(key)])
 }
