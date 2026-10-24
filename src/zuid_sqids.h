@@ -21,7 +21,8 @@ typedef struct {
     size_t nblock;
 } zuid_sqids;
 
-/* `words` (NULL: the default blocklist) are filtered as the reference
+/* `words` (NULL: the default blocklist), which must be lowercase, are
+ * filtered as the reference
  * filters them into `block`, which holds room for `nwords` pointers and
  * points into `words` or the compiled table. Returns 0, or -1 unless the
  * alphabet is 3 or more distinct ASCII characters and `min_length` is 0 to

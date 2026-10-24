@@ -173,7 +173,7 @@ id_valid <- function(
     list(layout = layout, alphabet = alphabet, min_length = min_length),
     format
   )
-  parsed <- parse_text(x, format, form, params)
+  parsed <- parse_text(x, format, form, params, text = FALSE)
   out <- !is.na(parsed$level) & parsed$level >= level_number(level)
   out[is.na(x)] <- NA
   names(out) <- names(x)
@@ -203,15 +203,24 @@ format_forms <- function(forms) {
   })
 }
 
-parse_text <- function(x, format, form, params = list()) {
+# list(text, level); `text = FALSE` returns the levels with NULL text.
+parse_text <- function(x, format, form, params = list(), text = TRUE) {
   if (format %in% text_formats) {
     return(parse_text_format(x, format, params))
   }
   now <- as.numeric(Sys.time()) * 1000
-  out <- .Call(zuid_c_parse, x, format, form, now, time_tolerance() * 1000)
+  out <- .Call(
+    zuid_c_parse,
+    x,
+    format,
+    form,
+    now,
+    time_tolerance() * 1000,
+    text
+  )
   names(out) <- c("text", "level")
   if (format == "snowflake") {
-    out$level <- layout_levels(out, params$layout, now)
+    out$level <- layout_levels(x, out$level, params$layout, now)
   }
   out
 }
@@ -219,13 +228,12 @@ parse_text <- function(x, format, form, params = list()) {
 # A Snowflake's structure and strict levels are its layout's: the sign bit
 # clear when the layout has one, and the time no later than now plus the
 # tolerance.
-layout_levels <- function(parsed, layout, now) {
-  level <- parsed$level
+layout_levels <- function(x, level, layout, now) {
   ok <- which(!is.na(level) & level >= 2L)
   if (!length(ok)) {
     return(level)
   }
-  bytes <- .Call(zuid_c_bytes, parsed$text[ok], "snowflake")
+  bytes <- .Call(zuid_c_bytes, x[ok], "snowflake")
   if (layout$sign_bit) {
     signed <- as.integer(bytes[1L, ]) >= 128L
     level[ok[signed]] <- 1L

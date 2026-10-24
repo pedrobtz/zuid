@@ -5,7 +5,7 @@
 
 static const R_CallMethodDef call_methods[] = {
     {"zuid_c_table", (DL_FUNC) &zuid_c_table, 1},
-    {"zuid_c_parse", (DL_FUNC) &zuid_c_parse, 5},
+    {"zuid_c_parse", (DL_FUNC) &zuid_c_parse, 6},
     {"zuid_c_format", (DL_FUNC) &zuid_c_format, 3},
     {"zuid_c_bytes", (DL_FUNC) &zuid_c_bytes, 2},
     {"zuid_c_from_bytes", (DL_FUNC) &zuid_c_from_bytes, 3},

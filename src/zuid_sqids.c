@@ -46,8 +46,8 @@ int zuid_sqids_init(zuid_sqids *s, const char *alphabet, size_t len,
         nwords = ZUID_SQIDS_BLOCKLIST_N;
     }
     /* Words of 3 or more characters, every one in the lowercased alphabet.
-     * The compiled table is lowercase already; a caller's words are
-     * compared case-insensitively below. */
+     * Words must be lowercase: the compiled table is, and the R side
+     * lowercases a caller's. */
     s->block = block;
     s->nblock = 0;
     for (size_t w = 0; w < nwords; w++) {
@@ -60,6 +60,17 @@ int zuid_sqids_init(zuid_sqids *s, const char *alphabet, size_t len,
             fits = c <= 127 && lowered[lower(c)];
         }
         if (fits) block[s->nblock++] = word;
+    }
+    /* Shortest first, so that is_blocked() stops at the first word longer
+     * than the id. An insertion sort: the list is filtered once per call. */
+    for (size_t i = 1; i < s->nblock; i++) {
+        const char *w = block[i];
+        size_t wl = strlen(w), j = i;
+        while (j > 0 && strlen(block[j - 1]) > wl) {
+            block[j] = block[j - 1];
+            j--;
+        }
+        block[j] = w;
     }
     shuffle(s->alphabet, s->n);
     return 0;
@@ -94,33 +105,32 @@ static int has_digit(const char *w)
     return 0;
 }
 
-static int ieq(const char *a, const char *b, size_t n)
-{
-    for (size_t i = 0; i < n; i++) {
-        if (lower((unsigned char) a[i]) != lower((unsigned char) b[i])) {
-            return 0;
-        }
-    }
-    return 1;
-}
-
+/* The reference's isBlockedId(), on the id lowercased once; the words are
+ * lowercase already (the compiled table is, and the R side lowercases a
+ * caller's). */
 static int is_blocked(const zuid_sqids *s, const char *id, size_t len)
 {
-    for (size_t w = 0; w < s->nblock; w++) {
+    char stack[512];
+    char *low = len < sizeof stack ? stack : (char *) malloc(len + 1);
+    if (!low) return 0;
+    for (size_t i = 0; i < len; i++) low[i] = (char) lower((unsigned char) id[i]);
+    low[len] = '\0';
+    int blocked = 0;
+    for (size_t w = 0; w < s->nblock && !blocked; w++) {
         const char *word = s->block[w];
         size_t wl = strlen(word);
-        if (wl > len) continue;
+        if (wl > len) break; /* sorted by length */
         if (len <= 3 || wl <= 3) {
-            if (wl == len && ieq(id, word, len)) return 1;
+            blocked = wl == len && memcmp(low, word, len) == 0;
         } else if (has_digit(word)) {
-            if (ieq(id, word, wl) || ieq(id + len - wl, word, wl)) return 1;
+            blocked = memcmp(low, word, wl) == 0 ||
+                      memcmp(low + len - wl, word, wl) == 0;
         } else {
-            for (size_t k = 0; k + wl <= len; k++) {
-                if (ieq(id + k, word, wl)) return 1;
-            }
+            blocked = strstr(low, word) != NULL;
         }
     }
-    return 0;
+    if (low != stack) free(low);
+    return blocked;
 }
 
 static void reverse(char *c, int n)

@@ -69,15 +69,17 @@ id_detect <- function(x, hint = NULL, layout = NULL) {
   }
   # SCRU64 is chosen only under a SCRU64 layout.
   choosable <- pool != "scru64" | (!is.null(layout) && layout$name == "scru64")
-  candidates <- lapply(seq_along(x), function(i) pool[passes[i, ]])
-  out <- vapply(
-    seq_along(x),
-    function(i) {
-      hits <- passes[i, ]
-      if (sum(hits) == 1L && all(choosable[hits])) pool[hits] else NA_character_
-    },
-    character(1)
-  )
+  # Over the pass matrix at once: the candidates in pool order, and the
+  # answer where exactly one choosable format passes.
+  hit <- which(passes, arr.ind = TRUE)
+  hit <- hit[order(hit[, "row"], hit[, "col"]), , drop = FALSE]
+  candidates <- unname(split(
+    pool[hit[, "col"]],
+    factor(hit[, "row"], levels = seq_along(x))
+  ))
+  single <- rowSums(passes) == 1L
+  first <- max.col(passes, ties.method = "first")
+  out <- ifelse(single & choosable[first], pool[first], NA_character_)
   names(out) <- names(x)
   attr(out, "candidates") <- candidates
   out

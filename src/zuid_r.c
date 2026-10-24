@@ -105,16 +105,19 @@ static int canonical_bytes(const zuid_format *fmt, SEXP s, uint8_t *out,
     return fmt->parse(text, len, -1, out, pfx) >= ZUID_LEVEL_SYNTAX;
 }
 
+/* `want_text` FALSE leaves the text NULL: id_valid() and id_detect() need
+ * the levels only, and making a string per element is most of the cost. */
 SEXP zuid_c_parse(SEXP x, SEXP format, SEXP form, SEXP now_ms,
-                  SEXP tolerance_ms)
+                  SEXP tolerance_ms, SEXP want_text)
 {
+    int with_text = Rf_asLogical(want_text) != FALSE;
     arg_character(x);
     const zuid_format *fmt = arg_format(format);
     int form_i = arg_form(fmt, form);
     double now = Rf_asReal(now_ms), tol = Rf_asReal(tolerance_ms);
     R_xlen_t n = XLENGTH(x);
 
-    SEXP text = PROTECT(Rf_allocVector(STRSXP, n));
+    SEXP text = PROTECT(with_text ? Rf_allocVector(STRSXP, n) : R_NilValue);
     SEXP level = PROTECT(Rf_allocVector(INTSXP, n));
     int *lv = INTEGER(level);
     uint8_t bytes[ZUID_MAX_WIDTH];
@@ -124,7 +127,7 @@ SEXP zuid_c_parse(SEXP x, SEXP format, SEXP form, SEXP now_ms,
     for (R_xlen_t i = 0; i < n; i++) {
         SEXP s = STRING_ELT(x, i);
         if (s == NA_STRING) {
-            SET_STRING_ELT(text, i, NA_STRING);
+            if (with_text) SET_STRING_ELT(text, i, NA_STRING);
             lv[i] = NA_INTEGER;
             continue;
         }
@@ -137,6 +140,7 @@ SEXP zuid_c_parse(SEXP x, SEXP format, SEXP form, SEXP now_ms,
             got = ZUID_LEVEL_STRICT;
         }
         lv[i] = (int) got;
+        if (!with_text) continue;
         if (got >= ZUID_LEVEL_SYNTAX) {
             size_t m = fmt->format(bytes, -1, &pfx, buf);
             SET_STRING_ELT(text, i, zuid_mkchar(buf, m));

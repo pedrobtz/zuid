@@ -47,7 +47,38 @@ time_it("`uuid::UUIDparse()`", function() uuid::UUIDparse(uuid_text))
 time_it("`ulid::ULIDgenerate()`", function() ulid::ULIDgenerate(n))
 
 if (!only_baseline) {
-  # zuid's rows of design section 10 are added here by the stages that build
-  # each operation.
-  invisible(NULL)
+  # zuid's rows of design section 10, from the checkout installed with R's
+  # usual optimisation (load_all() would compile for debugging).
+  lib <- tempfile("zuid-lib")
+  dir.create(lib)
+  status <- system2(
+    file.path(R.home("bin"), "R"),
+    c("CMD", "INSTALL", "--no-test-load", "--no-docs", "-l", shQuote(lib), "."),
+    stdout = FALSE,
+    stderr = FALSE
+  )
+  if (status != 0L) stop("R CMD INSTALL failed", call. = FALSE)
+  suppressMessages(library(zuid, lib.loc = lib))
+  uuids <- id_parse(uuid_text, "uuid")
+  ksuid_text <- as.character(id_ksuid(n))
+  mixed <- c(
+    uuid_text[seq_len(n / 4)],
+    as.character(id_ulid(n / 4)),
+    ksuid_text[seq_len(n / 4)],
+    as.character(id_xid(n / 4))
+  )
+  bytes <- id_bytes(uuids)
+  cat("\n")
+  time_it("`id_parse()` of UUID strings", function() id_parse(uuid_text, "uuid"))
+  time_it("`id_uuid(version = 7)`", function() id_uuid(n, version = 7))
+  time_it("`id_uuid(version = 4)`", function() id_uuid(n, version = 4))
+  time_it("`id_ulid()`", function() id_ulid(n))
+  time_it("`id_format(form = \"base62\")`", function() id_format(uuids, "base62"))
+  time_it("`id_format(form = \"words\")`", function() id_format(uuids, "words"))
+  time_it("`id_parse()` of KSUID strings", function() id_parse(ksuid_text, "ksuid"))
+  time_it("`id_detect()` of mixed strings", function() id_detect(mixed))
+  time_it("`id_fields()`", function() id_fields(uuids))
+  time_it("`id_sqids()` of single integers", function() id_sqids(seq_len(n)))
+  time_it("`id_bytes()`", function() id_bytes(uuids))
+  time_it("`id_from_bytes()`", function() id_from_bytes(bytes, "uuid"))
 }

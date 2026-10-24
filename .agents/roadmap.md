@@ -32,7 +32,7 @@ unaffected. Design §12's Arrow criterion does not apply to v0.1.0.
 | 6 | [XID, ObjectId and Snowflake layouts](#stage-6--xid-objectid-and-snowflake-layouts) | quick | [#9](https://github.com/pedrobtz/zuid/issues/9) | [#23](https://github.com/pedrobtz/zuid/pull/23) | 2026-10-24 |
 | 7 | [NanoID, Cuid2, Sqids and CID](#stage-7--nanoid-cuid2-sqids-and-cid) | quick | [#10](https://github.com/pedrobtz/zuid/issues/10) | [#24](https://github.com/pedrobtz/zuid/pull/24) | 2026-10-24 |
 | 8 | [Detection](#stage-8--detection) | quick | [#11](https://github.com/pedrobtz/zuid/issues/11) | [#25](https://github.com/pedrobtz/zuid/pull/25) | 2026-10-24 |
-| 9 | [Fuzzing and benchmarks](#stage-9--fuzzing-and-benchmarks) | quick | [#12](https://github.com/pedrobtz/zuid/issues/12) | | |
+| 9 | [Fuzzing and benchmarks](#stage-9--fuzzing-and-benchmarks) | quick | [#12](https://github.com/pedrobtz/zuid/issues/12) | [#26](https://github.com/pedrobtz/zuid/pull/26) | 2026-10-24 |
 | 10 | [Full CI](#stage-10--full-ci) | full | [#13](https://github.com/pedrobtz/zuid/issues/13) | | |
 | 11 | [v0.1.0 readiness](#stage-11--v010-readiness) | full | [#14](https://github.com/pedrobtz/zuid/issues/14) | | |
 
@@ -443,6 +443,20 @@ when the evidence allows, and report ambiguity otherwise.
 - `.agents/benchmarks.md` has a number for every row of §10 (D15: not a
   gate).
 - `R CMD check` passes on the quick r-actions profile.
+
+**Deviations (2026-10-24).**
+
+- Most §10 targets are missed, recorded with their causes in
+  `benchmarks.md`: creating 10⁶ R strings alone takes about 680 ms on the
+  benchmark machine. Two hot spots the first run showed were fixed in this
+  stage (`id_detect()` 8884 → 2915 ms, `id_sqids()` 12249 → 2786 ms),
+  including `id_valid()` no longer building text it discards.
+- The harness needs no `ZUID_STANDALONE` code: the codec files include no R
+  headers, so the fuzz build excludes the R-facing files instead
+  (`zuid_r*.c`, `zuid_init.c`) and defines the macro only for the record.
+- The fuzz workflow runs 120 s on pull requests and 30 minutes nightly, as
+  r-actions' example does, from a 209-file seed corpus drawn from the oracle
+  fixtures.
 
 **Design.** §9; §10; D15.
 
