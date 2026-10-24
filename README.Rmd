@@ -26,7 +26,7 @@ counter. Reading it means knowing which format the string is, and that is
 the step most code guesses at.
 
 zuid is a complete UUID implementation for R, with the formats around it.
-The core is [RFC 9562](https://www.rfc-editor.org/rfc/rfc9562) in full:
+The core is [RFC 9562](https://www.rfc-editor.org/info/rfc9562/) in full:
 versions 1 to 8, nil and max, and every text form. Around it are the same
 128 bits in other alphabets, and fourteen kindred formats: ULID, TypeID,
 UPID, SCRU128, SCRU64, KSUID, Snowflake and Sonyflake, XID, ObjectId,

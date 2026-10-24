@@ -18,7 +18,7 @@ a node or a counter. Reading it means knowing which format the string
 is, and that is the step most code guesses at.
 
 zuid is a complete UUID implementation for R, with the formats around
-it. The core is [RFC 9562](https://www.rfc-editor.org/rfc/rfc9562) in
+it. The core is [RFC 9562](https://www.rfc-editor.org/info/rfc9562/) in
 full: versions 1 to 8, nil and max, and every text form. Around it are
 the same 128 bits in other alphabets, and fourteen kindred formats:
 ULID, TypeID, UPID, SCRU128, SCRU64, KSUID, Snowflake and Sonyflake,
@@ -121,11 +121,11 @@ call. Version 7 UUIDs and ULIDs are monotonic within a session:
 ``` r
 id_uuid(3)
 #> <zuid_uuid[3]>
-#> [1] 01a16fca-bb38-73f0-9769-3e94d757e1c1 01a16fca-bb38-73f1-a6bf-19105f7fd21c
-#> [3] 01a16fca-bb38-73f2-a3f8-da22bcab4b31
+#> [1] 01a16fcf-47a5-744e-9fb9-2a38cba1579f 01a16fcf-47a5-744f-8be5-c30fd8528dec
+#> [3] 01a16fcf-47a5-7450-a003-dd53c4fdc313
 id_ulid(2)
 #> <zuid_ulid[2]>
-#> [1] 01M5QWNESS2N6GMAJQ21BW1PBB 01M5QWNESS2N6GMAJQ21BW1PBC
+#> [1] 01M5QWYHX62P89YZKDGCTH935J 01M5QWYHX62P89YZKDGCTH935K
 ```
 
 Every function starts with `id_` and takes the vector first. A function
