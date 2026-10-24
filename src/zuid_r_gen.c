@@ -14,6 +14,7 @@
 
 static zuid_uuid7_state uuid7_state;
 static zuid_uuid1_state uuid1_state;
+static zuid_ulid_state ulid_state;
 static int session_clock_seq = -1; /* -1 until first drawn */
 static uint8_t session_node[6];
 
@@ -21,6 +22,7 @@ SEXP zuid_c_reset_state(void)
 {
     memset(&uuid7_state, 0, sizeof uuid7_state);
     memset(&uuid1_state, 0, sizeof uuid1_state);
+    memset(&ulid_state, 0, sizeof ulid_state);
     session_clock_seq = -1;
     memset(session_node, 0, sizeof session_node);
     return R_NilValue;
@@ -28,11 +30,12 @@ SEXP zuid_c_reset_state(void)
 
 SEXP zuid_c_state(void)
 {
-    const char *names[] = {"entropy", "uuid7_last_ms", "uuid7_counter",
-                           "uuid1_last_ticks", "uuid1_clock_seq"};
-    SEXP out = PROTECT(Rf_allocVector(VECSXP, 5));
-    SEXP nms = PROTECT(Rf_allocVector(STRSXP, 5));
-    for (int i = 0; i < 5; i++) SET_STRING_ELT(nms, i, Rf_mkChar(names[i]));
+    const char *names[] = {"entropy",          "uuid7_last_ms",
+                           "uuid7_counter",    "uuid1_last_ticks",
+                           "uuid1_clock_seq",  "ulid_last_ms"};
+    SEXP out = PROTECT(Rf_allocVector(VECSXP, 6));
+    SEXP nms = PROTECT(Rf_allocVector(STRSXP, 6));
+    for (int i = 0; i < 6; i++) SET_STRING_ELT(nms, i, Rf_mkChar(names[i]));
     Rf_setAttrib(out, R_NamesSymbol, nms);
     const char *src = zuid_entropy_source();
     SET_VECTOR_ELT(out, 0, Rf_ScalarString(zuid_mkchar(src, strlen(src))));
@@ -48,6 +51,9 @@ SEXP zuid_c_state(void)
     SET_VECTOR_ELT(out, 4, Rf_ScalarInteger(session_clock_seq < 0
                                                 ? NA_INTEGER
                                                 : session_clock_seq));
+    SET_VECTOR_ELT(out, 5, Rf_ScalarReal(ulid_state.has
+                                             ? (double) ulid_state.last_ms
+                                             : NA_REAL));
     UNPROTECT(2);
     return out;
 }
@@ -145,9 +151,78 @@ SEXP zuid_c_uuid(SEXP n_, SEXP version_, SEXP time_us, SEXP random,
     SEXP out = PROTECT(Rf_allocVector(STRSXP, n));
     char buf[ZUID_TEXT_BUF];
     for (size_t i = 0; i < un; i++) {
-        size_t m = zuid_fmt_uuid.format(bytes + 16 * i, -1, buf);
+        size_t m = zuid_fmt_uuid.format(bytes + 16 * i, -1, NULL, buf);
         SET_STRING_ELT(out, (R_xlen_t) i, zuid_mkchar(buf, m));
     }
     UNPROTECT(1);
     return out;
+}
+
+/* Milliseconds since 1970 per value: from `time_us` (microseconds, floored)
+ * or the clock. */
+static int64_t *value_ms(SEXP time_us, size_t un)
+{
+    int64_t *ms = (int64_t *) R_alloc(un ? un : 1, sizeof(int64_t));
+    if (Rf_isNull(time_us)) {
+        int64_t now = zuid_clock_now_100ns() / 10000;
+        for (size_t i = 0; i < un; i++) ms[i] = now;
+    } else {
+        if (TYPEOF(time_us) != REALSXP || (size_t) XLENGTH(time_us) != un) {
+            Rf_error("zuid: `time` must be one value per element");
+        }
+        const double *us = REAL(time_us);
+        for (size_t i = 0; i < un; i++) {
+            int64_t v = (int64_t) us[i];
+            ms[i] = v / 1000 - (v % 1000 < 0);
+        }
+    }
+    return ms;
+}
+
+static SEXP canonical_strings(const zuid_format *fmt, const uint8_t *bytes,
+                              size_t un)
+{
+    SEXP out = PROTECT(Rf_allocVector(STRSXP, (R_xlen_t) un));
+    char buf[ZUID_TEXT_BUF];
+    for (size_t i = 0; i < un; i++) {
+        size_t m = fmt->format(bytes + 16 * i, -1, NULL, buf);
+        SET_STRING_ELT(out, (R_xlen_t) i, zuid_mkchar(buf, m));
+    }
+    UNPROTECT(1);
+    return out;
+}
+
+/* NULL when the entropy source failed; an integer, the position of the
+ * value that overflowed, on monotonic overflow (zuid_overflow_error). */
+SEXP zuid_c_ulid(SEXP n_, SEXP time_us, SEXP random, SEXP tolerance_ms)
+{
+    double dn = Rf_asReal(n_);
+    if (!(dn >= 0)) Rf_error("zuid: `n` must be non-negative");
+    size_t un = (size_t) dn;
+    int64_t tol_ms = (int64_t) Rf_asReal(tolerance_ms);
+    int64_t *ms = value_ms(time_us, un);
+    uint8_t *r = (uint8_t *) R_alloc(un ? un : 1, ZUID_ULID_RANDOM);
+    if (take_random(random, ZUID_ULID_RANDOM * un, r) != 0) return R_NilValue;
+    uint8_t *bytes = (uint8_t *) R_alloc(un ? un : 1, 16);
+    size_t bad = zuid_gen_ulid(un, ms, r, tol_ms, &ulid_state, bytes);
+    if (bad) return Rf_ScalarInteger((int) bad);
+    return canonical_strings(&zuid_fmt_ulid, bytes, un);
+}
+
+/* `tail`: three raw bytes, the prefix and version. NULL when the entropy
+ * source failed. */
+SEXP zuid_c_upid(SEXP n_, SEXP time_us, SEXP random, SEXP tail)
+{
+    double dn = Rf_asReal(n_);
+    if (!(dn >= 0)) Rf_error("zuid: `n` must be non-negative");
+    if (TYPEOF(tail) != RAWSXP || XLENGTH(tail) != 3) {
+        Rf_error("zuid: `tail` must be 3 raw bytes");
+    }
+    size_t un = (size_t) dn;
+    int64_t *ms = value_ms(time_us, un);
+    uint8_t *r = (uint8_t *) R_alloc(un ? un : 1, ZUID_UPID_RANDOM);
+    if (take_random(random, ZUID_UPID_RANDOM * un, r) != 0) return R_NilValue;
+    uint8_t *bytes = (uint8_t *) R_alloc(un ? un : 1, 16);
+    zuid_gen_upid(un, ms, r, RAW(tail), bytes);
+    return canonical_strings(&zuid_fmt_upid, bytes, un);
 }

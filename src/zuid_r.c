@@ -92,11 +92,12 @@ static int is_ascii(const char *s, size_t len)
 }
 
 /* Bytes of a canonical (or default-form) string already known to parse. */
-static int canonical_bytes(const zuid_format *fmt, SEXP s, uint8_t *out)
+static int canonical_bytes(const zuid_format *fmt, SEXP s, uint8_t *out,
+                           zuid_prefix *pfx)
 {
     const char *text = CHAR(s);
     size_t len = (size_t) LENGTH(s);
-    return fmt->parse(text, len, -1, out) >= ZUID_LEVEL_SYNTAX;
+    return fmt->parse(text, len, -1, out, pfx) >= ZUID_LEVEL_SYNTAX;
 }
 
 SEXP zuid_c_parse(SEXP x, SEXP format, SEXP form, SEXP now_ms,
@@ -112,6 +113,7 @@ SEXP zuid_c_parse(SEXP x, SEXP format, SEXP form, SEXP now_ms,
     SEXP level = PROTECT(Rf_allocVector(INTSXP, n));
     int *lv = INTEGER(level);
     uint8_t bytes[ZUID_MAX_WIDTH];
+    zuid_prefix pfx;
     char buf[ZUID_TEXT_BUF];
 
     for (R_xlen_t i = 0; i < n; i++) {
@@ -124,14 +126,14 @@ SEXP zuid_c_parse(SEXP x, SEXP format, SEXP form, SEXP now_ms,
         const char *chars = CHAR(s);
         size_t len = (size_t) LENGTH(s);
         zuid_level got = is_ascii(chars, len)
-                             ? fmt->parse(chars, len, form_i, bytes)
+                             ? fmt->parse(chars, len, form_i, bytes, &pfx)
                              : ZUID_LEVEL_NONE;
         if (got == ZUID_LEVEL_STRUCTURE && fmt->strict(bytes, now, tol)) {
             got = ZUID_LEVEL_STRICT;
         }
         lv[i] = (int) got;
         if (got >= ZUID_LEVEL_SYNTAX) {
-            size_t m = fmt->format(bytes, -1, buf);
+            size_t m = fmt->format(bytes, -1, &pfx, buf);
             SET_STRING_ELT(text, i, zuid_mkchar(buf, m));
         } else {
             SET_STRING_ELT(text, i, NA_STRING);
@@ -153,15 +155,16 @@ SEXP zuid_c_format(SEXP x, SEXP format, SEXP form)
     R_xlen_t n = XLENGTH(x);
     SEXP out = PROTECT(Rf_allocVector(STRSXP, n));
     uint8_t bytes[ZUID_MAX_WIDTH];
+    zuid_prefix pfx;
     char buf[ZUID_TEXT_BUF];
 
     for (R_xlen_t i = 0; i < n; i++) {
         SEXP s = STRING_ELT(x, i);
-        if (s == NA_STRING || !canonical_bytes(fmt, s, bytes)) {
+        if (s == NA_STRING || !canonical_bytes(fmt, s, bytes, &pfx)) {
             SET_STRING_ELT(out, i, NA_STRING);
             continue;
         }
-        size_t m = fmt->format(bytes, form_i, buf);
+        size_t m = fmt->format(bytes, form_i, &pfx, buf);
         SET_STRING_ELT(out, i, zuid_mkchar(buf, m));
     }
     UNPROTECT(1);
@@ -181,11 +184,12 @@ SEXP zuid_c_bytes(SEXP x, SEXP format)
     SEXP out = PROTECT(Rf_allocMatrix(RAWSXP, w, (int) n));
     Rbyte *raw = RAW(out);
     memset(raw, 0, (size_t) w * (size_t) n);
+    zuid_prefix pfx;
 
     for (R_xlen_t i = 0; i < n; i++) {
         SEXP s = STRING_ELT(x, i);
         if (s != NA_STRING) {
-            canonical_bytes(fmt, s, raw + (size_t) i * (size_t) w);
+            canonical_bytes(fmt, s, raw + (size_t) i * (size_t) w, &pfx);
         }
     }
     UNPROTECT(1);
@@ -214,7 +218,7 @@ SEXP zuid_c_from_bytes(SEXP bytes, SEXP format, SEXP na)
             SET_STRING_ELT(out, i, NA_STRING);
             continue;
         }
-        size_t m = fmt->format(raw + (size_t) i * (size_t) w, -1, buf);
+        size_t m = fmt->format(raw + (size_t) i * (size_t) w, -1, NULL, buf);
         SET_STRING_ELT(out, i, zuid_mkchar(buf, m));
     }
     UNPROTECT(1);
@@ -232,13 +236,14 @@ SEXP zuid_c_fields(SEXP x, SEXP format)
     arg_character(x);
     const zuid_format *fmt = arg_format(format);
     R_xlen_t n = XLENGTH(x);
-    const char *names[] = {"time_s", "time_ns", "time_unit", "version",
-                           "variant", "node", "sequence", "random"};
-    SEXP out = PROTECT(Rf_allocVector(VECSXP, 8));
-    SEXP nms = PROTECT(Rf_allocVector(STRSXP, 8));
-    SEXPTYPE types[] = {REALSXP, REALSXP, STRSXP, INTSXP,
-                        STRSXP,  STRSXP,  INTSXP, STRSXP};
-    for (int j = 0; j < 8; j++) {
+    const char *names[] = {"time_s",  "time_ns",  "time_unit",
+                           "version", "variant",  "node",
+                           "sequence", "random", "prefix"};
+    SEXP out = PROTECT(Rf_allocVector(VECSXP, 9));
+    SEXP nms = PROTECT(Rf_allocVector(STRSXP, 9));
+    SEXPTYPE types[] = {REALSXP, REALSXP, STRSXP, INTSXP, STRSXP,
+                        STRSXP,  INTSXP,  STRSXP, STRSXP};
+    for (int j = 0; j < 9; j++) {
         SET_VECTOR_ELT(out, j, Rf_allocVector(types[j], n));
         SET_STRING_ELT(nms, j, Rf_mkChar(names[j]));
     }
@@ -246,14 +251,15 @@ SEXP zuid_c_fields(SEXP x, SEXP format)
     double *ts = REAL(VECTOR_ELT(out, 0)), *tns = REAL(VECTOR_ELT(out, 1));
     int *ver = INTEGER(VECTOR_ELT(out, 3)), *seq = INTEGER(VECTOR_ELT(out, 6));
     uint8_t bytes[ZUID_MAX_WIDTH];
+    zuid_prefix pfx;
     zuid_fields f;
 
     for (R_xlen_t i = 0; i < n; i++) {
         SEXP s = STRING_ELT(x, i);
-        if (s == NA_STRING || !canonical_bytes(fmt, s, bytes)) {
+        if (s == NA_STRING || !canonical_bytes(fmt, s, bytes, &pfx)) {
             zuid_fields_clear(&f);
         } else {
-            fmt->fields(bytes, &f);
+            fmt->fields(bytes, &pfx, &f);
         }
         ts[i] = f.has_time ? (double) f.time_s : NA_REAL;
         tns[i] = f.has_time ? (double) f.time_frac_ns : NA_REAL;
@@ -263,6 +269,10 @@ SEXP zuid_c_fields(SEXP x, SEXP format)
         SET_STRING_ELT(VECTOR_ELT(out, 5), i, string_or_na(f.node));
         seq[i] = f.sequence < 0 ? NA_INTEGER : f.sequence;
         SET_STRING_ELT(VECTOR_ELT(out, 7), i, string_or_na(f.random));
+        SET_STRING_ELT(VECTOR_ELT(out, 8), i,
+                       f.has_prefix
+                           ? zuid_mkchar(f.prefix, strlen(f.prefix))
+                           : NA_STRING);
     }
     UNPROTECT(2);
     return out;
@@ -301,8 +311,9 @@ SEXP zuid_c_formats(void)
     return out;
 }
 
-/* Hex of each element's bytes: the sort and comparison key, since the
- * canonical text of some formats does not sort as their bytes do. */
+/* Hex of each element's bytes, after a TypeID's prefix and '_': the sort
+ * and comparison key, since the canonical text of some formats does not
+ * sort as their bytes do. */
 SEXP zuid_c_key(SEXP x, SEXP format)
 {
     static const char digits[] = "0123456789abcdef";
@@ -311,19 +322,26 @@ SEXP zuid_c_key(SEXP x, SEXP format)
     R_xlen_t n = XLENGTH(x);
     SEXP out = PROTECT(Rf_allocVector(STRSXP, n));
     uint8_t bytes[ZUID_MAX_WIDTH];
-    char buf[2 * ZUID_MAX_WIDTH];
+    zuid_prefix pfx;
+    char buf[ZUID_PREFIX_MAX + 1 + 2 * ZUID_MAX_WIDTH];
 
     for (R_xlen_t i = 0; i < n; i++) {
         SEXP s = STRING_ELT(x, i);
-        if (s == NA_STRING || !canonical_bytes(fmt, s, bytes)) {
+        if (s == NA_STRING || !canonical_bytes(fmt, s, bytes, &pfx)) {
             SET_STRING_ELT(out, i, NA_STRING);
             continue;
         }
-        for (int j = 0; j < fmt->width; j++) {
-            buf[2 * j] = digits[bytes[j] >> 4];
-            buf[2 * j + 1] = digits[bytes[j] & 0x0f];
+        size_t m = 0;
+        if (pfx.len > 0) {
+            memcpy(buf, pfx.s, pfx.len);
+            m = pfx.len;
+            buf[m++] = '_';
         }
-        SET_STRING_ELT(out, i, zuid_mkchar(buf, (size_t) (2 * fmt->width)));
+        for (int j = 0; j < fmt->width; j++) {
+            buf[m++] = digits[bytes[j] >> 4];
+            buf[m++] = digits[bytes[j] & 0x0f];
+        }
+        SET_STRING_ELT(out, i, zuid_mkchar(buf, m));
     }
     UNPROTECT(1);
     return out;

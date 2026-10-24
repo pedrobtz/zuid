@@ -4,6 +4,9 @@
 
 const zuid_format *const zuid_formats[] = {
     &zuid_fmt_uuid,
+    &zuid_fmt_ulid,
+    &zuid_fmt_typeid,
+    &zuid_fmt_upid,
 };
 const int zuid_n_formats = (int) (sizeof zuid_formats / sizeof zuid_formats[0]);
 
@@ -28,6 +31,8 @@ void zuid_fields_clear(zuid_fields *f)
     f->node[0] = '\0';
     f->sequence = -1;
     f->random[0] = '\0';
+    f->has_prefix = 0;
+    f->prefix[0] = '\0';
 }
 
 static int bit_at(const uint8_t *bytes, int i)
