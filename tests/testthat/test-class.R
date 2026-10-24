@@ -91,3 +91,28 @@ test_that("vctrs combines zuid vectors of one format", {
   )
   expect_identical(vctrs::vec_ptype_abbr(x), "uuid")
 })
+
+test_that("vectors of different formats do not combine or compare (D3)", {
+  u <- id_parse("017f22e2-79b0-7cc3-98c4-dc0c0c07398f", "uuid")
+  l <- id_convert(u, "ulid")
+  expect_error(c(u, l), class = "zuid_type_error")
+  expect_error(u == l, class = "zuid_type_error")
+  skip_if_not_installed("vctrs")
+  expect_error(vctrs::vec_c(u, l), class = "zuid_type_error")
+})
+
+test_that("Snowflakes under different layouts do not combine", {
+  skip_if_not_installed("vctrs")
+  a <- id_parse(
+    "175928847299117063",
+    "snowflake",
+    layout = id_layout("discord")
+  )
+  b <- id_parse(
+    "175928847299117063",
+    "snowflake",
+    layout = id_layout("twitter")
+  )
+  expect_error(c(a, b), class = "zuid_layout_error")
+  expect_error(vctrs::vec_c(a, b), class = "zuid_layout_error")
+})

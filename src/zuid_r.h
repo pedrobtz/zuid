@@ -24,6 +24,7 @@ SEXP zuid_c_uuid(SEXP n, SEXP version, SEXP time_us, SEXP random, SEXP node,
                  SEXP tolerance_ms);
 SEXP zuid_c_state(void);
 SEXP zuid_c_reset_state(void);
+SEXP zuid_c_entropy_fail(SEXP fail);
 SEXP zuid_c_ulid(SEXP n, SEXP time_us, SEXP random, SEXP tolerance_ms);
 SEXP zuid_c_upid(SEXP n, SEXP time_us, SEXP random, SEXP tail);
 SEXP zuid_c_scru128(SEXP n, SEXP time_us, SEXP random, SEXP tolerance_ms,

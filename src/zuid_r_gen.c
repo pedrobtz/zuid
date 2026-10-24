@@ -51,6 +51,13 @@ SEXP zuid_c_reset_state(void)
     return R_NilValue;
 }
 
+/* Test-only: make the entropy source fail (TRUE) or work again (FALSE). */
+SEXP zuid_c_entropy_fail(SEXP fail)
+{
+    zuid_entropy_set_failure(Rf_asLogical(fail) == TRUE);
+    return R_NilValue;
+}
+
 SEXP zuid_c_state(void)
 {
     const char *names[] = {"entropy",          "uuid7_last_ms",

@@ -10,6 +10,7 @@
 
 /* Entropy and clock, read by the R entry points only (zuid_entropy.c). */
 int zuid_entropy(uint8_t *buf, size_t n); /* 0 on success */
+void zuid_entropy_set_failure(int fail);  /* for the tests */
 const char *zuid_entropy_source(void);
 int64_t zuid_clock_now_100ns(void);       /* since 1970 */
 
