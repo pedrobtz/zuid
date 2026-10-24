@@ -39,7 +39,8 @@ id_from_bytes(bytes, format, layout = NULL)
 
 - layout:
 
-  Reserved for formats that need a layout.
+  For `"snowflake"` (required) and `"scru64"` (optional), an
+  [`id_layout()`](https://pedrobtz.github.io/zuid/reference/id_layout.md).
 
 ## Value
 

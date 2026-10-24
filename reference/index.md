@@ -17,6 +17,10 @@
   : Text forms and bytes
 - [`id_formats()`](https://pedrobtz.github.io/zuid/reference/id_formats.md)
   : The identifier formats zuid knows
+- [`id_layout()`](https://pedrobtz.github.io/zuid/reference/id_layout.md)
+  [`print(`*`<zuid_layout>`*`)`](https://pedrobtz.github.io/zuid/reference/id_layout.md)
+  [`format(`*`<zuid_layout>`*`)`](https://pedrobtz.github.io/zuid/reference/id_layout.md)
+  : Snowflake and SCRU64 layouts
 - [`id_nil()`](https://pedrobtz.github.io/zuid/reference/id_nil.md)
   [`id_max()`](https://pedrobtz.github.io/zuid/reference/id_nil.md) :
   The nil and max UUIDs
@@ -33,5 +37,9 @@
   Generate ULIDs, TypeIDs and UPIDs
 - [`id_uuid()`](https://pedrobtz.github.io/zuid/reference/id_uuid.md) :
   Generate UUIDs
+- [`id_xid()`](https://pedrobtz.github.io/zuid/reference/id_xid.md)
+  [`id_objectid()`](https://pedrobtz.github.io/zuid/reference/id_xid.md)
+  [`id_snowflake()`](https://pedrobtz.github.io/zuid/reference/id_xid.md)
+  : Generate XIDs, ObjectIds and Snowflakes
 - [`zuid_info()`](https://pedrobtz.github.io/zuid/reference/zuid_info.md)
   : Describe this build of zuid

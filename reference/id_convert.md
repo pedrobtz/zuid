@@ -1,8 +1,9 @@
 # Convert identifiers between formats
 
-`id_convert()` moves values between formats that hold the same 128 bits:
-`"uuid"`, `"ulid"`, `"typeid"` and `"upid"`. The bytes are kept and the
-text is rewritten.
+`id_convert()` moves values between formats that hold the same bits:
+`"uuid"`, `"ulid"`, `"typeid"` and `"upid"` (128 bits), and `"xid"` and
+`"objectid"` (96 bits, laid out alike). The bytes are kept and the text
+is rewritten.
 
 ## Usage
 

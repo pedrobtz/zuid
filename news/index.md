@@ -2,6 +2,17 @@
 
 ## zuid 0.0.0.9000
 
+- XID, ObjectId and Snowflake: parsing, fields and
+  [`id_xid()`](https://pedrobtz.github.io/zuid/reference/id_xid.md),
+  [`id_objectid()`](https://pedrobtz.github.io/zuid/reference/id_xid.md)
+  and
+  [`id_snowflake()`](https://pedrobtz.github.io/zuid/reference/id_xid.md).
+  [`id_layout()`](https://pedrobtz.github.io/zuid/reference/id_layout.md)
+  gives the Twitter, Discord, Instagram, Sonyflake and SCRU64 layouts
+  and builds custom ones; a Snowflake is read and generated only under a
+  layout, which travels with the vector.
+  [`id_convert()`](https://pedrobtz.github.io/zuid/reference/id_convert.md)
+  moves between `xid` and `objectid`.
 - SCRU128, SCRU64 and KSUID parse, validate and read their fields, and
   [`id_scru128()`](https://pedrobtz.github.io/zuid/reference/id_scru128.md),
   [`id_scru64()`](https://pedrobtz.github.io/zuid/reference/id_scru128.md)

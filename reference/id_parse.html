@@ -78,7 +78,9 @@ for now; detecting it from <code>x</code> is not available yet.</p></dd>
 
 
 <dt id="arg-layout">layout<a class="anchor" aria-label="anchor" href="#arg-layout"></a></dt>
-<dd><p>Reserved for formats that need a layout.</p></dd>
+<dd><p>For <code>"snowflake"</code>, required, and for <code>"scru64"</code>, optional:
+an <code><a href="id_layout.html">id_layout()</a></code>. It travels with the vector and says how to read its
+fields. A Snowflake whose layout has a sign bit must have it clear.</p></dd>
 
 
 <dt id="arg-level">level<a class="anchor" aria-label="anchor" href="#arg-level"></a></dt>
@@ -119,7 +121,10 @@ version. SCRU128 is 25 base36 characters and SCRU64 12, lowercase,
 either case on input; their reserved timestamps (the first and the last)
 pass <code>"syntax"</code> only. A KSUID is 27 base62 characters, case-sensitive,
 at most <code>aWgEPTl1tmebfsQzFP4bxwgy80V</code>. Strict also asks that a time is no
-later than now plus the tolerance. These formats have one text form each.</p>
+later than now plus the tolerance. An XID is 20 lowercase base32hex
+characters, an ObjectId 24 hex digits (either case on input) and a
+Snowflake 1 to 20 decimal digits without leading zeros. These formats have
+one text form each.</p>
     </div>
 
     <div class="section level2">

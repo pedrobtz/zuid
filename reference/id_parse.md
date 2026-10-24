@@ -42,7 +42,10 @@ id_valid(
 
 - layout:
 
-  Reserved for formats that need a layout.
+  For `"snowflake"`, required, and for `"scru64"`, optional: an
+  [`id_layout()`](https://pedrobtz.github.io/zuid/reference/id_layout.md).
+  It travels with the vector and says how to read its fields. A
+  Snowflake whose layout has a sign bit must have it clear.
 
 - level:
 
@@ -90,8 +93,10 @@ version. SCRU128 is 25 base36 characters and SCRU64 12, lowercase,
 either case on input; their reserved timestamps (the first and the last)
 pass `"syntax"` only. A KSUID is 27 base62 characters, case-sensitive,
 at most `aWgEPTl1tmebfsQzFP4bxwgy80V`. Strict also asks that a time is
-no later than now plus the tolerance. These formats have one text form
-each.
+no later than now plus the tolerance. An XID is 20 lowercase base32hex
+characters, an ObjectId 24 hex digits (either case on input) and a
+Snowflake 1 to 20 decimal digits without leading zeros. These formats
+have one text form each.
 
 ## Examples
 
