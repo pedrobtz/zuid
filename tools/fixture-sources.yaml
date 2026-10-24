@@ -116,6 +116,36 @@ fixtures:
     # 1050118621198921728 (2018-10-10T20:19:24Z, the Twitter API's example
     # Tweet object), written into tests/testthat/test-snowflake.R.
     retrieved: 2026-10-24
+  sqids_spec:
+    repo: sqids/sqids-spec
+    commit: 49b8ad8ea0725ee79c374ceb098cf100b52b0ec5
+    paths: [tests/encoding.test.ts, tests/minlength.test.ts,
+            tests/blocklist.test.ts, tests/alphabet.test.ts]
+    retrieved: 2026-10-24
+    # Written into tests/testthat/test-sqids.R. The spec's src/blocklist.json
+    # holds the same 560 words as the pinned sqids-blocklist table.
+  sqids:
+    path: tests/testthat/fixtures/sqids.csv
+    generator: tools/gen-js-fixtures.mjs
+    retrieved: 2026-10-24
+    javascript:
+      sqids: 0.3.0
+  cid:
+    path: tests/testthat/fixtures/cid.csv
+    generator: tools/gen-js-fixtures.mjs
+    retrieved: 2026-10-24
+    # js-multiformats over random digests in 17 multibases; go-cid's string
+    # vectors (ipfs/go-cid cid_test.go at
+    # 707ffd0177069183ed529f6799b3c2e1d67372c5) are in test-cid.R.
+    javascript:
+      multiformats: 13.3.1
+  nanoid:
+    repo: ai/nanoid
+    tag: 6.0.2
+    commit: 3167e108865702c0539d8e552365ed840ac9d8d9
+    path: test/index.test.js
+    retrieved: 2026-10-24
+    # The customRandom vectors, written into tests/testthat/test-nanoid.R.
   encodings:
     path: tests/testthat/fixtures/encodings.csv
     generator: tools/gen-fixtures
