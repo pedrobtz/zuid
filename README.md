@@ -1,28 +1,153 @@
 
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
 # zuid
 
 <!-- badges: start -->
+
+[![Lifecycle:
+experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![R-CMD-check](https://github.com/pedrobtz/zuid/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/pedrobtz/zuid/actions/workflows/R-CMD-check.yaml)
 [![coverage](https://raw.githubusercontent.com/pedrobtz/zuid/gh-pages/badges/coverage.svg)](https://github.com/pedrobtz/zuid/actions/workflows/coverage.yaml)
 <!-- badges: end -->
 
-zuid parses, inspects, encodes and generates UUIDs and the identifier formats around them. It is under development; see the [roadmap](https://github.com/pedrobtz/zuid/blob/main/.agents/roadmap.md).
+Identifiers arrive as opaque strings: a UUID from a database, a ULID
+from a log line, a KSUID from an event stream, a Snowflake from a chat
+platform. Each one carries information, often a creation time, sometimes
+a node or a counter. Reading it means knowing which format the string
+is, and that is the step most code guesses at.
+
+zuid is a complete UUID implementation for R, with the formats around
+it. The core is [RFC 9562](https://www.rfc-editor.org/rfc/rfc9562) in
+full: versions 1 to 8, nil and max, and every text form. Around it are
+the same 128 bits in other alphabets, and fourteen kindred formats:
+ULID, TypeID, UPID, SCRU128, SCRU64, KSUID, Snowflake and Sonyflake,
+XID, ObjectId, NanoID, Cuid2, Sqids and CID. One `id_` vocabulary works
+across all of them.
+
+- **Detection never guesses.** A string that could be two formats is
+  `NA`, with the candidates listed. A hint settles it.
+- **Inspection never raises on input.** `id_valid()`, `id_fields()` and
+  `id_time()` return `NA` for what they cannot read.
+- **128 bits do not make a UUID.** A ULID’s bytes stay a ULID until you
+  convert them, and converting is explicit.
+- **Entropy comes from the operating system.** `set.seed()` never
+  changes a generated identifier. Tests pass the random bytes in
+  instead.
+- **No `Imports`.** The C code is the package’s own, checked against the
+  reference vectors of each format that publishes them.
 
 ## Installation
 
-You can install the development version of zuid from [GitHub](https://github.com/) with:
+zuid is not on CRAN yet. Install the development version from GitHub:
 
 ``` r
 # install.packages("pak")
 pak::pak("pedrobtz/zuid")
 ```
 
-## Example
-
-This is a basic example which shows you how to solve a common problem:
+## Usage
 
 ``` r
 library(zuid)
-## basic example code
 ```
 
+`id_detect()` names the format of each string. The lowercase ULID could
+also be a TypeID without a prefix, so its answer is `NA`:
+
+``` r
+ids <- c(
+  "018f6b1c-2d3e-7a4b-8c5d-6e7f8091a2b3",
+  "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+  "01arz3ndektsv4rrffq69g5fav",
+  "0ujtsYcgvSTl8PAuAdqWYSMnLOv"
+)
+found <- id_detect(ids)
+as.vector(found)
+#> [1] "uuid"  "ulid"  NA      "ksuid"
+attr(found, "candidates")[[3]]
+#> [1] "ulid"   "typeid"
+```
+
+`id_parse()` gives a typed vector, and `id_time()` reads the creation
+time each format records:
+
+``` r
+uuid <- id_parse(ids[1])
+uuid
+#> <zuid_uuid[1]>
+#> [1] 018f6b1c-2d3e-7a4b-8c5d-6e7f8091a2b3
+id_time(uuid)
+#> [1] "2024-05-12 04:42:39 UTC"
+id_time(id_parse(ids[4], "ksuid"))
+#> [1] "2017-10-10 04:00:47 UTC"
+```
+
+`id_fields()` reads everything else a format knows. A Snowflake means
+nothing without its layout, so the layout is an argument:
+
+``` r
+discord <- id_layout("discord")
+discord
+#> <zuid_layout discord>
+#> | time 42 | worker 5 | process 5 | sequence 12 |
+#> time: ms units from 2015-01-01T00:00:00.000Z
+id_fields(id_parse("175928847299117063", "snowflake", layout = discord))[
+  c("time", "node", "sequence")
+]
+#>                  time               node sequence
+#> 1 2016-04-30 11:18:25 worker=1,process=0        7
+```
+
+The same 16 bytes can be written in other alphabets, read back, or
+carried into another format:
+
+``` r
+id_format(uuid, "base58")
+#> [1] "CB7z5qdx3BKrzyaKnqWbU"
+id_format(uuid, "words")
+#> [1] "advertised-impunity-counterrevolutionary-lecher-munition-injecting-maladroit-pitch"
+id_parse("CB7z5qdx3BKrzyaKnqWbU", "uuid", form = "base58")
+#> <zuid_uuid[1]>
+#> [1] 018f6b1c-2d3e-7a4b-8c5d-6e7f8091a2b3
+id_convert(uuid, "typeid", prefix = "user")
+#> <zuid_typeid[1]>
+#> [1] user_01hxnhrb9yf95rrqbefy0938nk
+```
+
+Generators read the clock and the operating system’s entropy once per
+call. Version 7 UUIDs and ULIDs are monotonic within a session:
+
+``` r
+id_uuid(3)
+#> <zuid_uuid[3]>
+#> [1] 01a16fca-bb38-73f0-9769-3e94d757e1c1 01a16fca-bb38-73f1-a6bf-19105f7fd21c
+#> [3] 01a16fca-bb38-73f2-a3f8-da22bcab4b31
+id_ulid(2)
+#> <zuid_ulid[2]>
+#> [1] 01M5QWNESS2N6GMAJQ21BW1PBB 01M5QWNESS2N6GMAJQ21BW1PBC
+```
+
+Every function starts with `id_` and takes the vector first. A function
+that inspects returns `NA` where the input says nothing; a function that
+builds raises a classed `zuid_error`.
+
+## Learn more
+
+- [Reading what an identifier
+  knows](https://pedrobtz.github.io/zuid/articles/fields.html) covers
+  detection, the three validation levels, fields and time.
+- [A UUID in every
+  alphabet](https://pedrobtz.github.io/zuid/articles/alphabets.html)
+  covers the encodings and conversion between formats.
+- The [reference index](https://pedrobtz.github.io/zuid/reference/)
+  lists every function.
+
+## Acknowledgements
+
+zuid is checked against the reference vectors of RFC 9562, TypeID’s
+`valid.yml` and `invalid.yml`, Discord’s Snowflake example, and the
+specifications or reference implementations of ULID, UPID, SCRU128,
+SCRU64, KSUID, XID, Sqids, NanoID, Proquint, Niceware and multiformats
+CID. The Sqids blocklist and the Niceware word list are data from their
+upstream projects; `inst/COPYRIGHTS` names their sources and authors.
