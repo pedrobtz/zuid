@@ -585,7 +585,7 @@ the reverse. The forms, with their output for 16 bytes:
 | `base32` | Crockford, `0-7` first | 26 | yes |
 | `base32rfc`, `base32hex` | RFC 4648, no padding | 26 | hex only |
 | `base36` | `0-9a-z`, Uuid25 | 25 | yes |
-| `base58` | base58btc | 22 | no |
+| `base58` | base58btc | 22 at most | no |
 | `base62` | `0-9A-Za-z` | 22 | yes |
 | `base64url` | RFC 4648 §5, no padding | 22 | no |
 | `base62sort`, `base64sort` | the IETF draft's sorted alphabets | 22 | yes |
@@ -595,24 +595,30 @@ the reverse. The forms, with their output for 16 bytes:
 
 Rules the table compresses:
 
-- Power-of-two alphabets slice bits left to right, with zero bits
-  prepended so the first character carries the remainder, which is why a
-  Crockford or RFC 4648 base32 string of a 128-bit value starts `0` to
-  `7` and the 130-bit TypeID and ULID rule falls out of the same code.
-- Base36, base58 and base62 treat the bytes as one big-endian integer and
+- Power-of-two alphabets slice bits left to right. Crockford `base32`
+  prepends the spare bits as zeros, so the first character carries the
+  remainder, which is why a 128-bit value starts `0` to `7` and the
+  130-bit TypeID and ULID rule falls out of the same code. The RFC 4648
+  forms (`base32rfc`, `base32hex`, `base64url`, `base64sort`) put the
+  spare bits at the end instead, as RFC 4648 and Go's and Python's
+  standard libraries do; decoding takes exact `=` padding too (D21).
+- Base36 and base62 treat the bytes as one big-endian integer and
   write it most significant digit first, zero-padded to the fixed width
   for the byte count, so `base36` of 16 bytes is Uuid25 and `base62` is
-  what `uuid-base62` and `uuid62` emit. `alphabet` is the same with the
+  KSUID's padding over 16 bytes. `base58` is base58btc as Bitcoin and
+  every Go and Python library write it: one `1` per leading zero byte,
+  then the rest of the value unpadded, so 16 bytes take up to 22
+  characters (D21). `alphabet` is the same with the
   caller's symbols, most significant digit first; `legacy = TRUE`
   reverses the digits for strings made by Python `shortuuid` before
-  1.0.0. A 26-letter alphabet gives 28 characters for 16 bytes, which is
+  1.0.0 (deferred: Stage 3 found no pinned reference for those strings). A 26-letter alphabet gives 28 characters for 16 bytes, which is
   the maintainer's example.
 - `base62sort` and `base64sort` are the IETF draft's order-preserving
-  variants: fixed width, an alphabet in ASCII order, and the value padded
-  with leading zero bits so that two encoded strings compare as their
-  UUIDs do, which makes a version 7 UUID sort chronologically in any
-  text column. The draft's exact post-processing is pinned in Stage 3
-  (§15 Q2).
+  variants: fixed width and an alphabet in ASCII order, so that two
+  encoded strings compare as their UUIDs do, which makes a version 7
+  UUID sort chronologically in any text column. `base62sort` is the same
+  form as `base62`; `base64sort` is base64url's bit grouping in the
+  alphabet `-0-9A-Z_a-z` (§15 Q2).
 - `proquint` writes each 16-bit unit as consonant, vowel, consonant,
   vowel, consonant from the tables above (4, 2, 4, 2 and 4 bits, most
   significant first), quints joined by `sep`, `-` by default. Decoding
@@ -1142,6 +1148,15 @@ full profile and records the dates.
   call away through `zucrypt`.
 - **D20 (C).** Passwords, Readable sentences, Hashids and the EFF word
   lists are deferred (§2), each for the reason given there.
+- **D21 (M).** Each encoding writes what the mainstream Go and Python
+  libraries write, where they and the IETF drafts disagree, so that text
+  made elsewhere decodes here. The maintainer set this on 2026-10-24.
+  Stage 3's oracle is their output (`tools/gen-encoding-fixtures`):
+  `oklog/ulid`, `python-ulid` and TypeID for Crockford; Go's and
+  Python's standard libraries for RFC 4648; Uuid25 for base36; Go's
+  `btcutil` and `mr-tron` and Python's `base58`; `pybase62` and KSUID;
+  ShortUUID 1.0 (Go and Python agree); `proquint`; and the JavaScript
+  Niceware 4.0.0, because Python's `niceware` 0.2.1 has an older list.
 
 ## 14. Later versions, in the order they are expected
 
@@ -1196,6 +1211,16 @@ full profile and records the dates.
   post-processing of Base62sort and Base64sort and the Crockford
   alphabet's decoding rules (the `I`, `L`, `O` and `U` substitutions),
   and records any difference from this RFC's §6.5 in the design log.
+  *Settled 2026-10-24 (Stage 3) by D21.* The Crockford draft
+  left-aligns the bits, so its example for RFC 9562's UUID is
+  `Z0EMZBKXXG8X19V502GCJ7KBYR`; every Go and Python library, and ULID
+  and TypeID, give `7R3N7TWZFC278AES80M34HWTZP`, and zuid follows them.
+  Its `I`, `L`, `O` and `U` substitutions are rejected on input, as
+  ULID and TypeID reject them. The draft's base32hex, base36, base58,
+  base62sort, base64url and base64sort vectors hold; its Figure 5 and
+  maximum base58 and base36 values are its NCName variants, not these
+  forms. Base64sort has no Go or Python implementation, so the draft is
+  its oracle.
 - **Q3.** Should `id_time()` default to `zutempo` instants once `zutempo`
   is on CRAN, so that UUID versions 1 and 6 are exact by default? D2's
   "readable when the class is lost" argues for `POSIXct`; exactness
