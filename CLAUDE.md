@@ -14,10 +14,11 @@ second ring is the kindred formats: ULID, TypeID, UPID, SCRU128, SCRU64,
 KSUID, Snowflake and Sonyflake, XID, ObjectId, NanoID, Cuid2, Sqids and
 CID. One `id_` vocabulary detects, parses, validates, reads fields and
 time, converts and generates across all of them. No `Imports` and no
-vendored code; `zuarrow`, `zuint`, `zucrypt` and `zutempo` are
-`Suggests`. It is not a hashing package (MD5, SHA-1 and SHA-256 come
-from `zucrypt`), not a random number generator, not a database driver,
-and in v0.1.0 not a password generator.
+vendored code. v0.1.0 has no interface with other `zu*` packages: Arrow
+interchange (`zuarrow`), integers (`zuint`), name-based UUIDs and CID
+generation (`zucrypt`) and exact instants (`zutempo`) come after it, as
+`Suggests`. It is not a hashing package, not a random number generator,
+not a database driver, and in v0.1.0 not a password generator.
 
 The specification is
 [`.agents/design.md`](https://pedrobtz.github.io/zuid/.agents/design.md),
@@ -98,9 +99,11 @@ five layers. The scaffold set up C through `usethis::use_c()`:
 
 These are fixed by the design before any code exists.
 
-- **No `Imports`.** Every other `zu*` package is `Suggests` and checked
-  with [`requireNamespace()`](https://rdrr.io/r/base/ns-load.html); a
-  missing one raises `zuid_dependency_error`.
+- **No `Imports`.** After 0.1.0 other `zu*` packages become `Suggests`,
+  checked with
+  [`requireNamespace()`](https://rdrr.io/r/base/ns-load.html); a missing
+  one raises `zuid_dependency_error`. In v0.1.0 no `zu*` package is
+  referenced at all.
 - **Entropy comes from the operating system, never R’s RNG** (D5). An
   identifier must not change when a script calls
   [`set.seed()`](https://rdrr.io/r/base/Random.html). Tests that need
