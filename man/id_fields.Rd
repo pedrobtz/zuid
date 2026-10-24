@@ -47,6 +47,12 @@ UUID's fields and its \code{prefix}, \code{""} when it has none. A UPID has its 
 in 256 ms units, 64 \code{random} bits, its \code{prefix} and its version nibble
 (6, the reference's \code{"a"}, is the current one).
 
+A SCRU128 has its millisecond time, \code{counter_hi} in \code{node} (as hex),
+\code{counter_lo} in \code{sequence} and its 32 entropy bits in \code{random}. A SCRU64
+has its time at 256 ms; its node and counter need the generator's
+\code{node_bits}, so they are \code{NA}. A KSUID has its time in seconds and its
+128-bit payload in \code{random}.
+
 The nil and max UUIDs report versions 0 and 15 and no variant. \code{random}
 is the random bits joined in order, as hex, left-padded with zero bits to
 a whole number of hex digits.

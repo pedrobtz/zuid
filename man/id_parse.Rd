@@ -69,8 +69,11 @@ input, starting \code{0} to \code{7}. A TypeID is a lowercase prefix, \verb{_} a
 lowercase Crockford characters, or the 26 alone; strict asks what it asks
 of the UUID. A UPID is four prefix characters, \verb{_} and 22 lowercase
 characters, as the reference writes them; strict asks for the current
-version. Strict also asks that a time is no later than now plus the
-tolerance. These formats have one text form each.
+version. SCRU128 is 25 base36 characters and SCRU64 12, lowercase,
+either case on input; their reserved timestamps (the first and the last)
+pass \code{"syntax"} only. A KSUID is 27 base62 characters, case-sensitive,
+at most \code{aWgEPTl1tmebfsQzFP4bxwgy80V}. Strict also asks that a time is no
+later than now plus the tolerance. These formats have one text form each.
 }
 \examples{
 x <- id_parse("018F6B1C-2D3E-7A4B-8C5D-6E7F8091A2B3", "uuid")
