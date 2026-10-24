@@ -1,5 +1,6 @@
 on:
   pull_request:
+    types: [opened, synchronize, reopened, labeled]
   schedule:
     # A long run nightly. The corpus cache is what makes the short PR runs
     # and this one add up to a single campaign.
@@ -25,4 +26,7 @@ jobs:
       cflags: -g -O1 -fno-omit-frame-pointer -Isrc -DZUID_STANDALONE
       seed-corpus: tools/fuzz/corpus
       dictionary: tools/fuzz/zuid.dict
-      max-total-time: ${{ github.event_name == 'schedule' && 1800 || 120 }}
+      # An hour nightly and on a pull request labelled full-ci (design.md
+      # section 12); two minutes on the others.
+      max-total-time: ${{ (github.event_name == 'schedule' || contains(github.event.pull_request.labels.*.name, 'full-ci')) && 3600 || 120 }}
+      timeout-minutes: 75
