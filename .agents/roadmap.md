@@ -1,4 +1,409 @@
-# zuid roadmap
+# zuid: roadmap
 
-The stages to v0.1.0, each with its exit criteria. Each stage is tracked
-as a sub-issue of the repository's v0.1.0 issue.
+Status: draft 2026-10-24. Implements [design.md](design.md).
+Target: v0.1.0, the first CRAN release.
+Tracking: [v0.1.0 (#2)](https://github.com/pedrobtz/zuid/issues/2), with one
+sub-issue per stage;
+[CRAN-submission (#15)](https://github.com/pedrobtz/zuid/issues/15).
+
+Follows design §11, with two portfolio changes. Design Stage 10 is split into
+`Full CI` and `v0.1.0 readiness`, so there are twelve stages, not the eleven
+§12 names. Stage 1 is `full` as well as Stage 2, because it is the first
+compiled code and the parser every later stage builds on.
+
+Scope narrowed 2026-10-24 by the maintainer: v0.1.0 has no interface with
+other `zu*` packages. `zuarrow`, `zuint`, `zucrypt` and `zutempo` are not in
+`Suggests`, and everything that needs them moves to After 0.1.0: Arrow and
+DuckDB interchange (§6.9), `id_integer()`, `id_time(class = "zutempo")`,
+name-based UUID versions 3 and 5, `id_cid()` generation, and Sqids numbers
+of 2⁵³ or more. Parsing, fields and validation of every format are
+unaffected. Design §12's Arrow criterion does not apply to v0.1.0.
+
+## Stages
+
+| Stage | Title | CI | Issue | Pull request | Done |
+| --- | --- | --- | --- | --- | --- |
+| 0 | [Package identity](#stage-0--package-identity) | quick | [#3](https://github.com/pedrobtz/zuid/issues/3) | | |
+| 1 | [Vector class, descriptors and UUID parsing](#stage-1--vector-class-descriptors-and-uuid-parsing) | full | [#4](https://github.com/pedrobtz/zuid/issues/4) | | |
+| 2 | [UUID generation](#stage-2--uuid-generation) | full | [#5](https://github.com/pedrobtz/zuid/issues/5) | | |
+| 3 | [Encodings](#stage-3--encodings) | quick | [#6](https://github.com/pedrobtz/zuid/issues/6) | | |
+| 4 | [ULID, TypeID and UPID](#stage-4--ulid-typeid-and-upid) | quick | [#7](https://github.com/pedrobtz/zuid/issues/7) | | |
+| 5 | [SCRU128, SCRU64 and KSUID](#stage-5--scru128-scru64-and-ksuid) | quick | [#8](https://github.com/pedrobtz/zuid/issues/8) | | |
+| 6 | [XID, ObjectId and Snowflake layouts](#stage-6--xid-objectid-and-snowflake-layouts) | quick | [#9](https://github.com/pedrobtz/zuid/issues/9) | | |
+| 7 | [NanoID, Cuid2, Sqids and CID](#stage-7--nanoid-cuid2-sqids-and-cid) | quick | [#10](https://github.com/pedrobtz/zuid/issues/10) | | |
+| 8 | [Detection](#stage-8--detection) | quick | [#11](https://github.com/pedrobtz/zuid/issues/11) | | |
+| 9 | [Fuzzing and benchmarks](#stage-9--fuzzing-and-benchmarks) | quick | [#12](https://github.com/pedrobtz/zuid/issues/12) | | |
+| 10 | [Full CI](#stage-10--full-ci) | full | [#13](https://github.com/pedrobtz/zuid/issues/13) | | |
+| 11 | [v0.1.0 readiness](#stage-11--v010-readiness) | full | [#14](https://github.com/pedrobtz/zuid/issues/14) | | |
+
+## Stage 0 — Package identity
+
+**Issue.** [#3](https://github.com/pedrobtz/zuid/issues/3), sub-issue of [v0.1.0](https://github.com/pedrobtz/zuid/issues/2).
+
+**CI.** `quick`.
+
+**Goal.** The package has its real identity, the CI the roadmap relies on,
+the two generated tables, and the benchmark baseline on record.
+
+**Work.**
+
+- `DESCRIPTION`: real Title and Description, `Authors@R` with `cre`, `aut`,
+  `cph`, `Depends: R (>= 4.1)`, `Language: en-GB`. `Suggests` holds test
+  tooling only; no `zu*` package.
+- `R-CMD-check.yaml`: add the `{"os": "windows-latest", "r": "devel"}`
+  runner row. Add `native-checks.yml` from r-actions' examples. Pin
+  `coverage.yml` to a commit, with the tag in a comment.
+- Hidden symbols and registration so the shared object exports
+  `R_init_zuid` only; `tests/testthat/test-abi.R` checks it (design R3).
+- `zuid_info()`.
+- `tools/fixture-sources.yaml`, and generators that write the Sqids
+  blocklist and the Niceware word list into `R/sysdata.rda` and a C header,
+  with source, retrieval date and SHA-256 recorded (D8).
+- `tools/run-benchmarks` and `.agents/benchmarks.md` with the baseline:
+  `uuid::UUIDgenerate()`, `uuid::UUIDparse()`, `ulid::ULIDgenerate()`.
+- The one-line pull request to `zufast`'s design moving UUID generation from
+  `zurand` to `zuid` (design §3).
+- Replace the placeholder test.
+
+**Exit criteria.**
+
+- `R CMD check` passes on the quick r-actions profile, and every quick check
+  finishes in under five minutes; any tuning is recorded here.
+- `DESCRIPTION` has no scaffold text.
+- `test-abi.R` passes.
+- `R/sysdata.rda` holds both tables, and `tools/fixture-sources.yaml` records
+  their sources and checksums.
+- `.agents/benchmarks.md` has the three baseline numbers.
+- The `zufast` pull request is open, and linked from this stage's pull
+  request.
+
+**Design.** §3, §10, §11 Stage 0, D8.
+
+## Stage 1 — Vector class, descriptors and UUID parsing
+
+**Issue.** [#4](https://github.com/pedrobtz/zuid/issues/4), sub-issue of [v0.1.0](https://github.com/pedrobtz/zuid/issues/2).
+
+**CI.** `full — first compiled code: a parser of untrusted input and the one
+CHARSXP constructor every later format builds on.`
+
+**Goal.** UUIDs parse, validate, format in the hex forms and report their
+fields and time, through the descriptor table every later format extends.
+
+**Work.**
+
+- `src/zuid_formats.{c,h}`: the descriptor record and the `uuid` row;
+  `R/sysdata.rda` regenerated from it; `id_formats()`.
+- `src/zuid_r.c`: the single `CHARSXP` constructor and the vectorised entry
+  points.
+- The `zuid` vector class with the methods of design §5.
+- `id_parse()`, `id_valid()` at the three levels (§6.3), for `uuid`.
+- The hex forms of §6.5 in `id_format()`; `id_bytes()`, `id_from_bytes()`.
+- `id_fields()`, `id_time()` (`POSIXct` and `ms`), `id_version()` for every
+  UUID version;
+  `id_nil()`, `id_max()`.
+- The condition classes of §8 that these raise.
+
+**Exit criteria.**
+
+- Oracle §7.1: every RFC 9562 Appendix A example parses field for field.
+- A text to bytes to text round trip over 10⁴ values passes.
+- Every rule each level rejects has a test.
+- `id_parse(strict = FALSE)`, `id_valid()`, `id_fields()` and `id_time()`
+  never raise on input.
+- A full-profile run is green on the pull request.
+
+**Design.** §4 layers 1, 3 and 5; §5; §6.1 (UUID); §6.3; §6.4; §6.5 (hex
+forms); §8.
+
+## Stage 2 — UUID generation
+
+**Issue.** [#5](https://github.com/pedrobtz/zuid/issues/5), sub-issue of [v0.1.0](https://github.com/pedrobtz/zuid/issues/2).
+
+**CI.** `full — first operating-system code: entropy and clock sources with
+Windows-only paths (BCryptGenRandom, GetSystemTimePreciseAsFileTime).`
+
+**Goal.** `id_uuid()` generates every version except the name-based 3 and 5,
+with monotonic version 7, from operating-system entropy.
+
+**Work.**
+
+- The entropy layer (`getrandom`, `getentropy`, `arc4random_buf`,
+  `BCryptGenRandom`) and the clock, read once in the R entry point (D5, D6).
+- `src/zuid_gen.c`: pure generators for versions 1, 2, 4, 6, 7 and 8.
+- The monotonic version 7 counter and its per-session state (§6.7).
+- `id_uuid(version = 3)` and `version = 5` raise a classed error saying
+  name-based generation comes after 0.1.0. Parsing them is Stage 1's.
+- `zuid_entropy_error`, `zuid_clock_error`.
+
+**Exit criteria.**
+
+- Oracle §7.1: the Appendix A examples other than versions 3 and 5
+  regenerate from their stated inputs.
+- 10⁵ version 7 values with a frozen clock strictly increase; the clock
+  moving back by less and by more than the tolerance behaves as §6.7 says.
+- `set.seed()` does not change generated values.
+- Generation with fixed `random` and `time` gives the same bytes on Linux,
+  macOS and Windows.
+- A full-profile run is green on the pull request.
+
+**Design.** §4 layer 4; §6.6; §6.7; D5, D6, D11.
+
+## Stage 3 — Encodings
+
+**Issue.** [#6](https://github.com/pedrobtz/zuid/issues/6), sub-issue of [v0.1.0](https://github.com/pedrobtz/zuid/issues/2).
+
+**CI.** `quick`.
+
+**Goal.** Any bytes encode and decode in every form, and UUIDs format in
+each of them.
+
+**Work.**
+
+- Read the two IETF drafts in full and pin Base62sort, Base64sort and the
+  Crockford decoding rules; record differences in `design.md` (§15 Q2).
+- `src/zuid_enc_*.c`: one codec per form of §6.5, compiling as C11 without R
+  under `ZUID_STANDALONE`.
+- `id_encode()`, `id_decode()`; every UUID `form` in `id_format()` and
+  `id_parse()`; ShortUUID as a default alphabet (D17).
+
+**Exit criteria.**
+
+- Oracles §7.2 and §7.10 pass, and the Niceware vectors of §7.11.
+- Every form round-trips over random byte strings of every length it takes.
+- The order-preserving forms sort 10⁴ encoded strings as their bytes sort.
+- `R CMD check` passes on the quick r-actions profile.
+
+**Design.** §4 layer 2; §6.5; D17; §15 Q2.
+
+## Stage 4 — ULID, TypeID and UPID
+
+**Issue.** [#7](https://github.com/pedrobtz/zuid/issues/7), sub-issue of [v0.1.0](https://github.com/pedrobtz/zuid/issues/2).
+
+**CI.** `quick`.
+
+**Goal.** The three 128-bit sortable formats parse, read fields, generate
+and convert to and from UUIDs.
+
+**Work.**
+
+- Descriptors and format code for `ulid`, `typeid`, `upid`.
+- `id_ulid()` with monotonic overflow (`zuid_overflow_error`), `id_typeid()`,
+  `id_upid()`.
+- `id_convert()` for `uuid`, `typeid`, `upid` and `ulid`;
+  `zuid_convert_error`.
+
+**Exit criteria.**
+
+- Oracles §7.3, §7.4 and §7.5 (UPID) pass.
+- Each format round-trips over 10⁴ generated values.
+- `R CMD check` passes on the quick r-actions profile.
+
+**Design.** §6.1, §6.4, §6.6, §6.7 for these formats; §5 `id_convert()`.
+
+## Stage 5 — SCRU128, SCRU64 and KSUID
+
+**Issue.** [#8](https://github.com/pedrobtz/zuid/issues/8), sub-issue of [v0.1.0](https://github.com/pedrobtz/zuid/issues/2).
+
+**CI.** `quick`.
+
+**Goal.** The three counter- and base36/base62-based formats parse, read
+fields and generate.
+
+**Work.**
+
+- Descriptors and format code for `scru128`, `scru64`, `ksuid`.
+- `id_scru128()` with the rollback rule of D18, `id_scru64()` requiring
+  `node` and `node_bits` (D13), `id_ksuid()`.
+
+**Exit criteria.**
+
+- Oracles §7.5 (SCRU) and §7.6 pass, including SCRU128's reserved
+  timestamps.
+- Each format round-trips over 10⁴ generated values.
+- `R CMD check` passes on the quick r-actions profile.
+
+**Design.** §6.1, §6.4, §6.6, §6.7 for these formats; D13, D18.
+
+## Stage 6 — XID, ObjectId and Snowflake layouts
+
+**Issue.** [#9](https://github.com/pedrobtz/zuid/issues/9), sub-issue of [v0.1.0](https://github.com/pedrobtz/zuid/issues/2).
+
+**CI.** `quick`.
+
+**Goal.** The 96-bit formats and Snowflake under explicit layouts parse,
+read fields and generate.
+
+**Work.**
+
+- Descriptors and format code for `xid`, `objectid`, `snowflake`.
+- `id_layout()` with the built-in layouts and custom ones as data;
+  `zuid_layout_error`.
+- `id_xid()` (D12), `id_objectid()`, `id_snowflake()` requiring `layout` and
+  `worker` (D13); `id_convert()` between `xid` and `objectid`.
+
+**Exit criteria.**
+
+- Oracles §7.7 and §7.8 pass.
+- Layouts round-trip through `id_layout()` and the `layout` attribute.
+- `R CMD check` passes on the quick r-actions profile.
+
+**Design.** §6.1, §6.4, §6.6, §6.8; D12, D13.
+
+## Stage 7 — NanoID, Cuid2, Sqids and CID
+
+**Issue.** [#10](https://github.com/pedrobtz/zuid/issues/10), sub-issue of [v0.1.0](https://github.com/pedrobtz/zuid/issues/2).
+
+**CI.** `quick`.
+
+**Goal.** The syntactic formats, Sqids and content identifiers parse and
+validate; NanoID and Sqids generate.
+
+**Work.**
+
+- `nanoid`, `cuid2` (validation only), `sqids`, `cid` (parsing and fields
+  only) descriptors and code.
+- `id_nanoid()` with mask-and-step sampling; `id_sqids()` with the blocklist
+  on by default (D8), for numbers below 2⁵³; `zuid_encode_error`.
+
+**Exit criteria.**
+
+- Oracles §7.9 and §7.13 pass, and §7.12's CID fixtures parse to their
+  stated fields.
+- `R CMD check` passes on the quick r-actions profile.
+
+**Design.** §6.1, §6.6 for these formats; D8, D19.
+
+## Stage 8 — Detection
+
+**Issue.** [#11](https://github.com/pedrobtz/zuid/issues/11), sub-issue of [v0.1.0](https://github.com/pedrobtz/zuid/issues/2).
+
+**CI.** `quick`.
+
+**Goal.** `id_detect()` and `id_parse(format = NULL)` pick a format only
+when the evidence allows, and report ambiguity otherwise.
+
+**Work.**
+
+- `id_detect()` with `hint`, `layout` and the `candidates` attribute.
+- `id_parse(format = NULL)`; `zuid_ambiguous_error`, `zuid_mixed_error`.
+
+**Exit criteria.**
+
+- A table of strings against expected results and candidates passes,
+  covering every collision §6.2 names.
+- No encoding or syntactic format is chosen without a hint (D10).
+- `R CMD check` passes on the quick r-actions profile.
+
+**Design.** §6.2; D10.
+
+## Stage 9 — Fuzzing and benchmarks
+
+**Issue.** [#12](https://github.com/pedrobtz/zuid/issues/12), sub-issue of [v0.1.0](https://github.com/pedrobtz/zuid/issues/2).
+
+**CI.** `quick`.
+
+**Goal.** The codecs are fuzzed, and every benchmark row has a number.
+
+**Work.**
+
+- The `ZUID_STANDALONE` fuzz harness and `fuzz.yml` from r-actions.
+- Every row of §10 measured into `.agents/benchmarks.md`.
+
+**Exit criteria.**
+
+- The fuzz workflow runs green.
+- `.agents/benchmarks.md` has a number for every row of §10 (D15: not a
+  gate).
+- `R CMD check` passes on the quick r-actions profile.
+
+**Design.** §9; §10; D15.
+
+## Stage 10 — Full CI
+
+**Issue.** [#13](https://github.com/pedrobtz/zuid/issues/13), sub-issue of [v0.1.0](https://github.com/pedrobtz/zuid/issues/2).
+
+**CI.** `full`.
+
+**Goal.** The full r-actions profile is green on the default branch's code.
+
+**Work.**
+
+- No new features. Run the full profile (`full-ci` label) and fix what it
+  finds: gctorture at the sensitive step, valgrind, ASan, every platform
+  leg, `nosuggests`, `nold`, cran-special.
+- Fix every failure recorded on this issue by earlier merges.
+- Run the fuzz target for one hour under sanitizers (§12).
+
+**Exit criteria.**
+
+- A full-profile run is green on the pull request and on its merge commit.
+- The same input gives byte-identical `zuid` vectors and `id_fields()`
+  frames on the Linux, macOS and Windows legs.
+- The fuzz target has run one hour clean with sanitizers.
+
+**Design.** §9; §12.
+
+## Stage 11 — v0.1.0 readiness
+
+**Issue.** [#14](https://github.com/pedrobtz/zuid/issues/14), sub-issue of [v0.1.0](https://github.com/pedrobtz/zuid/issues/2).
+
+**CI.** `full`.
+
+**Goal.** Only the submission itself is left.
+
+**Work.**
+
+- README and the two articles, "Reading what an identifier knows" and
+  "A UUID in every alphabet".
+- `inst/COPYRIGHTS` naming the Sqids blocklist's and Niceware's authors.
+- `Version: 0.1.0` and the matching `NEWS.md` heading.
+- `cran-comments.md` listing the r-actions CI legs as test environments.
+- Run `pkg-critical-review` and fix its blocking and required findings,
+  then `pkg-cran-review` and resolve every finding.
+
+**Exit criteria.**
+
+- Every acceptance criterion of design §12 holds, except the `zuarrow`
+  round trip, which is After 0.1.0.
+- `urlchecker::url_check()` and `spelling::spell_check_package()` are clean.
+- `R CMD check --as-cran` has 0 errors, 0 warnings and only the
+  "New submission" note.
+- A full-profile r-actions run is green on the release commit.
+
+**Design.** §2 (README and articles); §12; D8.
+
+## After 0.1.0
+
+First, the interfaces with other `zu*` packages, deferred by the
+maintainer on 2026-10-24 so v0.1.0 stands alone:
+
+- Arrow and DuckDB interchange through `zuarrow`'s registry (§6.9, D9),
+  with its §12 round-trip criterion.
+- `id_integer()` through `zuint`, and Sqids numbers of 2⁵³ or more as
+  `uint64`.
+- `id_time(class = "zutempo")`, and design §15 Q3 with it.
+- Name-based UUID versions 3 and 5, and `id_cid()` generation, through
+  `zucrypt`.
+
+Then design §14, in the order expected:
+
+- A C API, `inst/include/zuid.h`, once the R surface has settled.
+- Passwords and passphrases (`id_password()`, `id_passphrase()`,
+  `id_entropy()`), set aside so v0.1.0 is identifiers only.
+- Cuid2 generation, once a Keccak exists.
+- Hashids behind the Sqids interface, if a consumer asks.
+- The EFF word lists and Readable-style sentences.
+- Registration with `arrow` and `nanoarrow`.
+- More Snowflake layouts as consumers bring them.
+- Hashes without `zucrypt`, only if a consumer needs them first.
+- A `vctrs` record form, if the tidyverse integration wants one.
+
+## Open questions
+
+- **Q4: `id_parse()` on a `zuid` vector of another format (Stage 4).**
+  Reinterpret, or require `id_convert()`.
+- **Q5: Snowflake `padded` canonical text (Stage 6).**
+- **Q6: CRAN or GitHub release (Stage 11).** The board's `CRAN intent`
+  field records it; assumed `Planned`.
+- Design §15 Q1 (is the name free) is answered: crandb returned
+  `not_found` for `zuid` on 2026-10-24. Q2 is Stage 3's work.
