@@ -29,8 +29,11 @@ id_valid(
 \arguments{
 \item{x}{A character vector.}
 
-\item{format}{The format, such as \code{"uuid"}. See \code{\link[=id_formats]{id_formats()}}. Required
-for now; detecting it from \code{x} is not available yet.}
+\item{format}{The format, such as \code{"uuid"}. See \code{\link[=id_formats]{id_formats()}}. \code{NULL}
+detects it with \code{\link[=id_detect]{id_detect()}}: every element that is not missing must
+resolve to the same format, or the call is a \code{zuid_ambiguous_error}
+naming the candidates or a \code{zuid_mixed_error} naming the formats found.
+Elements that fit no format are \code{NA}, or an error with \code{strict = TRUE}.}
 
 \item{form}{A text form of \code{format}, or \code{NULL} for its canonical text.}
 

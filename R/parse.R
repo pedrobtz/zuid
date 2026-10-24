@@ -40,8 +40,11 @@
 #' formats have one text form each.
 #'
 #' @param x A character vector.
-#' @param format The format, such as `"uuid"`. See [id_formats()]. Required
-#'   for now; detecting it from `x` is not available yet.
+#' @param format The format, such as `"uuid"`. See [id_formats()]. `NULL`
+#'   detects it with [id_detect()]: every element that is not missing must
+#'   resolve to the same format, or the call is a `zuid_ambiguous_error`
+#'   naming the candidates or a `zuid_mixed_error` naming the formats found.
+#'   Elements that fit no format are `NA`, or an error with `strict = TRUE`.
 #' @param form A text form of `format`, or `NULL` for its canonical text.
 #' @param layout For `"snowflake"`, required, and for `"scru64"`, optional:
 #'   an [id_layout()]. It travels with the vector and says how to read its
@@ -103,10 +106,7 @@ id_parse <- function(
   }
   check_character(x)
   if (is.null(format)) {
-    zuid_abort(
-      "type",
-      "`format` is required: detecting it from `x` is not available yet."
-    )
+    format <- detect_one_format(x, layout)
   }
   check_format(format)
   if (!isTRUE(strict) && !isFALSE(strict)) {
