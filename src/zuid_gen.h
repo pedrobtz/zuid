@@ -53,6 +53,24 @@ void zuid_gen_uuid_time(size_t n, int version, const int64_t *ticks,
                         int64_t tolerance_ticks, zuid_uuid1_state *state,
                         uint8_t *out);
 
+typedef struct {
+    int has;
+    uint64_t timestamp;     /* ms */
+    uint32_t counter_hi, counter_lo;
+    uint64_t ts_counter_hi; /* when counter_hi was last renewed */
+} zuid_scru128_state;
+
+typedef struct {
+    int has;
+    int node_bits;
+    uint32_t node;
+    uint64_t timestamp;  /* 256 ms ticks */
+    uint32_t node_ctr;   /* node << counter bits | counter */
+} zuid_scru64_state;
+
+#define ZUID_SCRU128_RANDOM 10 /* 4 entropy, 3 counter_lo, 3 counter_hi */
+#define ZUID_SCRU64_RANDOM 3
+#define ZUID_KSUID_RANDOM 16
 #define ZUID_ULID_RANDOM 10
 #define ZUID_UPID_RANDOM 8
 
@@ -69,5 +87,28 @@ size_t zuid_gen_ulid(size_t n, const int64_t *ms, const uint8_t *random,
  * reference. */
 void zuid_gen_upid(size_t n, const int64_t *ms, const uint8_t *random,
                    const uint8_t tail[3], uint8_t *out);
+
+/* SCRU128 at `ms[i]`, by the specification's generator: counter_lo is
+ * renewed when the millisecond advances and incremented within it,
+ * counter_hi renewed once the timestamp has moved a second past its last
+ * renewal, and a counter overflow advances the timestamp. A clock back by
+ * more than `tolerance_ms` returns 1 + its index unless `reset`, which
+ * restarts the generator there (D18). */
+size_t zuid_gen_scru128(size_t n, const int64_t *ms, const uint8_t *random,
+                        int64_t tolerance_ms, int reset,
+                        zuid_scru128_state *state, uint8_t *out);
+
+/* SCRU64 at `ms[i]` for `node` of `node_bits` bits, by the reference
+ * generator: the counter is renewed at each new 256 ms tick and incremented
+ * within it, and an overflow advances the tick. Returns 0, 1 + the index of
+ * a rollback beyond `tolerance_ms` (unless `reset`), or, negated, 1 + the
+ * index of a tick past the largest timestamp. */
+long zuid_gen_scru64(size_t n, const int64_t *ms, const uint8_t *random,
+                     uint32_t node, int node_bits, int64_t tolerance_ms,
+                     int reset, zuid_scru64_state *state, uint8_t *out);
+
+/* KSUID at `ms[i]`: seconds since 1400000000 and 16 random bytes. */
+void zuid_gen_ksuid(size_t n, const int64_t *ms, const uint8_t *random,
+                    uint8_t *out);
 
 #endif

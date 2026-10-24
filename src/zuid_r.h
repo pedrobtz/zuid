@@ -26,6 +26,11 @@ SEXP zuid_c_state(void);
 SEXP zuid_c_reset_state(void);
 SEXP zuid_c_ulid(SEXP n, SEXP time_us, SEXP random, SEXP tolerance_ms);
 SEXP zuid_c_upid(SEXP n, SEXP time_us, SEXP random, SEXP tail);
+SEXP zuid_c_scru128(SEXP n, SEXP time_us, SEXP random, SEXP tolerance_ms,
+                    SEXP reset);
+SEXP zuid_c_scru64(SEXP n, SEXP time_us, SEXP random, SEXP node,
+                   SEXP node_bits, SEXP tolerance_ms, SEXP reset);
+SEXP zuid_c_ksuid(SEXP n, SEXP time_us, SEXP random);
 SEXP zuid_c_encode(SEXP bytes, SEXP form, SEXP alphabet, SEXP sep);
 SEXP zuid_c_decode(SEXP text, SEXP form, SEXP alphabet, SEXP width);
 
