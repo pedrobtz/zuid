@@ -86,8 +86,12 @@ input, starting `0` to `7`. A TypeID is a lowercase prefix, `_` and 26
 lowercase Crockford characters, or the 26 alone; strict asks what it
 asks of the UUID. A UPID is four prefix characters, `_` and 22 lowercase
 characters, as the reference writes them; strict asks for the current
-version. Strict also asks that a time is no later than now plus the
-tolerance. These formats have one text form each.
+version. SCRU128 is 25 base36 characters and SCRU64 12, lowercase,
+either case on input; their reserved timestamps (the first and the last)
+pass `"syntax"` only. A KSUID is 27 base62 characters, case-sensitive,
+at most `aWgEPTl1tmebfsQzFP4bxwgy80V`. Strict also asks that a time is
+no later than now plus the tolerance. These formats have one text form
+each.
 
 ## Examples
 

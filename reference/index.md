@@ -23,6 +23,10 @@
 - [`id_parse()`](https://pedrobtz.github.io/zuid/reference/id_parse.md)
   [`id_valid()`](https://pedrobtz.github.io/zuid/reference/id_parse.md)
   : Parse and validate identifiers
+- [`id_scru128()`](https://pedrobtz.github.io/zuid/reference/id_scru128.md)
+  [`id_scru64()`](https://pedrobtz.github.io/zuid/reference/id_scru128.md)
+  [`id_ksuid()`](https://pedrobtz.github.io/zuid/reference/id_scru128.md)
+  : Generate SCRU128, SCRU64 and KSUID values
 - [`id_ulid()`](https://pedrobtz.github.io/zuid/reference/id_ulid.md)
   [`id_typeid()`](https://pedrobtz.github.io/zuid/reference/id_ulid.md)
   [`id_upid()`](https://pedrobtz.github.io/zuid/reference/id_ulid.md) :

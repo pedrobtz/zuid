@@ -84,6 +84,11 @@ clock sequence (<code>sequence</code>) and the 48-bit <code>node</code>;</p></li
 UUID's fields and its <code>prefix</code>, <code>""</code> when it has none. A UPID has its time
 in 256 ms units, 64 <code>random</code> bits, its <code>prefix</code> and its version nibble
 (6, the reference's <code>"a"</code>, is the current one).</p>
+<p>A SCRU128 has its millisecond time, <code>counter_hi</code> in <code>node</code> (as hex),
+<code>counter_lo</code> in <code>sequence</code> and its 32 entropy bits in <code>random</code>. A SCRU64
+has its time at 256 ms; its node and counter need the generator's
+<code>node_bits</code>, so they are <code>NA</code>. A KSUID has its time in seconds and its
+128-bit payload in <code>random</code>.</p>
 <p>The nil and max UUIDs report versions 0 and 15 and no variant. <code>random</code>
 is the random bits joined in order, as hex, left-padded with zero bits to
 a whole number of hex digits.</p>

@@ -2,6 +2,15 @@
 
 ## zuid 0.0.0.9000
 
+- SCRU128, SCRU64 and KSUID parse, validate and read their fields, and
+  [`id_scru128()`](https://pedrobtz.github.io/zuid/reference/id_scru128.md),
+  [`id_scru64()`](https://pedrobtz.github.io/zuid/reference/id_scru128.md)
+  and
+  [`id_ksuid()`](https://pedrobtz.github.io/zuid/reference/id_scru128.md)
+  generate them. The SCRU generators follow their references: monotonic,
+  with counter overflow moving the timestamp forward, and a clock
+  rollback beyond the tolerance a `zuid_clock_error` unless
+  `rollback = "reset"`.
 - ULID, TypeID and UPID:
   [`id_parse()`](https://pedrobtz.github.io/zuid/reference/id_parse.md),
   [`id_valid()`](https://pedrobtz.github.io/zuid/reference/id_parse.md),
