@@ -46,6 +46,8 @@ are not monotonic within 256 ms.
 
 Entropy comes from the operating system, never from R's random number
 generator, and the clock rollback rule of \code{\link[=id_uuid]{id_uuid()}} applies to ULIDs.
+As there, a call given both \code{time} and \code{random} is a pure function of its
+arguments.
 }
 \examples{
 id_ulid(2)

@@ -45,11 +45,19 @@ test_that("generation follows the reference generator", {
   tick <- floor(t / 256)
   # 4 counter bits: one is kept back as the overflow guard, so 0x0e seeds 6.
   expect_identical(v, tick * 2^24 + 5 * 16 + c(6, 7, 8))
-  # The counter overflows into the next tick.
-  more <- id_scru64(8, node = 5, node_bits = 20, random = raw(24), time = t)
+  # The counter overflows into the next tick: from 6, ten values fill the
+  # counter and the eleventh moves on, renewed from its own seed.
+  more <- id_scru64(
+    11,
+    node = 5,
+    node_bits = 20,
+    random = as.raw(c(0, 0, 0x0e, rep(0, 30))),
+    time = t
+  )
   w <- as.numeric(paste0("0x", id_encode(id_bytes(more), "hex")))
-  expect_identical(w[8], (tick + 1) * 2^24 + 5 * 16)
-  expect_true(strictly_increasing(c(x, more)))
+  expect_identical(w[10], tick * 2^24 + 5 * 16 + 15)
+  expect_identical(w[11], (tick + 1) * 2^24 + 5 * 16)
+  expect_true(strictly_increasing(more))
 })
 
 test_that("generated SCRU64 IDs strictly increase and round-trip", {
@@ -91,4 +99,29 @@ test_that("node and node_bits are required and checked", {
     id_scru64(1, node = 1, node_bits = 8, random = raw(2)),
     class = "zuid_type_error"
   )
+})
+
+test_that("an overflow into the reserved last tick is an error", {
+  local_fresh_state()
+  expect_error(
+    id_scru64(
+      2,
+      node = 1,
+      node_bits = 8,
+      time = 282429536479 * 256,
+      random = as.raw(rep(0xff, 6))
+    ),
+    class = "zuid_overflow_error"
+  )
+})
+
+test_that("each node keeps its own state", {
+  local_fresh_state()
+  t <- as.POSIXct("2024-01-01", tz = "UTC")
+  a <- id_scru64(1, node = 1, node_bits = 23, time = t)
+  b <- id_scru64(1, node = 2, node_bits = 23, time = t)
+  c <- id_scru64(1, node = 1, node_bits = 23, time = t)
+  expect_false(a == c)
+  expect_true(strictly_increasing(c(a, c)))
+  expect_false(b == a)
 })

@@ -39,19 +39,22 @@ void zuid_gen_uuid_random(size_t n, int version, const uint8_t *random,
 
 /* Version 7 at `ms[i]` (milliseconds since 1970), RFC 9562 section 6.2
  * method 1. A clock that runs back by up to `tolerance_ms` keeps the last
- * millisecond; further back, generation restarts at the new time. */
-void zuid_gen_uuid7(size_t n, const int64_t *ms, const uint8_t *random,
-                    int64_t tolerance_ms, zuid_uuid7_state *state,
-                    uint8_t *out);
+ * millisecond; further back, generation restarts at the new time. Returns
+ * 0, or 1 + the index of a value whose counter overflow would pass the
+ * last millisecond; values before it are written. */
+size_t zuid_gen_uuid7(size_t n, const int64_t *ms, const uint8_t *random,
+                      int64_t tolerance_ms, zuid_uuid7_state *state,
+                      uint8_t *out);
 
 /* Versions 1 and 6 at `ticks[i]` (100 ns since 1582-10-15). A tick at or
  * before the last one is moved past it, unless the clock ran back by more
  * than `tolerance_ticks`, which increments the clock sequence instead
- * (RFC 9562 section 5.1). */
-void zuid_gen_uuid_time(size_t n, int version, const int64_t *ticks,
-                        int *clock_seq, const uint8_t node[6],
-                        int64_t tolerance_ticks, zuid_uuid1_state *state,
-                        uint8_t *out);
+ * (RFC 9562 section 5.1). Returns 0, or 1 + the index of a value whose tick
+ * is outside the 60-bit field. */
+size_t zuid_gen_uuid_time(size_t n, int version, const int64_t *ticks,
+                          int *clock_seq, const uint8_t node[6],
+                          int64_t tolerance_ticks, zuid_uuid1_state *state,
+                          uint8_t *out);
 
 typedef struct {
     int has;
@@ -77,12 +80,12 @@ typedef struct {
     int nparts;
     int width[ZUID_LAYOUT_PARTS];
     int kind[ZUID_LAYOUT_PARTS];
+    double epoch_ms, unit_ms; /* for generation only: tell layouts apart */
 } zuid_layout_spec;
 
 typedef struct {
     int has;
     zuid_layout_spec spec;
-    uint64_t node[ZUID_LAYOUT_PARTS];
     int64_t last_tick;  /* of the last value, which overflow can move ahead */
     int64_t last_clock; /* the latest tick the clock gave */
     uint64_t sequence;
@@ -118,16 +121,18 @@ void zuid_gen_upid(size_t n, const int64_t *ms, const uint8_t *random,
  * counter_hi renewed once the timestamp has moved a second past its last
  * renewal, and a counter overflow advances the timestamp. A clock back by
  * more than `tolerance_ms` returns 1 + its index unless `reset`, which
- * restarts the generator there (D18). */
-size_t zuid_gen_scru128(size_t n, const int64_t *ms, const uint8_t *random,
-                        int64_t tolerance_ms, int reset,
-                        zuid_scru128_state *state, uint8_t *out);
+ * restarts the generator there (D18). An overflow into the reserved
+ * timestamp 2^48 - 1 returns -(1 + its index). */
+long zuid_gen_scru128(size_t n, const int64_t *ms, const uint8_t *random,
+                      int64_t tolerance_ms, int reset,
+                      zuid_scru128_state *state, uint8_t *out);
 
-/* SCRU64 at `ms[i]` for `node` of `node_bits` bits, by the reference
+/* SCRU64 at `ms[i]` for `node` of `node_bits` bits, with the state of that
+ * node (the caller keeps one per node and size), by the reference
  * generator: the counter is renewed at each new 256 ms tick and incremented
  * within it, and an overflow advances the tick. Returns 0, 1 + the index of
  * a rollback beyond `tolerance_ms` (unless `reset`), or, negated, 1 + the
- * index of a tick past the largest timestamp. */
+ * index of a tick at or past the reserved largest timestamp. */
 long zuid_gen_scru64(size_t n, const int64_t *ms, const uint8_t *random,
                      uint32_t node, int node_bits, int64_t tolerance_ms,
                      int reset, zuid_scru64_state *state, uint8_t *out);
@@ -137,15 +142,17 @@ void zuid_gen_ksuid(size_t n, const int64_t *ms, const uint8_t *random,
                     uint8_t *out);
 
 /* Snowflake at `ticks[i]` (time units since the layout's epoch), with
- * `node[k]` for each node part. The sequence starts at zero each tick and
- * increments within it; an overflow moves to the next tick. A clock back
- * by more than `tolerance_ticks` from the latest tick it gave (not from a
- * tick an overflow moved to) returns 1 + its index (zuid_clock_error);
- * a tick past the time field's range returns -(1 + its index). */
+ * `node[k]` for each node part, and the state of the layout (the caller
+ * keeps one per layout, shared by all node values). The sequence starts at
+ * zero each tick and increments within it; an overflow moves to the next
+ * tick. A clock back by more than `tolerance_ticks` from the latest tick it
+ * gave (not from a tick an overflow moved to) returns 1 + its index
+ * (zuid_clock_error), unless `reset`, which restarts at that tick; a tick
+ * past the time field's range returns -(1 + its index). */
 long zuid_gen_snowflake(size_t n, const int64_t *ticks,
                         const zuid_layout_spec *spec, const uint64_t *node,
-                        int64_t tolerance_ticks, zuid_snowflake_state *state,
-                        uint8_t *out);
+                        int64_t tolerance_ticks, int reset,
+                        zuid_snowflake_state *state, uint8_t *out);
 
 /* Splits each 8-byte value into the layout's parts. */
 void zuid_layout_unpack(const uint8_t *bytes, const zuid_layout_spec *spec,

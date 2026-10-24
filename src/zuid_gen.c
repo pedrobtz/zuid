@@ -25,9 +25,11 @@ static int counter_seed(const uint8_t *r)
     return ((r[0] << 8) | r[1]) & 0x07ff;
 }
 
-void zuid_gen_uuid7(size_t n, const int64_t *ms, const uint8_t *random,
-                    int64_t tolerance_ms, zuid_uuid7_state *state,
-                    uint8_t *out)
+#define MAX48 INT64_C(0xffffffffffff)
+
+size_t zuid_gen_uuid7(size_t n, const int64_t *ms, const uint8_t *random,
+                      int64_t tolerance_ms, zuid_uuid7_state *state,
+                      uint8_t *out)
 {
     for (size_t i = 0; i < n; i++) {
         const uint8_t *r = random + ZUID_UUID7_RANDOM * i;
@@ -38,7 +40,13 @@ void zuid_gen_uuid7(size_t n, const int64_t *ms, const uint8_t *random,
             state->counter = counter_seed(r);
             state->has = 1;
         } else if (++state->counter > 0x0fff) {
-            /* Overflow: borrow the next millisecond, as RFC 9562 allows. */
+            /* Overflow: borrow the next millisecond, as RFC 9562 allows,
+             * unless this is the last one the field holds. The state stays
+             * at the maximum so the next call fails too. */
+            if (state->last_ms >= MAX48) {
+                state->counter = 0x0fff;
+                return i + 1;
+            }
             state->last_ms++;
             state->counter = counter_seed(r);
         }
@@ -52,12 +60,15 @@ void zuid_gen_uuid7(size_t n, const int64_t *ms, const uint8_t *random,
         memcpy(b + 8, r + 2, 8);
         set_version_variant(b, 7);
     }
+    return 0;
 }
 
-void zuid_gen_uuid_time(size_t n, int version, const int64_t *ticks,
-                        int *clock_seq, const uint8_t node[6],
-                        int64_t tolerance_ticks, zuid_uuid1_state *state,
-                        uint8_t *out)
+#define MAX60 INT64_C(0x0fffffffffffffff)
+
+size_t zuid_gen_uuid_time(size_t n, int version, const int64_t *ticks,
+                          int *clock_seq, const uint8_t node[6],
+                          int64_t tolerance_ticks, zuid_uuid1_state *state,
+                          uint8_t *out)
 {
     for (size_t i = 0; i < n; i++) {
         int64_t t = ticks[i];
@@ -68,6 +79,7 @@ void zuid_gen_uuid_time(size_t n, int version, const int64_t *ticks,
                 t = state->last_ticks + 1;
             }
         }
+        if (t < 0 || t > MAX60) return i + 1;
         state->last_ticks = t;
         state->has = 1;
 
@@ -103,6 +115,7 @@ void zuid_gen_uuid_time(size_t n, int version, const int64_t *ticks,
         memcpy(b + 10, node, 6);
         set_version_variant(b, version);
     }
+    return 0;
 }
 
 size_t zuid_gen_ulid(size_t n, const int64_t *ms, const uint8_t *random,
@@ -158,9 +171,9 @@ static void store_be(uint8_t *b, uint64_t v, int n)
 
 #define MAX24 UINT32_C(0xffffff)
 
-size_t zuid_gen_scru128(size_t n, const int64_t *ms, const uint8_t *random,
-                        int64_t tolerance_ms, int reset,
-                        zuid_scru128_state *state, uint8_t *out)
+long zuid_gen_scru128(size_t n, const int64_t *ms, const uint8_t *random,
+                      int64_t tolerance_ms, int reset,
+                      zuid_scru128_state *state, uint8_t *out)
 {
     for (size_t i = 0; i < n; i++) {
         const uint8_t *r = random + ZUID_SCRU128_RANDOM * i;
@@ -188,8 +201,10 @@ size_t zuid_gen_scru128(size_t n, const int64_t *ms, const uint8_t *random,
             state->timestamp = t;
             state->counter_lo = load24(r + 4);
         } else {
-            return i + 1;
+            return (long) i + 1;
         }
+        /* 2^48 - 1 is reserved, so an overflow cannot move there. */
+        if (state->timestamp >= (uint64_t) MAX48) return -((long) i + 1);
         if (state->timestamp - state->ts_counter_hi >= 1000 ||
             state->ts_counter_hi < 1) {
             state->ts_counter_hi = state->timestamp;
@@ -216,7 +231,9 @@ long zuid_gen_scru64(size_t n, const int64_t *ms, const uint8_t *random,
      * counter has four bits or fewer. */
     int guard = counter_bits <= 4 ? 1 : 0;
     uint64_t allowance = (uint64_t) tolerance_ms >> 8;
-    if (!state->has || state->node != node || state->node_bits != node_bits) {
+    /* The caller keeps one state per (node, node_bits); a fresh one starts
+     * here. */
+    if (!state->has) {
         state->has = 1;
         state->node = node;
         state->node_bits = node_bits;
@@ -243,7 +260,7 @@ long zuid_gen_scru64(size_t n, const int64_t *ms, const uint8_t *random,
         } else {
             return (long) i + 1;
         }
-        if (state->timestamp > SCRU64_MAX_TS) return -((long) i + 1);
+        if (state->timestamp >= SCRU64_MAX_TS) return -((long) i + 1);
         store_be(out + 8 * i, state->timestamp << 24 | state->node_ctr, 8);
     }
     return 0;
@@ -269,26 +286,30 @@ static uint64_t mask_bits(int w)
 
 long zuid_gen_snowflake(size_t n, const int64_t *ticks,
                         const zuid_layout_spec *spec, const uint64_t *node,
-                        int64_t tolerance_ticks, zuid_snowflake_state *state,
-                        uint8_t *out)
+                        int64_t tolerance_ticks, int reset,
+                        zuid_snowflake_state *state, uint8_t *out)
 {
     int time_w = 0, seq_w = 0;
     for (int k = 0; k < spec->nparts; k++) {
         if (spec->kind[k] == ZUID_PART_TIME) time_w = spec->width[k];
         if (spec->kind[k] == ZUID_PART_SEQUENCE) seq_w = spec->width[k];
     }
-    if (!state->has || memcmp(&state->spec, spec, sizeof *spec) != 0 ||
-        memcmp(state->node, node, sizeof state->node) != 0) {
+    /* One state per layout, shared by every node value: a sequence number
+     * is never reused within a tick, whichever node asks. */
+    if (!state->has || memcmp(&state->spec, spec, sizeof *spec) != 0) {
         memset(state, 0, sizeof *state);
         state->spec = *spec;
-        memcpy(state->node, node, sizeof state->node);
         state->last_tick = -1;
         state->last_clock = -1;
         state->has = 1;
     }
     for (size_t i = 0; i < n; i++) {
         int64_t t = ticks[i];
-        if (t < state->last_clock - tolerance_ticks) return (long) i + 1;
+        if (t < state->last_clock - tolerance_ticks) {
+            if (!reset) return (long) i + 1;
+            state->last_clock = t;
+            state->last_tick = t - 1;
+        }
         if (t > state->last_clock) state->last_clock = t;
         if (t > state->last_tick) {
             state->last_tick = t;

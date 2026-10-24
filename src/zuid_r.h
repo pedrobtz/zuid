@@ -33,7 +33,8 @@ SEXP zuid_c_scru64(SEXP n, SEXP time_us, SEXP random, SEXP node,
 SEXP zuid_c_ksuid(SEXP n, SEXP time_us, SEXP random);
 SEXP zuid_c_layout_unpack(SEXP bytes, SEXP widths, SEXP kinds);
 SEXP zuid_c_snowflake(SEXP ticks, SEXP widths, SEXP kinds, SEXP node,
-                      SEXP tolerance_ticks);
+                      SEXP epoch_ms, SEXP unit_ms, SEXP tolerance_ticks,
+                      SEXP reset);
 SEXP zuid_c_xid(SEXP secs, SEXP machine, SEXP process, SEXP random);
 SEXP zuid_c_objectid(SEXP secs, SEXP random);
 void zuid_layout_reset_state(void);

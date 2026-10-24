@@ -21,7 +21,7 @@ static const R_CallMethodDef call_methods[] = {
     {"zuid_c_scru64", (DL_FUNC) &zuid_c_scru64, 7},
     {"zuid_c_ksuid", (DL_FUNC) &zuid_c_ksuid, 3},
     {"zuid_c_layout_unpack", (DL_FUNC) &zuid_c_layout_unpack, 3},
-    {"zuid_c_snowflake", (DL_FUNC) &zuid_c_snowflake, 5},
+    {"zuid_c_snowflake", (DL_FUNC) &zuid_c_snowflake, 8},
     {"zuid_c_xid", (DL_FUNC) &zuid_c_xid, 4},
     {"zuid_c_objectid", (DL_FUNC) &zuid_c_objectid, 2},
     {"zuid_c_charset", (DL_FUNC) &zuid_c_charset, 2},

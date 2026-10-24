@@ -1,0 +1,15 @@
+#!/usr/bin/env Rscript
+# Rewrite tests/testthat/fixtures/determinism.txt from the package in the
+# working tree. The file is zuid's own output, so it guards that every
+# platform produces the same bytes, not that the bytes are right; the
+# oracle tests do that. Regenerate it only for a change that is meant to
+# alter generated values, and review the diff line by line.
+#
+#   tools/gen-determinism
+
+pkgload::load_all(quiet = TRUE)
+source("tests/testthat/helper-gen.R")
+source("tests/testthat/helper-determinism.R")
+path <- "tests/testthat/fixtures/determinism.txt"
+writeLines(determinism_lines(), path, useBytes = TRUE)
+cat("wrote", path, "\n")

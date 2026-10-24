@@ -202,3 +202,54 @@ test_that("n = 0 gives an empty vector", {
   expect_length(id_uuid(0), 0L)
   expect_s3_class(id_uuid(0, version = 1), "zuid_uuid")
 })
+
+test_that("version 7 at the last millisecond overflows instead of wrapping", {
+  local_fresh_state()
+  expect_error(
+    id_uuid(5000, version = 7, time = 2^48 - 1),
+    class = "zuid_overflow_error"
+  )
+  # The values a smaller call makes there are valid and increasing.
+  local_fresh_state()
+  x <- id_uuid(100, version = 7, time = 2^48 - 1)
+  expect_true(strictly_increasing(x))
+  expect_true(all(id_time(x, "ms") == 2^48 - 1))
+  expect_error(
+    id_typeid(5000, "user", time = 2^48 - 1),
+    class = "zuid_overflow_error"
+  )
+})
+
+test_that("versions 1 and 6 hold the largest accepted time exactly", {
+  local_fresh_state()
+  top <- 103072857660684688 / 1000
+  for (v in c(1, 6)) {
+    x <- id_uuid(1, version = v, time = top)
+    expect_true(id_valid(as.character(x), "uuid"))
+    expect_gt(id_time(x, "ms"), 1e14)
+    expect_error(
+      id_uuid(1, version = v, time = top + 0.1),
+      class = "zuid_type_error"
+    )
+  }
+})
+
+test_that("explicit time and random make generation a pure function", {
+  local_fresh_state()
+  t <- as.POSIXct("2024-01-01", tz = "UTC")
+  expect_identical(
+    id_uuid(3, random = as.raw(1:30), time = t),
+    id_uuid(3, random = as.raw(1:30), time = t)
+  )
+  expect_identical(
+    id_uuid(2, version = 1, random = as.raw(1:8), time = t),
+    id_uuid(2, version = 1, random = as.raw(1:8), time = t)
+  )
+  expect_identical(
+    id_ulid(2, random = as.raw(1:20), time = t),
+    id_ulid(2, random = as.raw(1:20), time = t)
+  )
+  # A pure call leaves the session's state alone.
+  expect_true(is.na(zuid_info()$state$uuid7_last_ms))
+  expect_true(is.na(zuid_info()$state$ulid_last_ms))
+})

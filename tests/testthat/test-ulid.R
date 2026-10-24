@@ -63,15 +63,15 @@ test_that("the random component overflowing is a zuid_overflow_error", {
   local_fresh_state()
   start <- id_parse("01BX5ZZKBKZZZZZZZZZZZZZZZX", "ulid")
   time <- id_time(start, "ms")
-  random <- c(id_bytes(start)[7:16], raw(20))
-  x <- id_ulid(3, random = random, time = time)
+  random <- c(id_bytes(start)[7:16], raw(30))
+  x <- id_ulid(3, random = random[1:30], time = time)
   expect_identical(as.character(x)[3], "01BX5ZZKBKZZZZZZZZZZZZZZZZ")
   expect_error(
-    id_ulid(1, random = raw(10), time = time),
+    id_ulid(4, random = random, time = time),
     class = "zuid_overflow_error"
   )
   # A later millisecond starts afresh.
-  expect_no_error(id_ulid(1, random = raw(10), time = time + 1))
+  expect_no_error(id_ulid(4, random = random, time = time + c(0, 0, 0, 1)))
 })
 
 test_that("ULIDs strictly increase over a frozen clock and survive a rollback", {

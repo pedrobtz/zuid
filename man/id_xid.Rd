@@ -16,7 +16,13 @@ id_xid(
 
 id_objectid(n = 1, random = NULL, time = NULL)
 
-id_snowflake(n = 1, layout, worker, time = NULL)
+id_snowflake(
+  n = 1,
+  layout,
+  worker,
+  time = NULL,
+  rollback = c("error", "reset")
+)
 }
 \arguments{
 \item{n}{The number of UUIDs.}
@@ -37,6 +43,9 @@ milliseconds since 1970) of length 1 or \code{n}.}
 
 \item{worker}{The node fields' values: one number when the layout has one
 node field, else a named list, such as \code{list(datacenter = 1, worker = 7)}.}
+
+\item{rollback}{For \code{id_snowflake()}, what to do when the clock (or
+\code{time}) runs back further than the tolerance: \code{"error"} or \code{"reset"}.}
 }
 \value{
 A zuid vector of \code{n} values.
@@ -57,9 +66,12 @@ drawn once per session, and a 3-byte counter started at a random value.
 node field, since duplicate node ids across machines are what Snowflake
 exists to prevent and only the caller can rule them out. The sequence
 starts at zero each tick and increments within it; when it overflows,
-generation moves to the next tick. A clock back by up to the option
-\code{zuid.clock_tolerance} (seconds, 0.01 by default) keeps the last tick;
-further back is a \code{zuid_clock_error}.
+generation moves to the next tick. One sequence serves every node value
+of a layout, so values for different workers interleave without repeats.
+A clock back by up to the option \code{zuid.clock_tolerance} (seconds, 0.01 by
+default) keeps the last tick. Further back, \code{rollback = "error"} raises
+\code{zuid_clock_error}, and \code{rollback = "reset"} restarts the layout's
+generator at the new time, which may repeat values made before.
 }
 \examples{
 id_xid(2)

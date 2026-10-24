@@ -947,13 +947,14 @@ Every condition inherits from `zuid_error`; tests assert on class.
 | `zuid_layout_error` | bits do not sum to the width; `sonyflake` has no epoch |
 | `zuid_convert_error` | `id_convert()` between formats sharing no value |
 | `zuid_encode_error` | Sqids alphabet exhausted; number or word out of range |
-| `zuid_overflow_error` | monotonic ULID overflow within a millisecond |
+| `zuid_overflow_error` | a monotonic counter or time field runs past its range |
 | `zuid_clock_error` | the clock ran backwards beyond the tolerance |
 | `zuid_entropy_error` | the operating system's entropy source failed |
 | `zuid_dependency_error` | a suggested package is asked for and absent |
 
 `id_detect()`, `id_valid()`, `id_fields()`, `id_time()` and `id_parse()`
-with the default `strict = FALSE` never raise on input.
+with the default `strict = FALSE` never raise on input. `id_parse()`
+without a `format` still needs a detectable element (D24).
 
 ## 9. Testing
 
@@ -1157,6 +1158,23 @@ full profile and records the dates.
   `btcutil` and `mr-tron` and Python's `base58`; `pybase62` and KSUID;
   ShortUUID 1.0 (Go and Python agree); `proquint`; and the JavaScript
   Niceware 4.0.0, because Python's `niceware` 0.2.1 has an older list.
+- **D22 (M).** A generator call given both `time` and `random` is a pure
+  function of its arguments: it uses a fresh monotonic state and leaves
+  the session's alone, so the same arguments give the same identifiers
+  (D6). Monotonicity across calls (§6.7) holds for calls that read the
+  clock or the entropy source. The maintainer set this on 2026-10-24, on
+  the critical review's question (#35).
+- **D23 (M).** `id_snowflake()` takes `rollback = c("error", "reset")`, as
+  SCRU does (D18), and its state is one per layout (parts, epoch, unit),
+  shared by every node value; SCRU64's is one per node and size. Both
+  were per call before, which repeated values when calls alternated
+  nodes (#28, #29). The maintainer set the argument on 2026-10-24 (#34).
+- **D24 (M).** `id_parse(x, format = NULL)` raises `zuid_parse_error` when
+  no element of `x` is present, empty or all `NA`, as when none fits:
+  without an element there is no evidence of a format, and D10 forbids
+  guessing one. "Never raises on input" (§8) is about values; a missing
+  format with nothing to detect it from is the caller's to give. The
+  maintainer set this on 2026-10-24 (#36).
 
 ## 14. Later versions, in the order they are expected
 
