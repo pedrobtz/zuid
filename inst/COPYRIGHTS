@@ -1,0 +1,54 @@
+zuid: copyright and licensing of included files
+===============================================
+
+Everything in this package is Copyright (c) 2026 Pedro Baltazar and is
+licensed under the MIT licence (see LICENSE), except the two generated tables
+below. zuid vendors no code. Each table is data taken unchanged from its
+upstream at the commit recorded in tools/fixture-sources.yaml, and written by
+tools/gen-tables into R/sysdata.rda and src/zuid_tables.c.
+
+
+Niceware word list
+------------------
+
+    Upstream:  https://github.com/diracdeltas/niceware
+    Release:   v4.0.0 (commit 0d48914236f1d026affc33efb6caa81cdf1bf715)
+    File:      lib/wordlist.js
+    Licence:   MIT
+    Copyright: Copyright (c) 2016 yan
+
+The list is derived from a general English word list and, as its authors warn,
+has not been checked for offensive words. It is used unchanged so that
+encodings decode in every Niceware implementation.
+
+
+Sqids blocklist
+---------------
+
+    Upstream:  https://github.com/sqids/sqids-blocklist
+    Commit:    084d15864ce0d102fd1aa0e752edb2d78e073e9f
+    File:      output/blocklist.json
+    Licence:   MIT
+    Copyright: Copyright (c) 2023 Sqids
+
+
+Both upstreams are published under the MIT licence:
+
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the
+    "Software"), to deal in the Software without restriction, including
+    without limitation the rights to use, copy, modify, merge, publish,
+    distribute, sublicense, and/or sell copies of the Software, and to permit
+    persons to whom the Software is furnished to do so, subject to the
+    following conditions:
+
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+    OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+    NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+    DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+    OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+    USE OR OTHER DEALINGS IN THE SOFTWARE.

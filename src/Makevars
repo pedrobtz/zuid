@@ -1,0 +1,5 @@
+# $(C_VISIBILITY) is R's substitution for -fvisibility=hidden, empty on a
+# compiler without it. It keeps every zuid_* symbol out of the dynamic symbol
+# table, so the shared object exports R_init_zuid only (design.md section 3,
+# R3). tests/testthat/test-abi.R checks it on the installed object.
+PKG_CFLAGS = $(C_VISIBILITY)

@@ -23,7 +23,7 @@ unaffected. Design §12's Arrow criterion does not apply to v0.1.0.
 
 | Stage | Title | CI | Issue | Pull request | Done |
 | --- | --- | --- | --- | --- | --- |
-| 0 | [Package identity](#stage-0--package-identity) | quick | [#3](https://github.com/pedrobtz/zuid/issues/3) | | |
+| 0 | [Package identity](#stage-0--package-identity) | quick | [#3](https://github.com/pedrobtz/zuid/issues/3) | [#17](https://github.com/pedrobtz/zuid/pull/17) | 2026-10-24 |
 | 1 | [Vector class, descriptors and UUID parsing](#stage-1--vector-class-descriptors-and-uuid-parsing) | full | [#4](https://github.com/pedrobtz/zuid/issues/4) | | |
 | 2 | [UUID generation](#stage-2--uuid-generation) | full | [#5](https://github.com/pedrobtz/zuid/issues/5) | | |
 | 3 | [Encodings](#stage-3--encodings) | quick | [#6](https://github.com/pedrobtz/zuid/issues/6) | | |
@@ -76,6 +76,10 @@ the two generated tables, and the benchmark baseline on record.
 - `.agents/benchmarks.md` has the three baseline numbers.
 - The `zufast` pull request is open, and linked from this stage's pull
   request.
+
+**Deviation (2026-10-24).** `inst/COPYRIGHTS` and the `Copyright` field
+land here rather than in Stage 11, because the two MIT-licensed tables ship
+from this stage on and their notices must ship with them.
 
 **Design.** §3, §10, §11 Stage 0, D8.
 

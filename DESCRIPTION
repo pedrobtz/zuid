@@ -1,14 +1,30 @@
 Package: zuid
-Title: What the Package Does (One Line, Title Case)
+Title: Universally Unique Identifiers, Their Encodings and Their Kin
 Version: 0.0.0.9000
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+    person("Pedro", "Baltazar", , "pedrobtz@gmail.com",
+           role = c("aut", "cre", "cph"))
+Description: Parses, validates, inspects and generates universally unique
+    identifiers (UUIDs) of every version defined by RFC 9562
+    <doi:10.17487/RFC9562>, and re-encodes them in alternative text forms
+    such as Crockford base32, base36, base58, base62, base64url, Proquint
+    and Niceware words. The same functions read the fields and creation
+    time of related identifier formats, including ULID, TypeID, UPID,
+    SCRU128, SCRU64, KSUID, Snowflake, XID, MongoDB ObjectId, NanoID,
+    Cuid2, Sqids and content identifiers (CID). Detection never assumes a
+    format that the input does not prove. Identifiers are generated from
+    the operating system's entropy source, never from R's random number
+    generator. No dependencies.
 License: MIT + file LICENSE
-Encoding: UTF-8
-Roxygen: list(markdown = TRUE)
-RoxygenNote: 8.1.0
+Copyright: See inst/COPYRIGHTS.
+URL: https://github.com/pedrobtz/zuid, https://pedrobtz.github.io/zuid/
+BugReports: https://github.com/pedrobtz/zuid/issues
+Depends: 
+    R (>= 4.1)
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
-URL: https://pedrobtz.github.io/zuid/
+Encoding: UTF-8
+Language: en-GB
+Roxygen: list(markdown = TRUE)
+Config/roxygen2/version: 8.1.0

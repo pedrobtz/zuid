@@ -3,10 +3,10 @@
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/pedrobtz/zuid/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/pedrobtz/zuid/actions/workflows/R-CMD-check.yaml)
-[![coverage](https://raw.githubusercontent.com/pedrobtz/zuid/main/.github/badges/coverage.svg)](https://github.com/pedrobtz/zuid/actions/workflows/coverage.yaml)
+[![coverage](https://raw.githubusercontent.com/pedrobtz/zuid/gh-pages/badges/coverage.svg)](https://github.com/pedrobtz/zuid/actions/workflows/coverage.yaml)
 <!-- badges: end -->
 
-The goal of zuid is to ...
+zuid parses, inspects, encodes and generates UUIDs and the identifier formats around them. It is under development; see the [roadmap](https://github.com/pedrobtz/zuid/blob/main/.agents/roadmap.md).
 
 ## Installation
 
