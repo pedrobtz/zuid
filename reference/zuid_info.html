@@ -62,8 +62,9 @@ and the number of <code>entries</code>.</p></dd>
 
 <dt><code>state</code></dt>
 <dd><p>the session's monotonic generation state: the last
-version 7 millisecond and counter, and the last version 1 and 6 tick
-and clock sequence, <code>NA</code> before the first value.</p></dd>
+version 7 millisecond and counter, the last version 1 and 6 tick
+and clock sequence, and the last ULID millisecond, <code>NA</code> before the
+first value.</p></dd>
 
 
 </dl></div>
@@ -93,13 +94,16 @@ and clock sequence, <code>NA</code> before the first value.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.645558e+12</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $state$uuid7_counter</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1521</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 950</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $state$uuid1_last_ticks</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $state$uuid1_clock_seq</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $state$ulid_last_ms</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.79284e+12</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>

@@ -50,6 +50,11 @@ variant is RFC 9562's:
 
 - versions 2, 3, 5 and 8: the version only.
 
+A ULID has its millisecond time and 80 `random` bits. A TypeID has its
+UUID's fields and its `prefix`, `""` when it has none. A UPID has its
+time in 256 ms units, 64 `random` bits, its `prefix` and its version
+nibble (6, the reference's `"a"`, is the current one).
+
 The nil and max UUIDs report versions 0 and 15 and no variant. `random`
 is the random bits joined in order, as hex, left-padded with zero bits
 to a whole number of hex digits.

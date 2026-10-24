@@ -2,6 +2,21 @@
 
 ## zuid 0.0.0.9000
 
+- ULID, TypeID and UPID:
+  [`id_parse()`](https://pedrobtz.github.io/zuid/reference/id_parse.md),
+  [`id_valid()`](https://pedrobtz.github.io/zuid/reference/id_parse.md),
+  [`id_fields()`](https://pedrobtz.github.io/zuid/reference/id_fields.md)
+  and the rest read them, and
+  [`id_ulid()`](https://pedrobtz.github.io/zuid/reference/id_ulid.md),
+  [`id_typeid()`](https://pedrobtz.github.io/zuid/reference/id_ulid.md)
+  and
+  [`id_upid()`](https://pedrobtz.github.io/zuid/reference/id_ulid.md)
+  generate them. ULIDs from one session strictly increase, by the
+  specification’s rule, with `zuid_overflow_error` when the random
+  component would overflow.
+- [`id_convert()`](https://pedrobtz.github.io/zuid/reference/id_convert.md)
+  moves values between `uuid`, `ulid`, `typeid` and `upid`, keeping the
+  bytes; other pairs are a `zuid_convert_error`.
 - [`id_encode()`](https://pedrobtz.github.io/zuid/reference/id_encode.md)
   and
   [`id_decode()`](https://pedrobtz.github.io/zuid/reference/id_encode.md)

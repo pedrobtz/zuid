@@ -81,6 +81,14 @@ case is accepted, and `form` selects another of the RFC 9562 text forms:
 [`id_encode()`](https://pedrobtz.github.io/zuid/reference/id_encode.md)
 over the 16 bytes, such as `"base32"`, `"base58"` or `"words"`.
 
+A ULID is 26 Crockford base32 characters, uppercase, either case on
+input, starting `0` to `7`. A TypeID is a lowercase prefix, `_` and 26
+lowercase Crockford characters, or the 26 alone; strict asks what it
+asks of the UUID. A UPID is four prefix characters, `_` and 22 lowercase
+characters, as the reference writes them; strict asks for the current
+version. Strict also asks that a time is no later than now plus the
+tolerance. These formats have one text form each.
+
 ## Examples
 
 ``` r

@@ -2,6 +2,8 @@
 
 ## All functions
 
+- [`id_convert()`](https://pedrobtz.github.io/zuid/reference/id_convert.md)
+  : Convert identifiers between formats
 - [`id_encode()`](https://pedrobtz.github.io/zuid/reference/id_encode.md)
   [`id_decode()`](https://pedrobtz.github.io/zuid/reference/id_encode.md)
   : Encode and decode bytes
@@ -21,6 +23,10 @@
 - [`id_parse()`](https://pedrobtz.github.io/zuid/reference/id_parse.md)
   [`id_valid()`](https://pedrobtz.github.io/zuid/reference/id_parse.md)
   : Parse and validate identifiers
+- [`id_ulid()`](https://pedrobtz.github.io/zuid/reference/id_ulid.md)
+  [`id_typeid()`](https://pedrobtz.github.io/zuid/reference/id_ulid.md)
+  [`id_upid()`](https://pedrobtz.github.io/zuid/reference/id_ulid.md) :
+  Generate ULIDs, TypeIDs and UPIDs
 - [`id_uuid()`](https://pedrobtz.github.io/zuid/reference/id_uuid.md) :
   Generate UUIDs
 - [`zuid_info()`](https://pedrobtz.github.io/zuid/reference/zuid_info.md)

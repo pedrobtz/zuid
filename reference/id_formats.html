@@ -53,14 +53,31 @@ epoch of its time field; and the text <code>forms</code> <code><a href="id_forma
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">id_formats</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   format      class width text_min text_max alphabet</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1   uuid structured   128       36       36   0-9a-f</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                          case                             time_unit</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 lower; either case on input 100ns (versions 1, 6), ms (version 7)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   format      class width text_min text_max</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1   uuid structured   128       36       36</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   ulid structured   128       26       26</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 typeid structured   128       26       90</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4   upid structured   128       27       27</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                           alphabet                        case</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                                           0-9a-f lower; either case on input</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2                     0-9A-HJKMNP-TV-Z (Crockford) upper; either case on input</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 prefix a-z_, suffix 0-9a-hjkmnp-tv-z (Crockford)                       lower</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4                                        234567a-z                       lower</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                               time_unit</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 100ns (versions 1, 6), ms (version 7)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2                                    ms</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3                           as the UUID</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4                                 256ms</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                    epoch</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1 1582-10-15T00:00:00Z (versions 1, 6), 1970-01-01T00:00:00Z (version 7)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2                                                   1970-01-01T00:00:00Z</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3                                                            as the UUID</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4                                                   1970-01-01T00:00:00Z</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                                                                                      forms</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1 hex, compact, urn, braced, uppercase, base32, base32rfc, base32hex, base36, base58, base62, base62sort, base64url, base64sort, alphabet, proquint, words</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2                                                                                                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3                                                                                                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4                                                                                                                                                         </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -31,8 +31,8 @@ A list with elements:
 - `state`:
 
   the session's monotonic generation state: the last version 7
-  millisecond and counter, and the last version 1 and 6 tick and clock
-  sequence, `NA` before the first value.
+  millisecond and counter, the last version 1 and 6 tick and clock
+  sequence, and the last ULID millisecond, `NA` before the first value.
 
 ## Examples
 
@@ -60,13 +60,16 @@ zuid_info()
 #> [1] 1.645558e+12
 #> 
 #> $state$uuid7_counter
-#> [1] 1521
+#> [1] 950
 #> 
 #> $state$uuid1_last_ticks
 #> [1] NA
 #> 
 #> $state$uuid1_clock_seq
 #> [1] NA
+#> 
+#> $state$ulid_last_ms
+#> [1] 1.79284e+12
 #> 
 #> 
 ```

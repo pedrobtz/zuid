@@ -80,7 +80,11 @@ clock sequence (<code>sequence</code>) and the 48-bit <code>node</code>;</p></li
 <li><p>version 4: the 122 <code>random</code> bits;</p></li>
 <li><p>version 7: the millisecond time and the 74 <code>random</code> bits;</p></li>
 <li><p>versions 2, 3, 5 and 8: the version only.</p></li>
-</ul><p>The nil and max UUIDs report versions 0 and 15 and no variant. <code>random</code>
+</ul><p>A ULID has its millisecond time and 80 <code>random</code> bits. A TypeID has its
+UUID's fields and its <code>prefix</code>, <code>""</code> when it has none. A UPID has its time
+in 256 ms units, 64 <code>random</code> bits, its <code>prefix</code> and its version nibble
+(6, the reference's <code>"a"</code>, is the current one).</p>
+<p>The nil and max UUIDs report versions 0 and 15 and no variant. <code>random</code>
 is the random bits joined in order, as hex, left-padded with zero bits to
 a whole number of hex digits.</p>
     </div>

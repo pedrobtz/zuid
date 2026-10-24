@@ -86,12 +86,12 @@ works. Version 2 is not generated: RFC 9562 leaves it to DCE Security.
 ``` r
 id_uuid(3)
 #> <zuid_uuid[3]>
-#> [1] 01a16d7f-ba3a-7685-853e-93a717f89413 01a16d7f-ba3a-7686-9a62-539dfde42d0f
-#> [3] 01a16d7f-ba3a-7687-a176-4a8ec0775666
+#> [1] 01a16d8f-e891-702b-b458-cf3204f74884 01a16d8f-e891-702c-a1d0-1d279c2a5611
+#> [3] 01a16d8f-e891-702d-8d18-e287a91e3941
 id_uuid(2, version = 4)
 #> <zuid_uuid[2]>
-#> [1] e1c2d4b7-2e2c-4f0c-9bfb-809e775f8cd4 1e305502-3884-42b7-bf38-2e751fecf78a
+#> [1] 36b2a80a-f056-4dbd-b19e-379670478d51 907d8b81-3cd3-4223-b1fe-f48e013c017d
 id_uuid(version = 7, time = as.POSIXct("2022-02-22 19:22:22", tz = "UTC"))
 #> <zuid_uuid[1]>
-#> [1] 017f22e2-79b0-75f1-a86b-c1d07d6311c3
+#> [1] 017f22e2-79b0-73b6-8138-1b112c3d123a
 ```

@@ -110,6 +110,13 @@ case is accepted, and <code>form</code> selects another of the RFC 9562 text for
 <code>"compact"</code> (32 hex digits), <code>"urn"</code> (<code>urn:uuid:</code> prefix), <code>"braced"</code> or
 <code>"uppercase"</code>, or one of the encodings of <code><a href="id_encode.html">id_encode()</a></code> over the 16 bytes,
 such as <code>"base32"</code>, <code>"base58"</code> or <code>"words"</code>.</p>
+<p>A ULID is 26 Crockford base32 characters, uppercase, either case on
+input, starting <code>0</code> to <code>7</code>. A TypeID is a lowercase prefix, <code>_</code> and 26
+lowercase Crockford characters, or the 26 alone; strict asks what it asks
+of the UUID. A UPID is four prefix characters, <code>_</code> and 22 lowercase
+characters, as the reference writes them; strict asks for the current
+version. Strict also asks that a time is no later than now plus the
+tolerance. These formats have one text form each.</p>
     </div>
 
     <div class="section level2">
