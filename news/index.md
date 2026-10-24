@@ -2,6 +2,13 @@
 
 ## zuid 0.0.0.9000
 
+- [`id_uuid()`](https://pedrobtz.github.io/zuid/reference/id_uuid.md)
+  generates UUID versions 1, 4, 6, 7 (the default) and 8 from the
+  operating system’s entropy source, never R’s random number generator.
+  Version 7 values from one session strictly increase, and `random` and
+  `time` give reproducible output.
+  [`zuid_info()`](https://pedrobtz.github.io/zuid/reference/zuid_info.md)
+  reports the entropy source and the generator state.
 - [`id_parse()`](https://pedrobtz.github.io/zuid/reference/id_parse.md)
   and
   [`id_valid()`](https://pedrobtz.github.io/zuid/reference/id_parse.md)

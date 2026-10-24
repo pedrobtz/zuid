@@ -35,6 +35,8 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.0.9000" id="zuid-0009000">zuid 0.0.0.9000<a class="anchor" aria-label="anchor" href="#zuid-0009000"></a></h2>
 <ul><li>
+<code><a href="../reference/id_uuid.html">id_uuid()</a></code> generates UUID versions 1, 4, 6, 7 (the default) and 8 from the operating system’s entropy source, never R’s random number generator. Version 7 values from one session strictly increase, and <code>random</code> and <code>time</code> give reproducible output. <code><a href="../reference/zuid_info.html">zuid_info()</a></code> reports the entropy source and the generator state.</li>
+<li>
 <code><a href="../reference/id_parse.html">id_parse()</a></code> and <code><a href="../reference/id_parse.html">id_valid()</a></code> read UUIDs in every RFC 9562 text form (canonical, compact, URN, braced, uppercase) and validate them at three levels: syntax, structure and strict.</li>
 <li>
 <code><a href="../reference/id_fields.html">id_fields()</a></code>, <code><a href="../reference/id_fields.html">id_time()</a></code> and <code><a href="../reference/id_fields.html">id_version()</a></code> read the version, variant, time, clock sequence, node and random bits of every UUID version.</li>

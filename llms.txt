@@ -45,6 +45,8 @@ library(zuid)
 - [`id_parse()`](https://pedrobtz.github.io/zuid/reference/id_parse.md)
   [`id_valid()`](https://pedrobtz.github.io/zuid/reference/id_parse.md)
   : Parse and validate identifiers
+- [`id_uuid()`](https://pedrobtz.github.io/zuid/reference/id_uuid.md) :
+  Generate UUIDs
 - [`zuid_info()`](https://pedrobtz.github.io/zuid/reference/zuid_info.md)
   : Describe this build of zuid
 
