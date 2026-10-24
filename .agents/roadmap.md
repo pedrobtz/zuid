@@ -34,7 +34,7 @@ unaffected. Design §12's Arrow criterion does not apply to v0.1.0.
 | 8 | [Detection](#stage-8--detection) | quick | [#11](https://github.com/pedrobtz/zuid/issues/11) | [#25](https://github.com/pedrobtz/zuid/pull/25) | 2026-10-24 |
 | 9 | [Fuzzing and benchmarks](#stage-9--fuzzing-and-benchmarks) | quick | [#12](https://github.com/pedrobtz/zuid/issues/12) | [#26](https://github.com/pedrobtz/zuid/pull/26) | 2026-10-24 |
 | 10 | [Full CI](#stage-10--full-ci) | full | [#13](https://github.com/pedrobtz/zuid/issues/13) | [#27](https://github.com/pedrobtz/zuid/pull/27) | 2026-10-24 |
-| 11 | [v0.1.0 readiness](#stage-11--v010-readiness) | full | [#14](https://github.com/pedrobtz/zuid/issues/14) | | |
+| 11 | [v0.1.0 readiness](#stage-11--v010-readiness) | full | [#14](https://github.com/pedrobtz/zuid/issues/14) | | 2026-10-25 |
 
 ## Stage 0 — Package identity
 
@@ -529,6 +529,27 @@ when the evidence allows, and report ambiguity otherwise.
 - `R CMD check --as-cran` has 0 errors, 0 warnings and only the
   "New submission" note.
 - A full-profile r-actions run is green on the release commit.
+
+**Deviations (2026-10-25).**
+
+- The articles are pkgdown articles under `vignettes/articles/`, not
+  vignettes: `vignettes/` is in `.Rbuildignore`, so they add no build
+  dependency and no check time.
+- `pkg-critical-review` filed #28 to #71 at 07e9b10. This stage fixes the
+  five Blocking and eleven Required findings (#28 to #43) and three cheap
+  suggestions (#50, #51, #59). The remaining suggestions, questions and
+  notes stay open for after 0.1.0. Three fixes needed decisions, which the
+  maintainer took and the design records as D22 (pure calls with `time`
+  and `random`), D23 (`id_snowflake(rollback =)`, per-layout and per-node
+  state) and D24 (`id_parse()` without a format needs an element).
+- Three C guards are not reached by tests, with the reason in
+  `tests/testthat/test-c-guards.R`: a string longer than R allows, a raw
+  matrix past `R_XLEN_T_MAX`, and the encoders' out-of-memory branches.
+- `pkg-cran-review` found the bundled data's copyright holders missing
+  from `Authors@R`; they are listed now, with the Description's acronyms
+  expanded and a method references section in `cran-comments.md`.
+- The two article links in the README return 404 until this merge
+  deploys the site; `urlchecker::url_check()` is otherwise clean.
 
 **Design.** §2 (README and articles); §12; D8.
 
