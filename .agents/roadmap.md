@@ -24,7 +24,7 @@ unaffected. Design §12's Arrow criterion does not apply to v0.1.0.
 | Stage | Title | CI | Issue | Pull request | Done |
 | --- | --- | --- | --- | --- | --- |
 | 0 | [Package identity](#stage-0--package-identity) | quick | [#3](https://github.com/pedrobtz/zuid/issues/3) | [#17](https://github.com/pedrobtz/zuid/pull/17) | 2026-10-24 |
-| 1 | [Vector class, descriptors and UUID parsing](#stage-1--vector-class-descriptors-and-uuid-parsing) | full | [#4](https://github.com/pedrobtz/zuid/issues/4) | | |
+| 1 | [Vector class, descriptors and UUID parsing](#stage-1--vector-class-descriptors-and-uuid-parsing) | full | [#4](https://github.com/pedrobtz/zuid/issues/4) | | 2026-10-24 |
 | 2 | [UUID generation](#stage-2--uuid-generation) | full | [#5](https://github.com/pedrobtz/zuid/issues/5) | | |
 | 3 | [Encodings](#stage-3--encodings) | quick | [#6](https://github.com/pedrobtz/zuid/issues/6) | | |
 | 4 | [ULID, TypeID and UPID](#stage-4--ulid-typeid-and-upid) | quick | [#7](https://github.com/pedrobtz/zuid/issues/7) | | |
@@ -115,6 +115,16 @@ fields and time, through the descriptor table every later format extends.
 - `id_parse(strict = FALSE)`, `id_valid()`, `id_fields()` and `id_time()`
   never raise on input.
 - A full-profile run is green on the pull request.
+
+**Deviations (2026-10-24).**
+
+- `id_formats()` reads the compiled descriptor table directly rather than a
+  copy in `R/sysdata.rda`. There is one copy, so the two cannot drift.
+- `id_parse(format = NULL)` raises `zuid_type_error` until Stage 8 builds
+  detection.
+- `id_parse()` on a zuid vector of another format raises `zuid_type_error`
+  and points at `id_convert()`, as the design proposes for §15 Q4.
+- `vctrs` and `withr` join `Suggests` for the tests.
 
 **Design.** §4 layers 1, 3 and 5; §5; §6.1 (UUID); §6.3; §6.4; §6.5 (hex
 forms); §8.
@@ -404,8 +414,8 @@ Then design §14, in the order expected:
 
 ## Open questions
 
-- **Q4: `id_parse()` on a `zuid` vector of another format (Stage 4).**
-  Reinterpret, or require `id_convert()`.
+- **Q4** is settled in Stage 1: `id_parse()` refuses a zuid vector of
+  another format and points at `id_convert()`, as the design proposed.
 - **Q5: Snowflake `padded` canonical text (Stage 6).**
 - **Q6: CRAN or GitHub release (Stage 11).** The board's `CRAN intent`
   field records it; assumed `Planned`.
