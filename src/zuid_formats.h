@@ -43,6 +43,7 @@ typedef struct {
     int version;          /* -1 when absent */
     const char *variant;  /* NULL when absent */
     char node[41];        /* hex; "" when absent */
+    int process;          /* XID's process id; -1 when absent */
     int sequence;         /* -1 when absent */
     char random[41];      /* hex; "" when absent */
     int has_prefix;
@@ -111,5 +112,8 @@ extern const zuid_format zuid_fmt_upid;
 extern const zuid_format zuid_fmt_scru128;
 extern const zuid_format zuid_fmt_scru64;
 extern const zuid_format zuid_fmt_ksuid;
+extern const zuid_format zuid_fmt_xid;
+extern const zuid_format zuid_fmt_objectid;
+extern const zuid_format zuid_fmt_snowflake;
 
 #endif
