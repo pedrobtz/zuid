@@ -1,6 +1,8 @@
 # zuid
 
-The goal of zuid is to …
+zuid parses, inspects, encodes and generates UUIDs and the identifier
+formats around them. It is under development; see the
+[roadmap](https://github.com/pedrobtz/zuid/blob/main/.agents/roadmap.md).
 
 ## Installation
 

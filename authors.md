@@ -2,17 +2,21 @@
 
 ## Authors
 
-- **First Last**. Author, maintainer.
+- **Pedro Baltazar**. Author, maintainer, copyright holder.
 
 ## Citation
 
-Last F (2026). *zuid: What the Package Does (One Line, Title Case)*. R
-package version 0.0.0.9000, <https://pedrobtz.github.io/zuid/>.
+Source:
+[`DESCRIPTION`](https://github.com/pedrobtz/zuid/blob/main/DESCRIPTION)
+
+Baltazar P (2026). *zuid: Universally Unique Identifiers, Their
+Encodings and Their Kin*. R package version 0.0.0.9000,
+<https://github.com/pedrobtz/zuid>.
 
     @Manual{,
-      title = {zuid: What the Package Does (One Line, Title Case)},
-      author = {First Last},
+      title = {zuid: Universally Unique Identifiers, Their Encodings and Their Kin},
+      author = {Pedro Baltazar},
       year = {2026},
       note = {R package version 0.0.0.9000},
-      url = {https://pedrobtz.github.io/zuid/},
+      url = {https://github.com/pedrobtz/zuid},
     }

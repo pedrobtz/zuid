@@ -1,5 +1,8 @@
 # Changelog
 
-## zuid (development version)
+## zuid 0.0.0.9000
 
-- Initial CRAN submission.
+- [`zuid_info()`](https://pedrobtz.github.io/zuid/reference/zuid_info.md)
+  reports the package version and the generated tables compiled into it,
+  the Niceware word list and the Sqids blocklist, with their pinned
+  upstream sources.
