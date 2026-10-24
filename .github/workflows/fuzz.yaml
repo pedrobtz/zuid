@@ -1,0 +1,28 @@
+on:
+  pull_request:
+  schedule:
+    # A long run nightly. The corpus cache is what makes the short PR runs
+    # and this one add up to a single campaign.
+    - cron: "0 3 * * *"
+
+name: fuzz
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  fuzz:
+    uses: pedrobtz/r-actions/.github/workflows/fuzz.yml@v1
+    with:
+      harness: tools/fuzz/harness.c
+      sources: src/*.c
+      # The R-facing half of src/: it needs R's headers and is not a codec.
+      exclude-sources: |
+        src/zuid_r.c
+        src/zuid_r_*.c
+        src/zuid_init.c
+      cflags: -g -O1 -fno-omit-frame-pointer -Isrc -DZUID_STANDALONE
+      seed-corpus: tools/fuzz/corpus
+      dictionary: tools/fuzz/zuid.dict
+      max-total-time: ${{ github.event_name == 'schedule' && 1800 || 120 }}
