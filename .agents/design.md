@@ -1151,7 +1151,7 @@ full profile and records the dates.
 - **D21 (M).** Each encoding writes what the mainstream Go and Python
   libraries write, where they and the IETF drafts disagree, so that text
   made elsewhere decodes here. The maintainer set this on 2026-10-24.
-  Stage 3's oracle is their output (`tools/gen-encoding-fixtures`):
+  Stage 3's oracle is their output (`tools/gen-fixtures`):
   `oklog/ulid`, `python-ulid` and TypeID for Crockford; Go's and
   Python's standard libraries for RFC 4648; Uuid25 for base36; Go's
   `btcutil` and `mr-tron` and Python's `base58`; `pybase62` and KSUID;

@@ -63,16 +63,43 @@ fixtures:
     repo: carderne/upid
     commit: d820a74227adb803d378d89da9eacba78c1a5e09
     path: tests/testthat/fixtures/upid.csv
-    generator: tools/gen-encoding-fixtures
+    generator: tools/gen-fixtures
     retrieved: 2026-10-24
     sha256: 2e6ddb778d7890a87d843a2c1739668d5de453fc066f0baa616b4eb7baadf713
     # The Python reference, upid 0.3.1, over random bytes; the README's
     # user_2accvpp5guht4dts56je5a is checked in tests/testthat/test-upid.R.
     python:
       upid: 0.3.1
+  scru128:
+    path: tests/testthat/fixtures/scru128.csv
+    generator: tools/gen-fixtures
+    retrieved: 2026-10-24
+    # The Python reference, scru128 3.0.4 (scru128/python), over the field
+    # boundaries of its own tests and random fields. The spec's
+    # base36_128.c vectors and rejections (scru128/spec at
+    # 6fce079f655a971f976b47d4aed8382da0c0d2d8) are written into
+    # tests/testthat/test-scru128.R.
+    python:
+      scru128: 3.0.4
+  scru64:
+    path: tests/testthat/fixtures/scru64.csv
+    generator: tools/gen-fixtures
+    retrieved: 2026-10-24
+    # The Python reference, scru64 1.0.2 (scru64/python), over boundaries
+    # and random values; its parse rejections (tests/test_identifier.py at
+    # da711a3e6e43b6446ccd23dca8a65284cfd84eb4) are in test-scru64.R.
+    python:
+      scru64: 1.0.2
+  ksuid:
+    repo: segmentio/ksuid
+    commit: d33724947fcfba7949906c2b1821e96a1c8d06e7
+    paths: [README.md, ksuid_test.go]
+    retrieved: 2026-10-24
+    # The README's inspected KSUIDs, the minimum and maximum strings and
+    # the parse rejections, written into tests/testthat/test-ksuid.R.
   encodings:
     path: tests/testthat/fixtures/encodings.csv
-    generator: tools/gen-encoding-fixtures
+    generator: tools/gen-fixtures
     retrieved: 2026-10-24
     # Output of the reference libraries, design.md D21. The Go libraries
     # (oklog/ulid v2.1.2, go.jetify.com/typeid v1.3.0, btcutil/base58 v1.2.0,
