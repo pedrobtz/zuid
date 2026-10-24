@@ -70,10 +70,10 @@ when every offset is blocked, the result is a `zuid_encode_error`.
 ``` r
 id_nanoid(2)
 #> <zuid_nanoid[2]>
-#> [1] JvUg5i-vnf80gAnNBhTDn yr_uC2P2aRxMGfAKSfgvV
+#> [1] 0uBITUfLdFjTDCPnyHLbA 0gFj5uA9g3OfoEE1lmMA3
 id_nanoid(2, size = 10, alphabet = "0123456789abcdef")
 #> <zuid_nanoid[2]>
-#> [1] 02d18a9a7b 73c5bd88ca
+#> [1] a69b01cb84 4d2a94dc09
 id_sqids(c(1, 2, 3))
 #> <zuid_sqids[3]>
 #> [1] Uk gb Ef
