@@ -55,12 +55,7 @@ vec_cast_to_chr <- function(x, to, ...) {
 }
 
 vec_cast_from_chr <- function(x, to, ...) {
-  id_parse(
-    x,
-    format = zuid_format_of(to),
-    layout = attr(to, "layout", exact = TRUE),
-    strict = TRUE
-  )
+  parse_like(x, to)
 }
 
 vec_ptype_abbr_zuid <- function(x, ...) {

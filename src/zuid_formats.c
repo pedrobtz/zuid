@@ -13,6 +13,10 @@ const zuid_format *const zuid_formats[] = {
     &zuid_fmt_xid,
     &zuid_fmt_objectid,
     &zuid_fmt_snowflake,
+    &zuid_fmt_nanoid,
+    &zuid_fmt_cuid2,
+    &zuid_fmt_sqids,
+    &zuid_fmt_cid,
 };
 const int zuid_n_formats = (int) (sizeof zuid_formats / sizeof zuid_formats[0]);
 

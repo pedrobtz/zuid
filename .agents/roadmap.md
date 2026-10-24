@@ -30,7 +30,7 @@ unaffected. Design §12's Arrow criterion does not apply to v0.1.0.
 | 4 | [ULID, TypeID and UPID](#stage-4--ulid-typeid-and-upid) | quick | [#7](https://github.com/pedrobtz/zuid/issues/7) | [#21](https://github.com/pedrobtz/zuid/pull/21) | 2026-10-24 |
 | 5 | [SCRU128, SCRU64 and KSUID](#stage-5--scru128-scru64-and-ksuid) | quick | [#8](https://github.com/pedrobtz/zuid/issues/8) | [#22](https://github.com/pedrobtz/zuid/pull/22) | 2026-10-24 |
 | 6 | [XID, ObjectId and Snowflake layouts](#stage-6--xid-objectid-and-snowflake-layouts) | quick | [#9](https://github.com/pedrobtz/zuid/issues/9) | [#23](https://github.com/pedrobtz/zuid/pull/23) | 2026-10-24 |
-| 7 | [NanoID, Cuid2, Sqids and CID](#stage-7--nanoid-cuid2-sqids-and-cid) | quick | [#10](https://github.com/pedrobtz/zuid/issues/10) | | |
+| 7 | [NanoID, Cuid2, Sqids and CID](#stage-7--nanoid-cuid2-sqids-and-cid) | quick | [#10](https://github.com/pedrobtz/zuid/issues/10) | [#24](https://github.com/pedrobtz/zuid/pull/24) | 2026-10-24 |
 | 8 | [Detection](#stage-8--detection) | quick | [#11](https://github.com/pedrobtz/zuid/issues/11) | | |
 | 9 | [Fuzzing and benchmarks](#stage-9--fuzzing-and-benchmarks) | quick | [#12](https://github.com/pedrobtz/zuid/issues/12) | | |
 | 10 | [Full CI](#stage-10--full-ci) | full | [#13](https://github.com/pedrobtz/zuid/issues/13) | | |
@@ -364,6 +364,26 @@ validate; NanoID and Sqids generate.
 - Oracles §7.9 and §7.13 pass, and §7.12's CID fixtures parse to their
   stated fields.
 - `R CMD check` passes on the quick r-actions profile.
+
+**Deviations (2026-10-24).**
+
+- `id_parse()` and `id_valid()` gain `alphabet` and `min_length`, after
+  `strict`, which the maintainer chose over a parameters object; with a
+  `blocklist` from `id_sqids()` they travel as vector attributes, as
+  `layout` does.
+- `id_nanoid()` follows NanoID 6.0.2's `customRandom()`, a cutoff-and-modulo
+  sampler, not mask-and-step: the reference changed in 6.0.0, and D21
+  follows the reference. Its default alphabet is in 6.x's order.
+- NanoID, Cuid2 and Sqids have no bytes, so `id_bytes()` and
+  `id_from_bytes()` are `zuid_type_error` for them; a CID's bytes are a
+  list. `id_from_bytes(, "cid")` writes base32 for version 1 and `Qm` for
+  version 0.
+- CID text is read in 17 multibases, those of js-multiformats' basics less
+  base2, base8, base10, base32z, base58flickr, base256emoji and identity.
+- `id_sqids()` takes a numeric vector (one Sqid per number) or a list (one
+  per element). Numbers above 2^53 - 1 are `zuid_encode_error` until zuint.
+- NanoID's oracle 13 is a chi-squared test over 10^6 symbols with a 1e-6
+  threshold, plus the reference's `customRandom` vectors.
 
 **Design.** §6.1, §6.6 for these formats; D8, D19.
 

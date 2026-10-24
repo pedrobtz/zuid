@@ -43,3 +43,21 @@ scru64_fixture <- function() {
     colClasses = c("character", "character", "numeric", "numeric")
   )
 }
+
+sqids_fixture <- function() {
+  utils::read.csv(
+    test_path("fixtures", "sqids.csv"),
+    colClasses = c("character", "integer", "character", "character"),
+    na.strings = "NA"
+  )
+}
+
+cid_fixture <- function() {
+  utils::read.csv(
+    test_path("fixtures", "cid.csv"),
+    colClasses = c("character", "integer", rep("character", 4))
+  )
+}
+
+# The numbers of Sqids, as a plain list.
+sqids_numbers <- function(x) unclass(id_fields(x)$numbers)

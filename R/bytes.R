@@ -36,6 +36,11 @@ id_format <- function(x, form = NULL) {
   check_zuid(x)
   format <- zuid_format_of(x)
   check_form(form, format)
+  if (format %in% text_formats) {
+    out <- as.character(x)
+    names(out) <- names(x)
+    return(out)
+  }
   out <- .Call(zuid_c_format, as.character(x), format, form)
   names(out) <- names(x)
   out
@@ -45,6 +50,17 @@ id_format <- function(x, form = NULL) {
 #' @export
 id_bytes <- function(x) {
   check_zuid(x)
+  if (zuid_format_of(x) == "cid") {
+    out <- .Call(zuid_c_cid_parse, as.character(x))$bytes
+    names(out) <- names(x)
+    return(out)
+  }
+  if (zuid_format_of(x) %in% text_formats) {
+    zuid_abort(
+      "type",
+      sprintf("A `%s` is text and has no bytes.", zuid_format_of(x))
+    )
+  }
   out <- .Call(zuid_c_bytes, as.character(x), zuid_format_of(x))
   missing <- which(is.na(x))
   if (length(missing)) {
@@ -64,6 +80,12 @@ id_from_bytes <- function(bytes, format, layout = NULL) {
   }
   check_format(format)
   check_layout(layout, format)
+  if (format == "cid") {
+    return(cid_from_bytes(bytes))
+  }
+  if (format %in% text_formats) {
+    zuid_abort("type", sprintf("A `%s` is text and has no bytes.", format))
+  }
   width <- id_formats()$width[id_formats()$format == format] %/% 8L
   if (is.list(bytes)) {
     na <- vapply(bytes, is.null, logical(1))
@@ -136,4 +158,31 @@ id_nil <- function() {
 #' @export
 id_max <- function() {
   new_zuid("ffffffff-ffff-ffff-ffff-ffffffffffff", "uuid")
+}
+
+cid_from_bytes <- function(bytes, call = sys.call(-1L)) {
+  if (is.raw(bytes) && !is.matrix(bytes)) {
+    bytes <- list(bytes)
+  }
+  ok <- is.list(bytes) &&
+    all(vapply(bytes, function(b) is.null(b) || is.raw(b), logical(1)))
+  if (!ok) {
+    zuid_abort(
+      "type",
+      "CID bytes are a raw vector or a list of raw vectors.",
+      call = call
+    )
+  }
+  text <- .Call(zuid_c_cid_text, unname(bytes))
+  bad <- is.na(text) & !vapply(bytes, is.null, logical(1))
+  if (any(bad)) {
+    zuid_abort(
+      "parse",
+      sprintf("Element %d of `bytes` is not a binary CID.", which(bad)[1L]),
+      positions = which(bad),
+      call = call
+    )
+  }
+  names(text) <- names(bytes)
+  new_zuid(text, "cid")
 }

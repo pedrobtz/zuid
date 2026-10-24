@@ -2,16 +2,30 @@
 # class c("zuid_<format>", "zuid") and a `format` attribute. One vector holds
 # one format.
 
-new_zuid <- function(text, format, layout = NULL) {
+new_zuid <- function(text, format, layout = NULL, params = NULL) {
   if (!is.character(text)) {
     text <- as.character(text)
   }
-  structure(
-    text,
-    format = format,
-    layout = layout,
-    class = c(paste0("zuid_", format), "zuid")
-  )
+  if (is.null(params)) {
+    params <- list(layout = layout)
+  }
+  out <- structure(text, format = format)
+  for (p in param_names) {
+    attr(out, p) <- params[[p]]
+  }
+  class(out) <- c(paste0("zuid_", format), "zuid")
+  out
+}
+
+# `text` as a vector of `x`'s format and parameters.
+renew <- function(text, x) {
+  new_zuid(text, zuid_format_of(x), params = stored_params(x))
+}
+
+stored_params <- function(x) {
+  out <- lapply(param_names, function(p) attr(x, p, exact = TRUE))
+  names(out) <- param_names
+  out
 }
 
 zuid_format_of <- function(x) {
@@ -40,12 +54,15 @@ check_zuid <- function(x, arg = "x", call = sys.call(-1L)) {
 # is, a character vector is parsed and must parse completely.
 as_zuid_like <- function(value, like, call = sys.call(-1L)) {
   format <- zuid_format_of(like)
-  layout <- attr(like, "layout", exact = TRUE)
   if (is_zuid(value)) {
-    if (!identical(attr(value, "layout", exact = TRUE), layout)) {
+    if (!identical(stored_params(value), stored_params(like))) {
       zuid_abort(
-        "layout",
-        "Can't combine zuid vectors with different layouts.",
+        if (identical(attr(value, "layout"), attr(like, "layout"))) {
+          "type"
+        } else {
+          "layout"
+        },
+        "Can't combine zuid vectors with different layouts or alphabets.",
         call = call
       )
     }
@@ -63,7 +80,7 @@ as_zuid_like <- function(value, like, call = sys.call(-1L)) {
     return(value)
   }
   if (is.null(value)) {
-    return(new_zuid(character(), format, layout))
+    return(renew(character(), like))
   }
   if (!is.character(value) && !all(is.na(value))) {
     zuid_abort(
@@ -76,7 +93,7 @@ as_zuid_like <- function(value, like, call = sys.call(-1L)) {
       call = call
     )
   }
-  id_parse(as.character(value), format = format, layout = layout, strict = TRUE)
+  parse_like(as.character(value), like, call = call)
 }
 
 #' @export
@@ -103,13 +120,13 @@ print.zuid <- function(x, ...) {
 #' @export
 `[.zuid` <- function(x, i, ...) {
   out <- NextMethod()
-  new_zuid(out, zuid_format_of(x), attr(x, "layout", exact = TRUE))
+  renew(out, x)
 }
 
 #' @export
 `[[.zuid` <- function(x, i, ...) {
   out <- NextMethod()
-  new_zuid(out, zuid_format_of(x), attr(x, "layout", exact = TRUE))
+  renew(out, x)
 }
 
 #' @export
@@ -117,7 +134,7 @@ print.zuid <- function(x, ...) {
   value <- as_zuid_like(value, x)
   out <- unclass(x)
   out[i] <- as.character(value)
-  new_zuid(out, zuid_format_of(x), attr(x, "layout", exact = TRUE))
+  renew(out, x)
 }
 
 #' @export
@@ -125,7 +142,7 @@ print.zuid <- function(x, ...) {
   value <- as_zuid_like(value, x)
   out <- unclass(x)
   out[[i]] <- as.character(value)
-  new_zuid(out, zuid_format_of(x), attr(x, "layout", exact = TRUE))
+  renew(out, x)
 }
 
 #' @export
@@ -133,29 +150,29 @@ c.zuid <- function(...) {
   args <- list(...)
   first <- args[[1L]]
   parts <- lapply(args, function(a) as.character(as_zuid_like(a, first)))
-  new_zuid(
-    unlist(parts, use.names = TRUE),
-    zuid_format_of(first),
-    attr(first, "layout", exact = TRUE)
-  )
+  renew(unlist(parts, use.names = TRUE), first)
 }
 
 #' @export
 rep.zuid <- function(x, ...) {
-  new_zuid(NextMethod(), zuid_format_of(x), attr(x, "layout", exact = TRUE))
+  renew(NextMethod(), x)
 }
 
 #' @export
 unique.zuid <- function(x, incomparables = FALSE, ...) {
   out <- unique(as.character(x), incomparables = incomparables, ...)
-  new_zuid(out, zuid_format_of(x), attr(x, "layout", exact = TRUE))
+  renew(out, x)
 }
 
 # Sorting is on bytes (design.md section 6.5), so a format whose canonical
 # text does not sort as its value does still sorts correctly.
 #' @export
 xtfrm.zuid <- function(x) {
-  key <- .Call(zuid_c_key, as.character(x), zuid_format_of(x))
+  key <- if (zuid_format_of(x) %in% text_formats) {
+    as.character(x)
+  } else {
+    .Call(zuid_c_key, as.character(x), zuid_format_of(x))
+  }
   match(key, sort(unique(key[!is.na(key)]), method = "radix"))
 }
 
@@ -178,11 +195,7 @@ Ops.zuid <- function(e1, e2) {
     }
     # A string that does not parse cannot equal any identifier, so it is
     # kept as it is rather than turned into NA.
-    parsed <- as.character(id_parse(
-      v,
-      format = zuid_format_of(like),
-      layout = attr(like, "layout", exact = TRUE)
-    ))
+    parsed <- as.character(parse_like(v, like, strict = FALSE))
     ifelse(is.na(parsed), v, parsed)
   }
   if (
@@ -213,5 +226,18 @@ as.data.frame.zuid <- function(
     optional = optional,
     ...,
     nm = nm
+  )
+}
+
+# Text parsed as `like`'s format with its parameters.
+parse_like <- function(text, like, strict = TRUE, call = sys.call(-1L)) {
+  parse_zuid(
+    text,
+    zuid_format_of(like),
+    NULL,
+    stored_params(like),
+    "structure",
+    strict,
+    call = call
   )
 }

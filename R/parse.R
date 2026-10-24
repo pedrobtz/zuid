@@ -30,8 +30,14 @@
 #' at most `aWgEPTl1tmebfsQzFP4bxwgy80V`. Strict also asks that a time is no
 #' later than now plus the tolerance. An XID is 20 lowercase base32hex
 #' characters, an ObjectId 24 hex digits (either case on input) and a
-#' Snowflake 1 to 20 decimal digits without leading zeros. These formats have
-#' one text form each.
+#' Snowflake 1 to 20 decimal digits without leading zeros. A NanoID is one or
+#' more symbols of its alphabet; a Cuid2 is 2 to 32 of `0-9a-z`, and strict
+#' asks that it starts with a letter, as generated ones do. A Sqid is valid
+#' when it decodes and its numbers encode back to it under the alphabet,
+#' `min_length` and blocklist. A CID is version 0 (`Qm` and 44 base58btc
+#' characters) or version 1 in one of 17 multibases; structure checks its
+#' varints, and the digest length of a hash function zuid knows. These
+#' formats have one text form each.
 #'
 #' @param x A character vector.
 #' @param format The format, such as `"uuid"`. See [id_formats()]. Required
@@ -43,6 +49,12 @@
 #' @param level The validation level elements must reach.
 #' @param strict If `TRUE`, an element that fails `level` is an error of
 #'   class `zuid_parse_error`. If `FALSE`, it becomes `NA`.
+#' @param alphabet For `"nanoid"` and `"sqids"`, the alphabet the values
+#'   were made with, or `NULL` for the format's default. It travels with the
+#'   vector.
+#' @param min_length For `"sqids"`, the `min_length` the values were made
+#'   with. A Sqids string is valid only when its numbers encode back to it,
+#'   which depends on the alphabet, `min_length` and the blocklist.
 #' @return `id_parse()`: a zuid vector, the same length as `x`, with `NA`
 #'   where an element is missing or fails `level`. `id_valid()`: a logical
 #'   vector, `NA` where `x` is.
@@ -58,9 +70,12 @@ id_parse <- function(
   form = NULL,
   layout = NULL,
   level = c("structure", "syntax", "strict"),
-  strict = FALSE
+  strict = FALSE,
+  alphabet = NULL,
+  min_length = 0
 ) {
   level <- match.arg(level)
+  params <- list(layout = layout, alphabet = alphabet, min_length = min_length)
   if (is_zuid(x)) {
     if (!is.null(format) && !identical(format, zuid_format_of(x))) {
       zuid_abort(
@@ -72,9 +87,18 @@ id_parse <- function(
       )
     }
     format <- zuid_format_of(x)
+    # A zuid vector's own parameters stand unless the call gives others.
+    own <- zuid_params(x)
     if (is.null(layout)) {
-      layout <- attr(x, "layout", exact = TRUE)
+      params$layout <- own$layout
     }
+    if (is.null(alphabet)) {
+      params$alphabet <- own$alphabet
+    }
+    if (missing(min_length)) {
+      params$min_length <- own$min_length
+    }
+    params$blocklist <- own$blocklist
     x <- as.character(x)
   }
   check_character(x)
@@ -85,13 +109,24 @@ id_parse <- function(
     )
   }
   check_format(format)
-  check_form(form, format)
-  check_layout(layout, format)
   if (!isTRUE(strict) && !isFALSE(strict)) {
     zuid_abort("type", "`strict` must be `TRUE` or `FALSE`.")
   }
+  parse_zuid(x, format, form, check_params(params, format), level, strict)
+}
 
-  parsed <- parse_text(x, format, form, layout)
+# id_parse() once the arguments are checked; `params` from check_params().
+parse_zuid <- function(
+  x,
+  format,
+  form,
+  params,
+  level,
+  strict,
+  call = sys.call(-1L)
+) {
+  check_form(form, format, call = call)
+  parsed <- parse_text(x, format, form, params)
   ok <- !is.na(parsed$level) & parsed$level >= level_number(level)
   if (strict && any(!ok & !is.na(x))) {
     bad <- which(!ok & !is.na(x))
@@ -106,13 +141,14 @@ id_parse <- function(
         level,
         paste(head_positions(bad), collapse = ", ")
       ),
-      positions = bad
+      positions = bad,
+      call = call
     )
   }
   text <- parsed$text
   text[!ok] <- NA_character_
   names(text) <- names(x)
-  new_zuid(text, format, layout)
+  new_zuid(text, format, params = params)
 }
 
 #' @rdname id_parse
@@ -122,7 +158,9 @@ id_valid <- function(
   format,
   form = NULL,
   layout = NULL,
-  level = c("structure", "syntax", "strict")
+  level = c("structure", "syntax", "strict"),
+  alphabet = NULL,
+  min_length = 0
 ) {
   level <- match.arg(level)
   if (is_zuid(x)) {
@@ -131,8 +169,11 @@ id_valid <- function(
   check_character(x)
   check_format(format)
   check_form(form, format)
-  check_layout(layout, format)
-  parsed <- parse_text(x, format, form, layout)
+  params <- check_params(
+    list(layout = layout, alphabet = alphabet, min_length = min_length),
+    format
+  )
+  parsed <- parse_text(x, format, form, params)
   out <- !is.na(parsed$level) & parsed$level >= level_number(level)
   out[is.na(x)] <- NA
   names(out) <- names(x)
@@ -162,12 +203,15 @@ format_forms <- function(forms) {
   })
 }
 
-parse_text <- function(x, format, form, layout = NULL) {
+parse_text <- function(x, format, form, params = list()) {
+  if (format %in% text_formats) {
+    return(parse_text_format(x, format, params))
+  }
   now <- as.numeric(Sys.time()) * 1000
   out <- .Call(zuid_c_parse, x, format, form, now, time_tolerance() * 1000)
   names(out) <- c("text", "level")
   if (format == "snowflake") {
-    out$level <- layout_levels(out, layout, now)
+    out$level <- layout_levels(out, params$layout, now)
   }
   out
 }

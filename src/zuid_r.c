@@ -46,6 +46,8 @@ SEXP zuid_c_table(SEXP name)
 
 /* ---- Vectorised entry points over the format descriptors ---------------- */
 
+/* A fixed-width format; the variable-width ones have entry points of
+ * their own (zuid_r_text.c). */
 static const zuid_format *arg_format(SEXP format)
 {
     if (!Rf_isString(format) || XLENGTH(format) != 1 ||
@@ -55,6 +57,9 @@ static const zuid_format *arg_format(SEXP format)
     const zuid_format *fmt = zuid_format_find(CHAR(STRING_ELT(format, 0)));
     if (fmt == NULL) {
         Rf_error("zuid: unknown format '%s'", CHAR(STRING_ELT(format, 0)));
+    }
+    if (fmt->width == 0) {
+        Rf_error("zuid: format '%s' has no fixed width", fmt->name);
     }
     return fmt;
 }
@@ -299,9 +304,9 @@ SEXP zuid_c_formats(void)
         const zuid_format *f = zuid_formats[i];
         SET_STRING_ELT(VECTOR_ELT(out, 0), i, string_or_na(f->name));
         SET_STRING_ELT(VECTOR_ELT(out, 1), i, string_or_na(class_names[f->cls]));
-        INTEGER(VECTOR_ELT(out, 2))[i] = f->width * 8;
+        INTEGER(VECTOR_ELT(out, 2))[i] = f->width ? f->width * 8 : NA_INTEGER;
         INTEGER(VECTOR_ELT(out, 3))[i] = f->text_min;
-        INTEGER(VECTOR_ELT(out, 4))[i] = f->text_max;
+        INTEGER(VECTOR_ELT(out, 4))[i] = f->text_max ? f->text_max : NA_INTEGER;
         SET_STRING_ELT(VECTOR_ELT(out, 5), i, string_or_na(f->alphabet));
         SET_STRING_ELT(VECTOR_ELT(out, 6), i, string_or_na(f->case_rule));
         SET_STRING_ELT(VECTOR_ELT(out, 7), i, string_or_na(f->time_unit));
