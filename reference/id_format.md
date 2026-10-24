@@ -50,6 +50,11 @@ missing elements as columns of zeros listed in the attribute `na`.
 
 ## Details
 
+Every encoding of
+[`id_encode()`](https://pedrobtz.github.io/zuid/reference/id_encode.md)
+is a form of a UUID too: `id_format(x, "base62")` is
+`id_encode(id_bytes(x), "base62")`.
+
 `id_from_bytes()` has no default `format`: sixteen bytes are not a UUID
 until the caller says so.
 
@@ -61,6 +66,8 @@ id_format(x, "urn")
 #> [1] "urn:uuid:018f6b1c-2d3e-7a4b-8c5d-6e7f8091a2b3"
 id_format(x, "compact")
 #> [1] "018f6b1c2d3e7a4b8c5d6e7f8091a2b3"
+id_format(x, "base32")
+#> [1] "01HXNHRB9YF95RRQBEFY0938NK"
 b <- id_bytes(x)
 b[, 1]
 #>  [1] 01 8f 6b 1c 2d 3e 7a 4b 8c 5d 6e 7f 80 91 a2 b3

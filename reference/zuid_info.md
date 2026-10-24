@@ -60,7 +60,7 @@ zuid_info()
 #> [1] 1.645558e+12
 #> 
 #> $state$uuid7_counter
-#> [1] 1796
+#> [1] 1521
 #> 
 #> $state$uuid1_last_ticks
 #> [1] NA

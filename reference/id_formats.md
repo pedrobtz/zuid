@@ -27,6 +27,6 @@ id_formats()
 #> 1 lower; either case on input 100ns (versions 1, 6), ms (version 7)
 #>                                                                    epoch
 #> 1 1582-10-15T00:00:00Z (versions 1, 6), 1970-01-01T00:00:00Z (version 7)
-#>                                  forms
-#> 1 hex, compact, urn, braced, uppercase
+#>                                                                                                                                                      forms
+#> 1 hex, compact, urn, braced, uppercase, base32, base32rfc, base32hex, base36, base58, base62, base62sort, base64url, base64sort, alphabet, proquint, words
 ```

@@ -29,6 +29,9 @@ library(zuid)
 
 ## All functions
 
+- [`id_encode()`](https://pedrobtz.github.io/zuid/reference/id_encode.md)
+  [`id_decode()`](https://pedrobtz.github.io/zuid/reference/id_encode.md)
+  : Encode and decode bytes
 - [`id_fields()`](https://pedrobtz.github.io/zuid/reference/id_fields.md)
   [`id_time()`](https://pedrobtz.github.io/zuid/reference/id_fields.md)
   [`id_version()`](https://pedrobtz.github.io/zuid/reference/id_fields.md)
