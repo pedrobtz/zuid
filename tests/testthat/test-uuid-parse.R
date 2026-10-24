@@ -132,7 +132,7 @@ test_that("arguments are checked with classed errors", {
   expect_error(id_parse("x"), class = "zuid_type_error")
   expect_error(id_parse("x", "nope"), class = "zuid_type_error")
   expect_error(
-    id_parse("x", "uuid", form = "base62"),
+    id_parse("x", "uuid", form = "base99"),
     class = "zuid_type_error"
   )
   expect_error(id_parse("x", "uuid", strict = NA), class = "zuid_type_error")
@@ -168,6 +168,24 @@ test_that("id_formats() describes uuid", {
   expect_identical(row$text_min, 36L)
   expect_identical(
     row$forms[[1]],
-    c("hex", "compact", "urn", "braced", "uppercase")
+    c(
+      "hex",
+      "compact",
+      "urn",
+      "braced",
+      "uppercase",
+      "base32",
+      "base32rfc",
+      "base32hex",
+      "base36",
+      "base58",
+      "base62",
+      "base62sort",
+      "base64url",
+      "base64sort",
+      "alphabet",
+      "proquint",
+      "words"
+    )
   )
 })
