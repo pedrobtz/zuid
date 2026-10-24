@@ -104,3 +104,44 @@ void zuid_gen_uuid_time(size_t n, int version, const int64_t *ticks,
         set_version_variant(b, version);
     }
 }
+
+size_t zuid_gen_ulid(size_t n, const int64_t *ms, const uint8_t *random,
+                     int64_t tolerance_ms, zuid_ulid_state *state,
+                     uint8_t *out)
+{
+    for (size_t i = 0; i < n; i++) {
+        int64_t t = ms[i];
+        if (!state->has || t > state->last_ms ||
+            t < state->last_ms - tolerance_ms) {
+            state->last_ms = t;
+            memcpy(state->random, random + ZUID_ULID_RANDOM * i, 10);
+            state->has = 1;
+        } else {
+            int k = 9;
+            while (k >= 0 && ++state->random[k] == 0) k--;
+            if (k < 0) {
+                /* All ones plus one: the specification's overflow. Leave the
+                 * component at its maximum so the next call fails too. */
+                memset(state->random, 0xff, 10);
+                return i + 1;
+            }
+        }
+        uint64_t m = (uint64_t) state->last_ms;
+        uint8_t *b = out + 16 * i;
+        for (int k = 0; k < 6; k++) b[k] = (uint8_t) (m >> (40 - 8 * k));
+        memcpy(b + 6, state->random, 10);
+    }
+    return 0;
+}
+
+void zuid_gen_upid(size_t n, const int64_t *ms, const uint8_t *random,
+                   const uint8_t tail[3], uint8_t *out)
+{
+    for (size_t i = 0; i < n; i++) {
+        uint64_t t = (uint64_t) ms[i] >> 8;
+        uint8_t *b = out + 16 * i;
+        for (int k = 0; k < 5; k++) b[k] = (uint8_t) (t >> (32 - 8 * k));
+        memcpy(b + 5, random + ZUID_UPID_RANDOM * i, 8);
+        memcpy(b + 13, tail, 3);
+    }
+}

@@ -89,8 +89,10 @@ static int ascii_ieq(const char *s, const char *lower, size_t n)
     return 1;
 }
 
-static zuid_level uuid_parse(const char *s, size_t len, int form, uint8_t *out)
+static zuid_level uuid_parse(const char *s, size_t len, int form, uint8_t *out,
+                             zuid_prefix *pfx)
 {
+    pfx->len = 0;
     int ok;
     uint8_t buf[ZUID_TEXT_BUF + 8];
     switch (form) {
@@ -169,8 +171,10 @@ static void set_time_ms(zuid_fields *f, uint64_t ms)
     f->time_unit = "ms";
 }
 
-static void uuid_fields(const uint8_t *b, zuid_fields *f)
+static void uuid_fields(const uint8_t *b, const zuid_prefix *pfx,
+                        zuid_fields *f)
 {
+    (void) pfx;
     zuid_fields_clear(f);
     if (is_all(b, 0x00) || is_all(b, 0xff)) {
         f->version = b[0] == 0 ? 0 : 15;
@@ -218,7 +222,7 @@ static int uuid_strict(const uint8_t *b, double now_ms, double tolerance_ms)
     if (v < 1 || v > 8) return 0;
     if (v == 1 || v == 6 || v == 7) {
         zuid_fields f;
-        uuid_fields(b, &f);
+        uuid_fields(b, NULL, &f);
         double ms = (double) f.time_s * 1000.0 + f.time_frac_ns / 1e6;
         if (ms > now_ms + tolerance_ms) return 0;
     }
@@ -239,8 +243,10 @@ static size_t write_digits(const uint8_t *b, int hyphens, int upper, char *out)
     return pos;
 }
 
-static size_t uuid_format(const uint8_t *b, int form, char *out)
+static size_t uuid_format(const uint8_t *b, int form, const zuid_prefix *pfx,
+                          char *out)
 {
+    (void) pfx;
     if (form >= FORM_ENC_FIRST) {
         long m = zuid_encode(uuid_encodings[form - FORM_ENC_FIRST], b, 16, NULL,
                              "-", 1, out);

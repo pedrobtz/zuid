@@ -1,5 +1,11 @@
 # zuid 0.0.0.9000
 
+* ULID, TypeID and UPID: `id_parse()`, `id_valid()`, `id_fields()` and the
+  rest read them, and `id_ulid()`, `id_typeid()` and `id_upid()` generate
+  them. ULIDs from one session strictly increase, by the specification's
+  rule, with `zuid_overflow_error` when the random component would overflow.
+* `id_convert()` moves values between `uuid`, `ulid`, `typeid` and `upid`,
+  keeping the bytes; other pairs are a `zuid_convert_error`.
 * `id_encode()` and `id_decode()` write and read bytes of any length in
   hex, Crockford base32, RFC 4648 base32 and base32hex, base36, base58,
   base62, base64url, the sortable base62 and base64 of the IETF draft, a

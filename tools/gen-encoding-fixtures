@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Write tests/testthat/fixtures/encodings.csv from the Python reference
-libraries (design.md section 7, oracles 2, 10 and 11; section 15 Q2).
+libraries (design.md section 7, oracles 2, 10 and 11; section 15 Q2), and
+tests/testthat/fixtures/upid.csv from the UPID reference (oracle 5).
 
 Each row is a form, the bytes in hex, and the text the reference library
 writes for them. zuid follows what mainstream Go and Python libraries emit
@@ -11,7 +12,7 @@ tools/fixture-sources.yaml (fixtures: encodings):
 
     python3 -m venv /tmp/zuid-enc && /tmp/zuid-enc/bin/pip install \
       base58==2.1.1 pybase62==1.0.0 python-ulid==4.0.1 uuid25==0.1.4 \
-      base32-crockford==0.3.0 shortuuid==1.0.13 proquint==0.2.1
+      base32-crockford==0.3.0 shortuuid==1.0.13 proquint==0.2.1 upid==0.3.1
     (cd /tmp/zuid-enc && npm install --ignore-scripts niceware@4.0.0)
     NICEWARE_JS=/tmp/zuid-enc/node_modules/niceware \
       /tmp/zuid-enc/bin/python -I tools/gen-encoding-fixtures
@@ -36,9 +37,11 @@ import proquint
 import shortuuid
 import shortuuid.main
 import ulid
+import upid
 import uuid25
 
 OUT = "tests/testthat/fixtures/encodings.csv"
+OUT_UPID = "tests/testthat/fixtures/upid.csv"
 
 SPECIAL = [
     "f81d4fae7dec11d0a76500a0c91e6bf6",  # RFC 9562 section 4
@@ -160,6 +163,17 @@ def main():
             for b, t in zip(blobs, texts):
                 w.writerow([form, b.hex(), t])
     print(f"wrote {OUT}", file=sys.stderr)
+
+    # UPID: the reference's text for random bytes, every version nibble.
+    rng = random.Random(20261025)
+    blobs = [bytes.fromhex(h) for h in SPECIAL] + [rng.randbytes(16) for _ in range(200)]
+    with open(OUT_UPID, "w", newline="") as f:
+        w = csv.writer(f, lineterminator="\n")
+        w.writerow(["hex", "text", "prefix", "milliseconds"])
+        for b in blobs:
+            u = upid.UPID(b)
+            w.writerow([b.hex(), u.to_str(), u.prefix, u.milliseconds])
+    print(f"wrote {OUT_UPID}", file=sys.stderr)
 
 
 if __name__ == "__main__":

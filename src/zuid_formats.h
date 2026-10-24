@@ -10,6 +10,14 @@
 
 #define ZUID_MAX_WIDTH 32  /* bytes; the widest fixed-width format is 20 */
 #define ZUID_TEXT_BUF 256  /* bytes; longer than any form of any format */
+#define ZUID_PREFIX_MAX 63 /* a TypeID prefix, the longest text outside the bytes */
+
+/* Text a format carries outside its bytes: the TypeID prefix. Empty for
+ * every other format. */
+typedef struct {
+    char s[ZUID_PREFIX_MAX + 1];
+    size_t len;
+} zuid_prefix;
 
 typedef enum {
     ZUID_CLASS_STRUCTURED,
@@ -37,6 +45,8 @@ typedef struct {
     char node[41];        /* hex; "" when absent */
     int sequence;         /* -1 when absent */
     char random[41];      /* hex; "" when absent */
+    int has_prefix;
+    char prefix[ZUID_PREFIX_MAX + 1];
 } zuid_fields;
 
 void zuid_fields_clear(zuid_fields *f);
@@ -71,16 +81,20 @@ typedef struct zuid_format {
      * on input accepts whatever the canonical text's case rule allows. */
     int (*form_index)(const char *form);
     /* Parse `len` bytes of text in `form`. Returns the level reached, at
-     * most ZUID_LEVEL_STRUCTURE, and fills `out` (width bytes) when at least
-     * ZUID_LEVEL_SYNTAX. */
-    zuid_level (*parse)(const char *text, size_t len, int form, uint8_t *out);
+     * most ZUID_LEVEL_STRUCTURE, and fills `out` (width bytes) and `pfx`
+     * when at least ZUID_LEVEL_SYNTAX. */
+    zuid_level (*parse)(const char *text, size_t len, int form, uint8_t *out,
+                        zuid_prefix *pfx);
     /* Whether a value that passed structure passes strict, given the current
      * time and tolerance in milliseconds since 1970. */
     int (*strict)(const uint8_t *bytes, double now_ms, double tolerance_ms);
-    /* Write the text of `bytes` in `form` (-1: canonical) into `out`, which
-     * holds ZUID_TEXT_BUF bytes. Returns the length, without a terminator. */
-    size_t (*format)(const uint8_t *bytes, int form, char *out);
-    void (*fields)(const uint8_t *bytes, zuid_fields *out);
+    /* Write the text of `bytes` (and `pfx`, NULL for none) in `form` (-1:
+     * canonical) into `out`, which holds ZUID_TEXT_BUF bytes. Returns the
+     * length, without a terminator. */
+    size_t (*format)(const uint8_t *bytes, int form, const zuid_prefix *pfx,
+                     char *out);
+    void (*fields)(const uint8_t *bytes, const zuid_prefix *pfx,
+                   zuid_fields *out);
 } zuid_format;
 
 /* The format named `name`, or NULL. */
@@ -91,5 +105,8 @@ extern const int zuid_n_formats;
 
 /* Formats, one per zuid_fmt_*.c. */
 extern const zuid_format zuid_fmt_uuid;
+extern const zuid_format zuid_fmt_ulid;
+extern const zuid_format zuid_fmt_typeid;
+extern const zuid_format zuid_fmt_upid;
 
 #endif

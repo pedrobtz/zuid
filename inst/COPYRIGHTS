@@ -3,9 +3,10 @@ zuid: copyright and licensing of included files
 
 Everything in this package is Copyright (c) 2026 Pedro Baltazar and is
 licensed under the MIT licence (see LICENSE), except the two generated tables
-below. zuid vendors no code. Each table is data taken unchanged from its
-upstream at the commit recorded in tools/fixture-sources.yaml, and written by
-tools/gen-tables into R/sysdata.rda and src/zuid_tables.c.
+and the TypeID test fixtures below. zuid vendors no code. Each table is data
+taken unchanged from its upstream at the commit recorded in
+tools/fixture-sources.yaml, and written by tools/gen-tables into
+R/sysdata.rda and src/zuid_tables.c.
 
 
 Niceware word list
@@ -52,3 +53,16 @@ Both upstreams are published under the MIT licence:
     DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
     OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
     USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+TypeID specification fixtures
+-----------------------------
+
+    Upstream:  https://github.com/jetify-com/typeid
+    Commit:    be8ff0daf5dc1f6d40c62a03cfc89945263a69af
+    Files:     spec/valid.yml, spec/invalid.yml
+    Stored:    tests/testthat/fixtures/typeid/
+    Licence:   Apache-2.0, a copy in tests/testthat/fixtures/typeid/LICENSE
+    Copyright: Jetify Inc. and the TypeID contributors
+
+The two test-data files are copied unchanged and used only by the tests.

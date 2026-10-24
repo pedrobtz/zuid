@@ -27,7 +27,7 @@ unaffected. Design §12's Arrow criterion does not apply to v0.1.0.
 | 1 | [Vector class, descriptors and UUID parsing](#stage-1--vector-class-descriptors-and-uuid-parsing) | full | [#4](https://github.com/pedrobtz/zuid/issues/4) | [#18](https://github.com/pedrobtz/zuid/pull/18) | 2026-10-24 |
 | 2 | [UUID generation](#stage-2--uuid-generation) | full | [#5](https://github.com/pedrobtz/zuid/issues/5) | [#19](https://github.com/pedrobtz/zuid/pull/19) | 2026-10-24 |
 | 3 | [Encodings](#stage-3--encodings) | quick | [#6](https://github.com/pedrobtz/zuid/issues/6) | [#20](https://github.com/pedrobtz/zuid/pull/20) | 2026-10-24 |
-| 4 | [ULID, TypeID and UPID](#stage-4--ulid-typeid-and-upid) | quick | [#7](https://github.com/pedrobtz/zuid/issues/7) | | |
+| 4 | [ULID, TypeID and UPID](#stage-4--ulid-typeid-and-upid) | quick | [#7](https://github.com/pedrobtz/zuid/issues/7) | [#21](https://github.com/pedrobtz/zuid/pull/21) | 2026-10-24 |
 | 5 | [SCRU128, SCRU64 and KSUID](#stage-5--scru128-scru64-and-ksuid) | quick | [#8](https://github.com/pedrobtz/zuid/issues/8) | | |
 | 6 | [XID, ObjectId and Snowflake layouts](#stage-6--xid-objectid-and-snowflake-layouts) | quick | [#9](https://github.com/pedrobtz/zuid/issues/9) | | |
 | 7 | [NanoID, Cuid2, Sqids and CID](#stage-7--nanoid-cuid2-sqids-and-cid) | quick | [#10](https://github.com/pedrobtz/zuid/issues/10) | | |
@@ -240,6 +240,21 @@ and convert to and from UUIDs.
 - Oracles §7.3, §7.4 and §7.5 (UPID) pass.
 - Each format round-trips over 10⁴ generated values.
 - `R CMD check` passes on the quick r-actions profile.
+
+**Deviations (2026-10-24).**
+
+- A ULID, TypeID or UPID string too large for 128 bits fails `syntax`, not
+  only `structure`: it has no bytes, so it has no canonical text either.
+- `id_from_bytes(bytes, "typeid")` makes TypeIDs without a prefix; a prefix
+  comes through `id_convert(x, "typeid", prefix = )`.
+- `id_convert(x, to, prefix = NULL)` names its one extra argument instead of
+  taking `...`.
+- `id_upid()` rejects a prefix outside the UPID alphabet with
+  `zuid_type_error`, where the reference silently turns it into `zzzz`.
+- UPID has no published test vectors. The oracle is the Python reference,
+  `upid` 0.3.1, over random bytes, plus the README's example.
+- The TypeID fixtures ship with upstream's Apache-2.0 licence beside them,
+  and `inst/COPYRIGHTS` records them.
 
 **Design.** §6.1, §6.4, §6.6, §6.7 for these formats; §5 `id_convert()`.
 
