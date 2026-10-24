@@ -25,7 +25,7 @@ unaffected. Design §12's Arrow criterion does not apply to v0.1.0.
 | --- | --- | --- | --- | --- | --- |
 | 0 | [Package identity](#stage-0--package-identity) | quick | [#3](https://github.com/pedrobtz/zuid/issues/3) | [#17](https://github.com/pedrobtz/zuid/pull/17) | 2026-10-24 |
 | 1 | [Vector class, descriptors and UUID parsing](#stage-1--vector-class-descriptors-and-uuid-parsing) | full | [#4](https://github.com/pedrobtz/zuid/issues/4) | [#18](https://github.com/pedrobtz/zuid/pull/18) | 2026-10-24 |
-| 2 | [UUID generation](#stage-2--uuid-generation) | full | [#5](https://github.com/pedrobtz/zuid/issues/5) | | |
+| 2 | [UUID generation](#stage-2--uuid-generation) | full | [#5](https://github.com/pedrobtz/zuid/issues/5) | [#19](https://github.com/pedrobtz/zuid/pull/19) | 2026-10-24 |
 | 3 | [Encodings](#stage-3--encodings) | quick | [#6](https://github.com/pedrobtz/zuid/issues/6) | | |
 | 4 | [ULID, TypeID and UPID](#stage-4--ulid-typeid-and-upid) | quick | [#7](https://github.com/pedrobtz/zuid/issues/7) | | |
 | 5 | [SCRU128, SCRU64 and KSUID](#stage-5--scru128-scru64-and-ksuid) | quick | [#8](https://github.com/pedrobtz/zuid/issues/8) | | |
@@ -143,7 +143,7 @@ with monotonic version 7, from operating-system entropy.
 
 - The entropy layer (`getrandom`, `getentropy`, `arc4random_buf`,
   `BCryptGenRandom`) and the clock, read once in the R entry point (D5, D6).
-- `src/zuid_gen.c`: pure generators for versions 1, 2, 4, 6, 7 and 8.
+- `src/zuid_gen.c`: pure generators for versions 1, 4, 6, 7 and 8.
 - The monotonic version 7 counter and its per-session state (§6.7).
 - `id_uuid(version = 3)` and `version = 5` raise a classed error saying
   name-based generation comes after 0.1.0. Parsing them is Stage 1's.
@@ -159,6 +159,18 @@ with monotonic version 7, from operating-system entropy.
 - Generation with fixed `random` and `time` gives the same bytes on Linux,
   macOS and Windows.
 - A full-profile run is green on the pull request.
+
+**Deviations (2026-10-24).**
+
+- Version 2 is not generated. RFC 9562 leaves it to DCE Security, and the
+  Work list named it by mistake. It raises `zuid_type_error`.
+- Appendix A.6 regenerates except one bit: zuid seeds the version 7 counter
+  with its top bit clear (§6.7), so its `rand_a` is `0x4C3`, not `0xCC3`.
+- `zuid_clock_error` is not raised here. §6.7 gives UUID version 7 no error:
+  a rollback beyond `zuid.rollback_tolerance` restarts at the new time, and
+  versions 1 and 6 increment the clock sequence, as RFC 9562 §6.1 says. The
+  error arrives with SCRU128 and Snowflake (Stages 5 and 6).
+- Versions 3 and 5 raise `zuid_dependency_error`, since they need `zucrypt`.
 
 **Design.** §4 layer 4; §6.6; §6.7; D5, D6, D11.
 

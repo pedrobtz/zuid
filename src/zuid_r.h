@@ -20,5 +20,9 @@ SEXP zuid_c_from_bytes(SEXP bytes, SEXP format, SEXP na);
 SEXP zuid_c_fields(SEXP x, SEXP format);
 SEXP zuid_c_formats(void);
 SEXP zuid_c_key(SEXP x, SEXP format);
+SEXP zuid_c_uuid(SEXP n, SEXP version, SEXP time_us, SEXP random, SEXP node,
+                 SEXP tolerance_ms);
+SEXP zuid_c_state(void);
+SEXP zuid_c_reset_state(void);
 
 #endif

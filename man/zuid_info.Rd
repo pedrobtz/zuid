@@ -13,11 +13,17 @@ A list with elements:
 \item{\code{tables}}{a data frame with one row per generated table: its
 name, the upstream \code{repo}, \code{commit} and \code{path}, the file's \code{sha256},
 and the number of \code{entries}.}
+\item{\code{entropy}}{the operating-system entropy source compiled in:
+\code{"getrandom"}, \code{"getentropy"}, \code{"BCryptGenRandom"} or
+\code{"arc4random_buf"}.}
+\item{\code{state}}{the session's monotonic generation state: the last
+version 7 millisecond and counter, and the last version 1 and 6 tick
+and clock sequence, \code{NA} before the first value.}
 }
 }
 \description{
-Reports the installed version and the generated tables compiled into it,
-with the upstream source each was taken from.
+Reports the installed version, the generated tables compiled into it,
+the entropy source and the monotonic generation state.
 }
 \examples{
 zuid_info()
