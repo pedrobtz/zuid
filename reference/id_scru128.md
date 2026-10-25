@@ -70,18 +70,25 @@ A clock that runs back by up to the option `zuid.rollback_tolerance`
 (seconds, 10 by default) keeps the last timestamp, as both SCRU
 specifications recommend. Further back, `rollback = "error"` raises
 `zuid_clock_error`, so that monotonicity is never silently lost, and
-`rollback = "reset"` restarts the generator at the new time.
+`rollback = "reset"` restarts the generator at the new time. A counter
+overflow that would reach the reserved last timestamp is a
+`zuid_overflow_error`.
+
+SCRU64 keeps one state per `node` and `node_bits`, so values for each
+node increase however the calls for different nodes interleave. As in
+[`id_uuid()`](https://pedrobtz.github.io/zuid/reference/id_uuid.md), a
+call given both `time` and `random` is a pure function of its arguments.
 
 ## Examples
 
 ``` r
 id_scru128(2)
 #> <zuid_scru128[2]>
-#> [1] 03h3z5ewpe0ebb28jhw714meh 03h3z5ewpe0ebb28jhxngn11d
+#> [1] 03h40mfx944vw0c4q8vrwwr3d 03h40mfx944vw0c4q8x1k3pfi
 id_scru64(2, node = 42, node_bits = 8)
 #> <zuid_scru64[2]>
-#> [1] 0w4xewbzda17 0w4xewbzda18
+#> [1] 0w4xsipdrnv7 0w4xsipdrnv8
 id_ksuid(2)
 #> <zuid_ksuid[2]>
-#> [1] 3L9eQpw1XPEt5EKwN0VMtziUW7a 3L9eQvLDNJmU3FtjXiNpmcCEIDj
+#> [1] 3LABRYDZrhkszQwsQyTHQbo79UU 3LABRaQXTwzanMc5qPLci4KlHNV
 ```

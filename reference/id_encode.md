@@ -31,8 +31,8 @@ id_decode(text, form, alphabet = NULL, width = NULL)
 
 - sep:
 
-  The separator between units for `"proquint"` and `"words"`. It must
-  not contain letters.
+  The separator between units for `"proquint"` and `"words"`: ASCII
+  characters other than letters.
 
 - text:
 

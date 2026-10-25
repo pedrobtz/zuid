@@ -21,7 +21,13 @@ id_xid(
 
 id_objectid(n = 1, random = NULL, time = NULL)
 
-id_snowflake(n = 1, layout, worker, time = NULL)
+id_snowflake(
+  n = 1,
+  layout,
+  worker,
+  time = NULL,
+  rollback = c("error", "reset")
+)
 ```
 
 ## Arguments
@@ -61,6 +67,11 @@ id_snowflake(n = 1, layout, worker, time = NULL)
   The node fields' values: one number when the layout has one node
   field, else a named list, such as `list(datacenter = 1, worker = 7)`.
 
+- rollback:
+
+  For `id_snowflake()`, what to do when the clock (or `time`) runs back
+  further than the tolerance: `"error"` or `"reset"`.
+
 ## Value
 
 A zuid vector of `n` values.
@@ -74,20 +85,24 @@ drawn once per session, and a 3-byte counter started at a random value.
 every node field, since duplicate node ids across machines are what
 Snowflake exists to prevent and only the caller can rule them out. The
 sequence starts at zero each tick and increments within it; when it
-overflows, generation moves to the next tick. A clock back by up to the
-option `zuid.clock_tolerance` (seconds, 0.01 by default) keeps the last
-tick; further back is a `zuid_clock_error`.
+overflows, generation moves to the next tick. One sequence serves every
+node value of a layout, so values for different workers interleave
+without repeats. A clock back by up to the option `zuid.clock_tolerance`
+(seconds, 0.01 by default) keeps the last tick. Further back,
+`rollback = "error"` raises `zuid_clock_error`, and `rollback = "reset"`
+restarts the layout's generator at the new time, which may repeat values
+made before.
 
 ## Examples
 
 ``` r
 id_xid(2)
 #> <zuid_xid[2]>
-#> [1] dbegiafbe41hjn84gfo0 dbegiafbe41hjn84gfog
+#> [1] dbekhi9g2vs1lhaolri0 dbekhi9g2vs1lhaolrig
 id_objectid(2)
 #> <zuid_objectid[2]>
-#> [1] 6add0929d1140e394ef26190 6add0929d1140e394ef26191
+#> [1] 6add48c97cff36c876100fd8 6add48c97cff36c876100fd9
 id_snowflake(2, id_layout("twitter"), list(datacenter = 1, worker = 7))
 #> <zuid_snowflake[2]>
-#> [1] 2114079049289723904 2114079049289723905
+#> [1] 2114147364985008128 2114147364985008129
 ```

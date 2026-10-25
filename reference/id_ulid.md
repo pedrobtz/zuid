@@ -56,18 +56,19 @@ are not monotonic within 256 ms.
 Entropy comes from the operating system, never from R's random number
 generator, and the clock rollback rule of
 [`id_uuid()`](https://pedrobtz.github.io/zuid/reference/id_uuid.md)
-applies to ULIDs.
+applies to ULIDs. As there, a call given both `time` and `random` is a
+pure function of its arguments.
 
 ## Examples
 
 ``` r
 id_ulid(2)
 #> <zuid_ulid[2]>
-#> [1] 01M5QPQJHS9W0BAXXVNK201ZWQ 01M5QPQJHS9W0BAXXVNK201ZWR
+#> [1] 01M5R68MCM7P3ZAS513QG71406 01M5R68MCM7P3ZAS513QG71407
 id_typeid(2, "user")
 #> <zuid_typeid[2]>
-#> [1] user_01m5qpqjhse0k9eay987s49b1t user_01m5qpqjhse0kvyk5nvvvg5dhc
+#> [1] user_01m5r68mcne9rsy4whwyrhd6wd user_01m5r68mcne9s8qda85337ek4n
 id_upid(2, "user")
 #> <zuid_upid[2]>
-#> [1] user_2akqyuyeqga57iqqmmgkha user_2akqyuyevuuwxydzhbsuba
+#> [1] user_2akr2t4ll7ynwfa4zg3ria user_2akr2t4lu75oaqzi44vq3a
 ```

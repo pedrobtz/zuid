@@ -41,10 +41,11 @@ id_uuid(
 - random:
 
   `NULL` to draw from the operating system, or exactly the bytes the
-  version needs, for tests and reproducible fixtures: 16 per value for
-  versions 4 and 8; 10 per value for version 7 (2 seed the counter at a
-  new millisecond, 8 fill the 62 random bits); for versions 1 and 6, 2
-  bytes of clock sequence and, without `node`, 6 bytes of node.
+  version needs, for tests and reproducible fixtures (with `time`): 16
+  per value for versions 4 and 8; 10 per value for version 7 (2 seed the
+  counter at a new millisecond, 8 fill the 62 random bits); for versions
+  1 and 6, 2 bytes of clock sequence and, without `node`, 6 bytes of
+  node.
 
 - time:
 
@@ -76,7 +77,13 @@ A zuid vector of `n` UUIDs.
 A clock that runs back by up to the option `zuid.rollback_tolerance`
 (seconds, 10 by default) keeps generation increasing from the last
 value. Further back, version 7 restarts at the new time and versions 1
-and 6 increment the clock sequence.
+and 6 increment the clock sequence. Values that would pass the last
+instant the time field holds are a `zuid_overflow_error`.
+
+With both `time` and `random` given, a call is a pure function of its
+arguments: the same arguments give the same UUIDs, and the session's
+monotonic state is neither used nor changed. Values within the call
+still increase.
 
 Versions 3 and 5 hash a name and are not generated yet; parsing them
 works. Version 2 is not generated: RFC 9562 leaves it to DCE Security.
@@ -86,12 +93,12 @@ works. Version 2 is not generated: RFC 9562 leaves it to DCE Security.
 ``` r
 id_uuid(3)
 #> <zuid_uuid[3]>
-#> [1] 01a16f6b-ca8b-73cc-bcc0-10e29e31f33e 01a16f6b-ca8b-73cd-b398-3aa62e9530bf
-#> [3] 01a16f6b-ca8b-73ce-8fdf-f4d8860ebbf9
+#> [1] 01a17064-522d-7599-8f9b-0916ed00c1c5 01a17064-522d-759a-b139-2b0047c3eb37
+#> [3] 01a17064-522d-759b-9086-a228efb33679
 id_uuid(2, version = 4)
 #> <zuid_uuid[2]>
-#> [1] 2bcd3bde-02ba-4b15-af5f-559b749baea5 c02115ec-f3fa-4f49-a16f-528f5a2f8144
+#> [1] 4896ee2c-907e-4c7b-988d-2fc6f9783015 a8cee064-cbf0-4a3b-a442-7b43e92754bd
 id_uuid(version = 7, time = as.POSIXct("2022-02-22 19:22:22", tz = "UTC"))
 #> <zuid_uuid[1]>
-#> [1] 017f22e2-79b0-7135-a22b-44dea9d3bdca
+#> [1] 017f22e2-79b0-760f-adce-5d1798c10d66
 ```

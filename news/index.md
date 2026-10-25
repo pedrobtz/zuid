@@ -1,7 +1,26 @@
 # Changelog
 
-## zuid 0.0.0.9000
+## zuid 0.1.0
 
+- Initial CRAN submission.
+- A README and two articles, “Reading what an identifier knows” and “A
+  UUID in every alphabet”.
+- A generator call given both `time` and `random` is a pure function of
+  its arguments: the same arguments give the same identifiers, and the
+  session’s monotonic state is left alone.
+- [`id_snowflake()`](https://pedrobtz.github.io/zuid/reference/id_xid.md)
+  takes `rollback = "reset"`, and keeps one sequence per layout shared
+  by every worker, so alternating workers never repeat a value.
+  [`id_scru64()`](https://pedrobtz.github.io/zuid/reference/id_scru128.md)
+  keeps one state per node.
+- Version 7 UUIDs, TypeIDs, SCRU128 and SCRU64 raise
+  `zuid_overflow_error` at the end of their time range instead of
+  wrapping or emitting a reserved timestamp.
+- [`id_valid()`](https://pedrobtz.github.io/zuid/reference/id_parse.md)
+  checks a zuid vector under its own alphabet, `min_length` and layout,
+  and
+  [`id_encode()`](https://pedrobtz.github.io/zuid/reference/id_encode.md)
+  requires an ASCII `sep`.
 - [`id_detect()`](https://pedrobtz.github.io/zuid/reference/id_detect.md)
   names each element’s format, or `NA` with its candidates when the
   evidence does not settle it; only structured formats are tried without

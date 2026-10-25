@@ -11,7 +11,7 @@ is never used, so set.seed() does not change the result."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">zuid</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,6 +20,11 @@ is never used, so set.seed() does not change the result."></head><body>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/alphabets.html">A UUID in every alphabet</a></li>
+    <li><a class="dropdown-item" href="../articles/fields.html">Reading what an identifier knows</a></li>
+  </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -79,7 +84,8 @@ of the session's random one.</p></dd>
 
 <dt id="arg-random">random<a class="anchor" aria-label="anchor" href="#arg-random"></a></dt>
 <dd><p><code>NULL</code> to draw from the operating system, or exactly the
-bytes the version needs, for tests and reproducible fixtures: 16 per
+bytes the version needs, for tests and reproducible fixtures (with
+<code>time</code>): 16 per
 value for versions 4 and 8; 10 per value for version 7 (2 seed the
 counter at a new millisecond, 8 fill the 62 random bits); for versions
 1 and 6, 2 bytes of clock sequence and, without <code>node</code>, 6 bytes of node.</p></dd>
@@ -111,7 +117,12 @@ session strictly increase in time.</p></li>
 </ul><p>A clock that runs back by up to the option <code>zuid.rollback_tolerance</code>
 (seconds, 10 by default) keeps generation increasing from the last value.
 Further back, version 7 restarts at the new time and versions 1 and 6
-increment the clock sequence.</p>
+increment the clock sequence. Values that would pass the last instant
+the time field holds are a <code>zuid_overflow_error</code>.</p>
+<p>With both <code>time</code> and <code>random</code> given, a call is a pure function of its
+arguments: the same arguments give the same UUIDs, and the session's
+monotonic state is neither used nor changed. Values within the call
+still increase.</p>
 <p>Versions 3 and 5 hash a name and are not generated yet; parsing them
 works. Version 2 is not generated: RFC 9562 leaves it to DCE Security.</p>
     </div>
@@ -120,14 +131,14 @@ works. Version 2 is not generated: RFC 9562 leaves it to DCE Security.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">id_uuid</span><span class="op">(</span><span class="fl">3</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;zuid_uuid[3]&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 01a16f6b-ca8b-73cc-bcc0-10e29e31f33e 01a16f6b-ca8b-73cd-b398-3aa62e9530bf</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3] 01a16f6b-ca8b-73ce-8fdf-f4d8860ebbf9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 01a17064-522d-7599-8f9b-0916ed00c1c5 01a17064-522d-759a-b139-2b0047c3eb37</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3] 01a17064-522d-759b-9086-a228efb33679</span>
 <span class="r-in"><span><span class="fu">id_uuid</span><span class="op">(</span><span class="fl">2</span>, version <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;zuid_uuid[2]&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2bcd3bde-02ba-4b15-af5f-559b749baea5 c02115ec-f3fa-4f49-a16f-528f5a2f8144</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4896ee2c-907e-4c7b-988d-2fc6f9783015 a8cee064-cbf0-4a3b-a442-7b43e92754bd</span>
 <span class="r-in"><span><span class="fu">id_uuid</span><span class="op">(</span>version <span class="op">=</span> <span class="fl">7</span>, time <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.POSIXlt.html" class="external-link">as.POSIXct</a></span><span class="op">(</span><span class="st">"2022-02-22 19:22:22"</span>, tz <span class="op">=</span> <span class="st">"UTC"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;zuid_uuid[1]&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 017f22e2-79b0-7135-a22b-44dea9d3bdca</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 017f22e2-79b0-760f-adce-5d1798c10d66</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

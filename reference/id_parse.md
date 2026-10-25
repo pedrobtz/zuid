@@ -43,7 +43,9 @@ id_valid(
   every element that is not missing must resolve to the same format, or
   the call is a `zuid_ambiguous_error` naming the candidates or a
   `zuid_mixed_error` naming the formats found. Elements that fit no
-  format are `NA`, or an error with `strict = TRUE`.
+  format are `NA`, or an error with `strict = TRUE`. When no element
+  fits, or none is present (`x` is empty or all `NA`), there is no
+  format to detect, and the call is a `zuid_parse_error`: give `format`.
 
 - form:
 

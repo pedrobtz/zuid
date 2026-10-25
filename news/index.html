@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">zuid</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -16,6 +16,11 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/alphabets.html">A UUID in every alphabet</a></li>
+    <li><a class="dropdown-item" href="../articles/fields.html">Reading what an identifier knows</a></li>
+  </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -33,8 +38,16 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.0.0.9000" id="zuid-0009000">zuid 0.0.0.9000<a class="anchor" aria-label="anchor" href="#zuid-0009000"></a></h2>
-<ul><li>
+<h2 class="pkg-version" data-toc-text="0.1.0" id="zuid-010">zuid 0.1.0<a class="anchor" aria-label="anchor" href="#zuid-010"></a></h2>
+<ul><li>Initial CRAN submission.</li>
+<li>A README and two articles, “Reading what an identifier knows” and “A UUID in every alphabet”.</li>
+<li>A generator call given both <code>time</code> and <code>random</code> is a pure function of its arguments: the same arguments give the same identifiers, and the session’s monotonic state is left alone.</li>
+<li>
+<code><a href="../reference/id_xid.html">id_snowflake()</a></code> takes <code>rollback = "reset"</code>, and keeps one sequence per layout shared by every worker, so alternating workers never repeat a value. <code><a href="../reference/id_scru128.html">id_scru64()</a></code> keeps one state per node.</li>
+<li>Version 7 UUIDs, TypeIDs, SCRU128 and SCRU64 raise <code>zuid_overflow_error</code> at the end of their time range instead of wrapping or emitting a reserved timestamp.</li>
+<li>
+<code><a href="../reference/id_parse.html">id_valid()</a></code> checks a zuid vector under its own alphabet, <code>min_length</code> and layout, and <code><a href="../reference/id_encode.html">id_encode()</a></code> requires an ASCII <code>sep</code>.</li>
+<li>
 <code><a href="../reference/id_detect.html">id_detect()</a></code> names each element’s format, or <code>NA</code> with its candidates when the evidence does not settle it; only structured formats are tried without a <code>hint</code>. <code>id_parse(format = NULL)</code> detects one format for the whole vector, or raises <code>zuid_ambiguous_error</code> or <code>zuid_mixed_error</code>.</li>
 <li>NanoID, Cuid2, Sqids and CID parse and validate, and <code><a href="../reference/id_nanoid.html">id_nanoid()</a></code> and <code><a href="../reference/id_nanoid.html">id_sqids()</a></code> generate. <code><a href="../reference/id_parse.html">id_parse()</a></code> and <code><a href="../reference/id_parse.html">id_valid()</a></code> take <code>alphabet</code> and <code>min_length</code> for NanoID and Sqids, and the parameters travel with the vector. <code><a href="../reference/id_fields.html">id_fields()</a></code> reads a Sqid’s numbers and a CID’s version, codec, hash function and digest, and <code><a href="../reference/id_format.html">id_bytes()</a></code> gives a CID’s binary form.</li>
 <li>XID, ObjectId and Snowflake: parsing, fields and <code><a href="../reference/id_xid.html">id_xid()</a></code>, <code><a href="../reference/id_xid.html">id_objectid()</a></code> and <code><a href="../reference/id_xid.html">id_snowflake()</a></code>. <code><a href="../reference/id_layout.html">id_layout()</a></code> gives the Twitter, Discord, Instagram, Sonyflake and SCRU64 layouts and builds custom ones; a Snowflake is read and generated only under a layout, which travels with the vector. <code><a href="../reference/id_convert.html">id_convert()</a></code> moves between <code>xid</code> and <code>objectid</code>.</li>
