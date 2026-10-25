@@ -323,3 +323,20 @@ test_that("a UUID form must decode to exactly 16 bytes", {
   )
   expect_true(is.na(id_parse("zobit-huvov", "uuid", form = "proquint")))
 })
+
+test_that("sep must be ASCII", {
+  latin1 <- "\xb7"
+  Encoding(latin1) <- "latin1"
+  expect_error(
+    id_encode(as.raw(1:4), "proquint", sep = latin1),
+    class = "zuid_type_error"
+  )
+  expect_error(
+    id_encode(as.raw(1:4), "proquint", sep = "·"),
+    class = "zuid_type_error"
+  )
+  expect_identical(
+    id_encode(as.raw(c(127, 0, 0, 1)), "proquint", sep = "."),
+    "lusab.babad"
+  )
+})

@@ -160,3 +160,43 @@ test_that("worker is required and must fit the layout", {
   )
   expect_error(id_snowflake(1, list(), 1), class = "zuid_layout_error")
 })
+
+test_that("alternating workers within one tick never repeat a value", {
+  local_fresh_state()
+  lay <- id_layout("instagram")
+  t0 <- as.POSIXct("2024-01-01", tz = "UTC")
+  x <- c(
+    id_snowflake(1, lay, 1, time = t0),
+    id_snowflake(1, lay, 2, time = t0),
+    id_snowflake(1, lay, 1, time = t0)
+  )
+  expect_false(anyDuplicated(as.character(x)) > 0)
+  expect_identical(id_fields(x)$sequence, 0:2)
+})
+
+test_that("layouts with the same widths and other epochs keep separate state", {
+  local_fresh_state()
+  tw <- id_layout("twitter")
+  other <- id_layout(
+    time = list(bits = 41, unit = "ms", epoch = 0),
+    fields = list(datacenter = 5, worker = 5),
+    sequence = 12
+  )
+  w <- list(datacenter = 1, worker = 1)
+  t <- as.POSIXct("2024-01-01", tz = "UTC")
+  expect_no_error(id_snowflake(1, tw, w, time = t))
+  expect_no_error(id_snowflake(1, other, w, time = t - 3600))
+  expect_no_error(id_snowflake(1, tw, w, time = t))
+})
+
+test_that("rollback = \"reset\" recovers after a future time", {
+  local_fresh_state()
+  tw <- id_layout("twitter")
+  w <- list(datacenter = 1, worker = 1)
+  t <- as.POSIXct("2024-01-01", tz = "UTC")
+  id_snowflake(1, tw, w, time = t + 3600)
+  expect_error(id_snowflake(1, tw, w, time = t), class = "zuid_clock_error")
+  x <- id_snowflake(1, tw, w, time = t, rollback = "reset")
+  expect_equal(as.numeric(id_time(x)), as.numeric(t))
+  expect_no_error(id_snowflake(1, tw, w, time = t))
+})

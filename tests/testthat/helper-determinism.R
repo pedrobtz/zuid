@@ -21,10 +21,18 @@ determinism_lines <- function() {
     ksuid = id_ksuid(2, random = r(32), time = t),
     xid = id_xid(3, process = 4242, random = r(6), time = t),
     objectid = id_objectid(3, random = r(8), time = t),
-    snowflake = id_snowflake(3, id_layout("twitter"), list(datacenter = 3, worker = 9), time = t),
+    snowflake = id_snowflake(
+      3,
+      id_layout("twitter"),
+      list(datacenter = 3, worker = 9),
+      time = t
+    ),
     nanoid = id_nanoid(2, 21, random = r(64)),
     sqids = id_sqids(list(c(1, 2, 3), 2^53 - 1), min_length = 10),
-    cid = id_parse("bafkreie5qrjvaw64n4tjm6hbnm7fnqvcssfed4whsjqxzslbd3jwhsk3mm", "cid")
+    cid = id_parse(
+      "bafkreie5qrjvaw64n4tjm6hbnm7fnqvcssfed4whsjqxzslbd3jwhsk3mm",
+      "cid"
+    )
   )
   lines <- character()
   for (nm in names(vectors)) {
@@ -35,7 +43,20 @@ determinism_lines <- function() {
       lines,
       paste(nm, as.character(x)),
       paste(nm, "time", ifelse(is.na(ms), "NA", sprintf("%.0f", ms))),
-      paste(nm, "fields", f$version, f$variant, f$node, f$process, f$sequence, f$random, f$prefix, f$codec, f$hash, f$digest)
+      paste(
+        nm,
+        "fields",
+        f$version,
+        f$variant,
+        f$node,
+        f$process,
+        f$sequence,
+        f$random,
+        f$prefix,
+        f$codec,
+        f$hash,
+        f$digest
+      )
     )
   }
   bytes <- r(16)

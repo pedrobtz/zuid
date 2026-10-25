@@ -17,3 +17,9 @@ strictly_increasing <- function(x) {
   key <- id_encode(id_bytes(x), "hex")
   all(key[-1L] > key[-length(key)])
 }
+
+# Makes the entropy source fail until the calling test ends.
+local_entropy_failure <- function(env = parent.frame()) {
+  .Call(zuid:::zuid_c_entropy_fail, TRUE)
+  withr::defer(.Call(zuid:::zuid_c_entropy_fail, FALSE), envir = env)
+}

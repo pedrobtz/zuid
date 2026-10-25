@@ -19,7 +19,13 @@
 #' A clock that runs back by up to the option `zuid.rollback_tolerance`
 #' (seconds, 10 by default) keeps generation increasing from the last value.
 #' Further back, version 7 restarts at the new time and versions 1 and 6
-#' increment the clock sequence.
+#' increment the clock sequence. Values that would pass the last instant
+#' the time field holds are a `zuid_overflow_error`.
+#'
+#' With both `time` and `random` given, a call is a pure function of its
+#' arguments: the same arguments give the same UUIDs, and the session's
+#' monotonic state is neither used nor changed. Values within the call
+#' still increase.
 #'
 #' Versions 3 and 5 hash a name and are not generated yet; parsing them
 #' works. Version 2 is not generated: RFC 9562 leaves it to DCE Security.
@@ -30,7 +36,8 @@
 #' @param node For versions 1 and 6, six raw bytes to use as the node instead
 #'   of the session's random one.
 #' @param random `NULL` to draw from the operating system, or exactly the
-#'   bytes the version needs, for tests and reproducible fixtures: 16 per
+#'   bytes the version needs, for tests and reproducible fixtures (with
+#'   `time`): 16 per
 #'   value for versions 4 and 8; 10 per value for version 7 (2 seed the
 #'   counter at a new millisecond, 8 fill the 62 random bits); for versions
 #'   1 and 6, 2 bytes of clock sequence and, without `node`, 6 bytes of node.
@@ -104,10 +111,7 @@ id_uuid <- function(
     node,
     rollback_tolerance() * 1000
   )
-  if (is.null(out)) {
-    zuid_abort("entropy", "The operating system's entropy source failed.")
-  }
-  new_zuid(out, "uuid")
+  generated(out, "uuid")
 }
 
 check_count <- function(n, call = sys.call(-1L)) {
@@ -181,7 +185,9 @@ uuid_time_range <- function(version) {
   if (version == 7L) {
     c(0, (2^48 - 1) * 1e3)
   } else {
-    c(-12219292800 * 1e6, (2^60 - 1) / 10 - 12219292800 * 1e6)
+    # 2^60 - 1 ticks, less the Gregorian offset, in microseconds: the
+    # largest double below it, since the exact bound is past 2^53.
+    c(-12219292800 * 1e6, 103072857660684688)
   }
 }
 
@@ -220,6 +226,8 @@ rollback_tolerance <- function() {
 #'
 #' Entropy comes from the operating system, never from R's random number
 #' generator, and the clock rollback rule of [id_uuid()] applies to ULIDs.
+#' As there, a call given both `time` and `random` is a pure function of its
+#' arguments.
 #'
 #' @inheritParams id_uuid
 #' @param prefix For `id_typeid()`, the type: up to 63 lowercase letters and

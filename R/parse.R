@@ -45,6 +45,9 @@
 #'   resolve to the same format, or the call is a `zuid_ambiguous_error`
 #'   naming the candidates or a `zuid_mixed_error` naming the formats found.
 #'   Elements that fit no format are `NA`, or an error with `strict = TRUE`.
+#'   When no element fits, or none is present (`x` is empty or all `NA`),
+#'   there is no format to detect, and the call is a `zuid_parse_error`:
+#'   give `format`.
 #' @param form A text form of `format`, or `NULL` for its canonical text.
 #' @param layout For `"snowflake"`, required, and for `"scru64"`, optional:
 #'   an [id_layout()]. It travels with the vector and says how to read its
@@ -90,18 +93,7 @@ id_parse <- function(
       )
     }
     format <- zuid_format_of(x)
-    # A zuid vector's own parameters stand unless the call gives others.
-    own <- zuid_params(x)
-    if (is.null(layout)) {
-      params$layout <- own$layout
-    }
-    if (is.null(alphabet)) {
-      params$alphabet <- own$alphabet
-    }
-    if (missing(min_length)) {
-      params$min_length <- own$min_length
-    }
-    params$blocklist <- own$blocklist
+    params <- with_own_params(params, x, missing(min_length))
     x <- as.character(x)
   }
   check_character(x)
@@ -113,6 +105,22 @@ id_parse <- function(
     zuid_abort("type", "`strict` must be `TRUE` or `FALSE`.")
   }
   parse_zuid(x, format, form, check_params(params, format), level, strict)
+}
+
+# A zuid vector's own parameters stand unless the call gives others.
+with_own_params <- function(params, x, default_min_length) {
+  own <- zuid_params(x)
+  if (is.null(params$layout)) {
+    params$layout <- own$layout
+  }
+  if (is.null(params$alphabet)) {
+    params$alphabet <- own$alphabet
+  }
+  if (default_min_length) {
+    params$min_length <- own$min_length
+  }
+  params$blocklist <- own$blocklist
+  params
 }
 
 # id_parse() once the arguments are checked; `params` from check_params().
@@ -163,16 +171,19 @@ id_valid <- function(
   min_length = 0
 ) {
   level <- match.arg(level)
+  params <- list(layout = layout, alphabet = alphabet, min_length = min_length)
+  check_format(format)
   if (is_zuid(x)) {
+    # A vector of this format is checked under its own parameters; one of
+    # another format is only text here.
+    if (identical(format, zuid_format_of(x))) {
+      params <- with_own_params(params, x, missing(min_length))
+    }
     x <- as.character(x)
   }
   check_character(x)
-  check_format(format)
   check_form(form, format)
-  params <- check_params(
-    list(layout = layout, alphabet = alphabet, min_length = min_length),
-    format
-  )
+  params <- check_params(params, format)
   parsed <- parse_text(x, format, form, params, text = FALSE)
   out <- !is.na(parsed$level) & parsed$level >= level_number(level)
   out[is.na(x)] <- NA

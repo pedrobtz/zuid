@@ -25,7 +25,8 @@ id_uuid(
 of the session's random one.}
 
 \item{random}{\code{NULL} to draw from the operating system, or exactly the
-bytes the version needs, for tests and reproducible fixtures: 16 per
+bytes the version needs, for tests and reproducible fixtures (with
+\code{time}): 16 per
 value for versions 4 and 8; 10 per value for version 7 (2 seed the
 counter at a new millisecond, 8 fill the 62 random bits); for versions
 1 and 6, 2 bytes of clock sequence and, without \code{node}, 6 bytes of node.}
@@ -59,7 +60,13 @@ session strictly increase in time.
 A clock that runs back by up to the option \code{zuid.rollback_tolerance}
 (seconds, 10 by default) keeps generation increasing from the last value.
 Further back, version 7 restarts at the new time and versions 1 and 6
-increment the clock sequence.
+increment the clock sequence. Values that would pass the last instant
+the time field holds are a \code{zuid_overflow_error}.
+
+With both \code{time} and \code{random} given, a call is a pure function of its
+arguments: the same arguments give the same UUIDs, and the session's
+monotonic state is neither used nor changed. Values within the call
+still increase.
 
 Versions 3 and 5 hash a name and are not generated yet; parsing them
 works. Version 2 is not generated: RFC 9562 leaves it to DCE Security.

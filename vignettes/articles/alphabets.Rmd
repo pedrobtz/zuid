@@ -1,0 +1,152 @@
+---
+title: "A UUID in every alphabet"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, message = FALSE}
+library(zuid)
+```
+
+A UUID is 16 bytes. The hyphenated hex text is one way to write them, and
+not the shortest. Others are shorter, sort as the bytes do, or can be read
+aloud. This article shows the forms zuid writes, how to read them back,
+and how bytes move between formats.
+
+## The forms
+
+`id_format()` writes a UUID in any of its forms:
+
+```{r}
+u <- id_parse("018f6b1c-2d3e-7a4b-8c5d-6e7f8091a2b3", "uuid")
+forms <- c(
+  "hex", "compact", "urn", "braced", "uppercase",
+  "base32", "base32rfc", "base32hex", "base36", "base58",
+  "base62", "base64url", "base64sort", "alphabet", "proquint", "words"
+)
+text <- vapply(forms, id_format, "", x = u)
+writeLines(sprintf("%-10s %s", forms, text))
+```
+
+Each form writes what the mainstream Go and Python libraries write, so
+text made elsewhere reads here:
+
+* `base32` is Crockford's alphabet, as ULID uses. A UUID in this form is
+  textually a ULID.
+* `base32rfc` and `base32hex` are RFC 4648's, without padding.
+* `base36` is Uuid25's 25 characters.
+* `base58` is Bitcoin's alphabet. Its length varies: each leading zero
+  byte is one `1`.
+* `base62` is `0-9A-Za-z`, fixed width.
+* `base64url` is RFC 4648's URL-safe alphabet, and `base64sort` the same
+  bits in an alphabet in ASCII order.
+* `alphabet` defaults to ShortUUID's 57 symbols.
+* `proquint` writes each 16 bits as five pronounceable letters, and
+  `words` each 16 bits as a Niceware word. The Niceware list was not
+  checked for offensive words, so some text in this form may offend.
+
+## Reading them back
+
+`id_parse()` reads any of the forms with `form`:
+
+```{r}
+id_parse("CB7z5qdx3BKrzyaKnqWbU", "uuid", form = "base58")
+id_parse("bakaz-kosis-fuhuv-lonar-mudit-kunuz-mafid-papug", "uuid", form = "proquint")
+```
+
+The word forms ignore case and the separator, so text that someone read
+aloud and typed back still decodes:
+
+```{r}
+spoken <- "Advertised Impunity Counterrevolutionary Lecher Munition Injecting Maladroit Pitch"
+id_parse(spoken, "uuid", form = "words")
+```
+
+## Bytes of any length
+
+`id_encode()` and `id_decode()` are the forms over bytes of any length, not
+only 16. Proquint's own example is an IPv4 address:
+
+```{r}
+localhost <- as.raw(c(127, 0, 0, 1))
+id_encode(localhost, "proquint")
+id_decode("lusab-babad", "proquint")
+```
+
+A list of raw vectors encodes element by element, and `NULL` is a missing
+value:
+
+```{r}
+id_encode(list(localhost, as.raw(1:6), NULL), "base58")
+```
+
+`alphabet` takes any symbols, in digit order:
+
+```{r}
+id_encode(localhost, "alphabet", alphabet = "01")
+```
+
+## Order
+
+The fixed-width forms `base32`, `base36`, `base62`, `base64sort` and
+`alphabet` (with its symbols in ASCII order) sort as their bytes do. Here
+are five byte strings, out of order, and their hex:
+
+```{r}
+hex <- c(
+  "f0000000000000000000000000000000",
+  "3c000000000000000000000000000000",
+  "00000000000000000000000000000001",
+  "a5000000000000000000000000000000",
+  "7f000000000000000000000000000000"
+)
+bytes <- id_decode(hex, "hex")
+order(hex)
+```
+
+In `base62` and `base64sort` the text sorts the same way, and in
+`base64url` it does not, since its alphabet puts `A-Z` before `0-9`:
+
+```{r}
+order(id_encode(bytes, "base62"), method = "radix")
+order(id_encode(bytes, "base64sort"), method = "radix")
+order(id_encode(bytes, "base64url"), method = "radix")
+```
+
+A version 7 UUID begins with its time, so in a sorting form its text
+sorts by time too.
+
+## Between formats
+
+Bytes do not carry their format. Sixteen bytes could be a UUID, a ULID or
+a SCRU128, so `id_from_bytes()` asks which:
+
+```{r}
+b <- id_bytes(u)
+id_from_bytes(b, "ulid")
+err <- tryCatch(id_from_bytes(b), error = identity)
+class(err)
+```
+
+`id_convert()` moves an identifier to a format with the same bytes and the
+same meaning. A ULID, a TypeID and a UPID hold a UUID's 128 bits, and XID
+and ObjectId share their 12-byte layout:
+
+```{r}
+id_convert(u, "ulid")
+id_convert(u, "typeid", prefix = "user")
+id_convert(id_parse("9m4e2mr0ui3e8a215n4g", "xid"), "objectid")
+```
+
+A conversion that would change the meaning of the bits is an error, not a
+reinterpretation:
+
+```{r}
+err <- tryCatch(id_convert(u, "ksuid"), error = identity)
+class(err)
+```

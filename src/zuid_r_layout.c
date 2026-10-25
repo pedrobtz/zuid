@@ -8,14 +8,31 @@
 
 #include <string.h>
 
-static zuid_snowflake_state snowflake_state;
+/* One Snowflake state per layout (its parts, epoch and unit), shared by
+ * all node values. A full table reuses its oldest slot. */
+#define SNOWFLAKE_STATES 16
+static zuid_snowflake_state snowflake_states[SNOWFLAKE_STATES];
+static int snowflake_next;
+
+static zuid_snowflake_state *snowflake_state_for(const zuid_layout_spec *spec)
+{
+    for (int k = 0; k < SNOWFLAKE_STATES; k++) {
+        zuid_snowflake_state *s = &snowflake_states[k];
+        if (s->has && memcmp(&s->spec, spec, sizeof *spec) == 0) return s;
+    }
+    zuid_snowflake_state *s = &snowflake_states[snowflake_next];
+    snowflake_next = (snowflake_next + 1) % SNOWFLAKE_STATES;
+    memset(s, 0, sizeof *s);
+    return s;
+}
 static zuid_counter_state xid_counter, objectid_counter;
 static int xid_machine_drawn, objectid_random_drawn;
 static uint8_t xid_machine[3], objectid_random[5];
 
 void zuid_layout_reset_state(void)
 {
-    memset(&snowflake_state, 0, sizeof snowflake_state);
+    memset(snowflake_states, 0, sizeof snowflake_states);
+    snowflake_next = 0;
     memset(&xid_counter, 0, sizeof xid_counter);
     memset(&objectid_counter, 0, sizeof objectid_counter);
     xid_machine_drawn = objectid_random_drawn = 0;
@@ -92,12 +109,16 @@ static int64_t *whole_values(SEXP x, size_t un)
     return v;
 }
 
-/* `node`: one value per part, ignored for non-node parts. Returns the text,
- * or an integer as zuid_gen_snowflake() describes. */
+/* `node`: one value per part, ignored for non-node parts; `epoch_ms` and
+ * `unit_ms` pick the layout's state. Returns the text, or an integer as
+ * zuid_gen_snowflake() describes. */
 SEXP zuid_c_snowflake(SEXP ticks, SEXP widths, SEXP kinds, SEXP node,
-                      SEXP tolerance_ticks)
+                      SEXP epoch_ms, SEXP unit_ms, SEXP tolerance_ticks,
+                      SEXP reset)
 {
     zuid_layout_spec spec = arg_spec(widths, kinds);
+    spec.epoch_ms = Rf_asReal(epoch_ms);
+    spec.unit_ms = Rf_asReal(unit_ms);
     if (TYPEOF(node) != REALSXP || XLENGTH(node) != spec.nparts) {
         Rf_error("zuid: `node` must have one value per part");
     }
@@ -111,7 +132,8 @@ SEXP zuid_c_snowflake(SEXP ticks, SEXP widths, SEXP kinds, SEXP node,
     uint8_t *bytes = (uint8_t *) R_alloc(un ? un : 1, 8);
     long bad = zuid_gen_snowflake(un, t, &spec, nodes,
                                   (int64_t) Rf_asReal(tolerance_ticks),
-                                  &snowflake_state, bytes);
+                                  Rf_asLogical(reset) == TRUE,
+                                  snowflake_state_for(&spec), bytes);
     if (bad) return Rf_ScalarInteger((int) bad);
     return texts(&zuid_fmt_snowflake, bytes, un);
 }

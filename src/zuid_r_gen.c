@@ -16,7 +16,24 @@ static zuid_uuid7_state uuid7_state;
 static zuid_uuid1_state uuid1_state;
 static zuid_ulid_state ulid_state;
 static zuid_scru128_state scru128_state;
-static zuid_scru64_state scru64_state;
+/* SCRU64 keeps one state per (node, node_bits), so that values for one
+ * node stay monotonic whichever other nodes the session generates for. A
+ * full table reuses its oldest slot. */
+#define SCRU64_STATES 16
+static zuid_scru64_state scru64_states[SCRU64_STATES];
+static int scru64_next;
+
+static zuid_scru64_state *scru64_state_for(uint32_t node, int node_bits)
+{
+    for (int k = 0; k < SCRU64_STATES; k++) {
+        zuid_scru64_state *s = &scru64_states[k];
+        if (s->has && s->node == node && s->node_bits == node_bits) return s;
+    }
+    zuid_scru64_state *s = &scru64_states[scru64_next];
+    scru64_next = (scru64_next + 1) % SCRU64_STATES;
+    memset(s, 0, sizeof *s);
+    return s;
+}
 static int session_clock_seq = -1; /* -1 until first drawn */
 static uint8_t session_node[6];
 
@@ -26,10 +43,18 @@ SEXP zuid_c_reset_state(void)
     memset(&uuid1_state, 0, sizeof uuid1_state);
     memset(&ulid_state, 0, sizeof ulid_state);
     memset(&scru128_state, 0, sizeof scru128_state);
-    memset(&scru64_state, 0, sizeof scru64_state);
+    memset(scru64_states, 0, sizeof scru64_states);
+    scru64_next = 0;
     zuid_layout_reset_state();
     session_clock_seq = -1;
     memset(session_node, 0, sizeof session_node);
+    return R_NilValue;
+}
+
+/* Test-only: make the entropy source fail (TRUE) or work again (FALSE). */
+SEXP zuid_c_entropy_fail(SEXP fail)
+{
+    zuid_entropy_set_failure(Rf_asLogical(fail) == TRUE);
     return R_NilValue;
 }
 
@@ -78,9 +103,18 @@ static int take_random(SEXP random, size_t need, uint8_t *buf)
     return zuid_entropy(buf, need);
 }
 
+/* With both `time` and `random` given, a call is a pure function of its
+ * inputs (D6): it uses a fresh state of its own and leaves the session's
+ * alone. */
+static int is_pure(SEXP time_us, SEXP random)
+{
+    return !Rf_isNull(time_us) && !Rf_isNull(random);
+}
+
 /* `time_us`: NULL to read the clock, or microseconds since 1970 per value.
- * Returns the canonical text, or NULL when the entropy source failed (the R
- * caller raises zuid_entropy_error). */
+ * Returns the canonical text, NULL when the entropy source failed (the R
+ * caller raises zuid_entropy_error), or a negative integer, -(1 + the
+ * index) of a value past the time field (zuid_overflow_error). */
 SEXP zuid_c_uuid(SEXP n_, SEXP version_, SEXP time_us, SEXP random,
                  SEXP node, SEXP tolerance_ms)
 {
@@ -118,7 +152,12 @@ SEXP zuid_c_uuid(SEXP n_, SEXP version_, SEXP time_us, SEXP random,
             int64_t q = t100[i] / 10000;
             ms[i] = (t100[i] % 10000 < 0) ? q - 1 : q;
         }
-        zuid_gen_uuid7(un, ms, r, tol_ms, &uuid7_state, bytes);
+        zuid_uuid7_state local = {0};
+        size_t bad = zuid_gen_uuid7(un, ms, r, tol_ms,
+                                    is_pure(time_us, random) ? &local
+                                                             : &uuid7_state,
+                                    bytes);
+        if (bad) return Rf_ScalarInteger(-(int) bad);
     } else if (version == 1 || version == 6) {
         /* Clock sequence (2 bytes) and, without `node`, the node (6 bytes):
          * from `random` for this call, else drawn once per session. */
@@ -146,8 +185,14 @@ SEXP zuid_c_uuid(SEXP n_, SEXP version_, SEXP time_us, SEXP random,
         }
         if (have_node) memcpy(node_bytes, RAW(node), 6);
         for (size_t i = 0; i < un; i++) t100[i] += GREGORIAN_OFFSET;
-        zuid_gen_uuid_time(un, version, t100, &clock_seq, node_bytes,
-                           tol_ms * 10000, &uuid1_state, bytes);
+        zuid_uuid1_state local = {0};
+        size_t bad = zuid_gen_uuid_time(un, version, t100, &clock_seq,
+                                        node_bytes, tol_ms * 10000,
+                                        is_pure(time_us, random)
+                                            ? &local
+                                            : &uuid1_state,
+                                        bytes);
+        if (bad) return Rf_ScalarInteger(-(int) bad);
         if (Rf_isNull(random)) session_clock_seq = clock_seq;
     } else {
         Rf_error("zuid: version %d is not generated", version);
@@ -210,7 +255,10 @@ SEXP zuid_c_ulid(SEXP n_, SEXP time_us, SEXP random, SEXP tolerance_ms)
     uint8_t *r = (uint8_t *) R_alloc(un ? un : 1, ZUID_ULID_RANDOM);
     if (take_random(random, ZUID_ULID_RANDOM * un, r) != 0) return R_NilValue;
     uint8_t *bytes = (uint8_t *) R_alloc(un ? un : 1, 16);
-    size_t bad = zuid_gen_ulid(un, ms, r, tol_ms, &ulid_state, bytes);
+    zuid_ulid_state local = {0};
+    size_t bad = zuid_gen_ulid(un, ms, r, tol_ms,
+                               is_pure(time_us, random) ? &local : &ulid_state,
+                               bytes);
     if (bad) return Rf_ScalarInteger((int) bad);
     return canonical_strings(&zuid_fmt_ulid, bytes, un);
 }
@@ -241,7 +289,8 @@ static size_t arg_count(SEXP n_)
 }
 
 /* NULL when the entropy source failed; an integer, the position of the
- * value, on a rollback beyond the tolerance (zuid_clock_error). */
+ * value, on a rollback beyond the tolerance (zuid_clock_error), negated
+ * for an overflow into the reserved timestamp (zuid_overflow_error). */
 SEXP zuid_c_scru128(SEXP n_, SEXP time_us, SEXP random, SEXP tolerance_ms,
                     SEXP reset)
 {
@@ -252,9 +301,12 @@ SEXP zuid_c_scru128(SEXP n_, SEXP time_us, SEXP random, SEXP tolerance_ms,
         return R_NilValue;
     }
     uint8_t *bytes = (uint8_t *) R_alloc(un ? un : 1, 16);
-    size_t bad = zuid_gen_scru128(un, ms, r, (int64_t) Rf_asReal(tolerance_ms),
-                                  Rf_asLogical(reset) == TRUE, &scru128_state,
-                                  bytes);
+    zuid_scru128_state local = {0};
+    long bad = zuid_gen_scru128(un, ms, r, (int64_t) Rf_asReal(tolerance_ms),
+                                Rf_asLogical(reset) == TRUE,
+                                is_pure(time_us, random) ? &local
+                                                         : &scru128_state,
+                                bytes);
     if (bad) return Rf_ScalarInteger((int) bad);
     return canonical_strings(&zuid_fmt_scru128, bytes, un);
 }
@@ -276,10 +328,13 @@ SEXP zuid_c_scru64(SEXP n_, SEXP time_us, SEXP random, SEXP node,
         return R_NilValue;
     }
     uint8_t *bytes = (uint8_t *) R_alloc(un ? un : 1, 8);
+    zuid_scru64_state local = {0};
+    zuid_scru64_state *state = is_pure(time_us, random)
+                                   ? &local
+                                   : scru64_state_for((uint32_t) nd, bits);
     long bad = zuid_gen_scru64(un, ms, r, (uint32_t) nd, bits,
                                (int64_t) Rf_asReal(tolerance_ms),
-                               Rf_asLogical(reset) == TRUE, &scru64_state,
-                               bytes);
+                               Rf_asLogical(reset) == TRUE, state, bytes);
     if (bad) return Rf_ScalarInteger((int) bad);
     return canonical_strings(&zuid_fmt_scru64, bytes, un);
 }

@@ -1,5 +1,19 @@
-# zuid 0.0.0.9000
+# zuid 0.1.0
 
+* Initial CRAN submission.
+* A README and two articles, "Reading what an identifier knows" and "A UUID
+  in every alphabet".
+* A generator call given both `time` and `random` is a pure function of its
+  arguments: the same arguments give the same identifiers, and the
+  session's monotonic state is left alone.
+* `id_snowflake()` takes `rollback = "reset"`, and keeps one sequence per
+  layout shared by every worker, so alternating workers never repeat a
+  value. `id_scru64()` keeps one state per node.
+* Version 7 UUIDs, TypeIDs, SCRU128 and SCRU64 raise `zuid_overflow_error`
+  at the end of their time range instead of wrapping or emitting a reserved
+  timestamp.
+* `id_valid()` checks a zuid vector under its own alphabet, `min_length`
+  and layout, and `id_encode()` requires an ASCII `sep`.
 * `id_detect()` names each element's format, or `NA` with its candidates
   when the evidence does not settle it; only structured formats are tried
   without a `hint`. `id_parse(format = NULL)` detects one format for the

@@ -144,6 +144,7 @@ test_that("a zuid vector reparses as itself and refuses another format", {
   expect_identical(id_parse(x), x)
   expect_identical(id_parse(x, "uuid"), x)
   expect_true(id_valid(x, "uuid"))
+  expect_error(id_parse(x, "ulid"), class = "zuid_type_error")
 })
 
 test_that("text round-trips through bytes over 10^4 values", {

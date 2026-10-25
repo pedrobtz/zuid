@@ -60,7 +60,14 @@ A clock that runs back by up to the option \code{zuid.rollback_tolerance}
 (seconds, 10 by default) keeps the last timestamp, as both SCRU
 specifications recommend. Further back, \code{rollback = "error"} raises
 \code{zuid_clock_error}, so that monotonicity is never silently lost, and
-\code{rollback = "reset"} restarts the generator at the new time.
+\code{rollback = "reset"} restarts the generator at the new time. A counter
+overflow that would reach the reserved last timestamp is a
+\code{zuid_overflow_error}.
+
+SCRU64 keeps one state per \code{node} and \code{node_bits}, so values for each
+node increase however the calls for different nodes interleave. As in
+\code{\link[=id_uuid]{id_uuid()}}, a call given both \code{time} and \code{random} is a pure function of
+its arguments.
 }
 \examples{
 id_scru128(2)

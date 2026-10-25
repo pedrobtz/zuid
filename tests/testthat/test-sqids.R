@@ -205,3 +205,16 @@ test_that("the parameters travel with the vector", {
     class = "zuid_type_error"
   )
 })
+
+test_that("id_valid() checks a zuid vector under its own parameters", {
+  s <- id_sqids(c(1, 2), alphabet = "abcdefghij", min_length = 6)
+  expect_identical(id_valid(s, "sqids"), c(TRUE, TRUE))
+  expect_identical(
+    id_valid(as.character(s), "sqids", alphabet = "abcdefghij", min_length = 6),
+    c(TRUE, TRUE)
+  )
+  n <- id_nanoid(2, 8, alphabet = "xyz")
+  expect_identical(id_valid(n, "nanoid"), c(TRUE, TRUE))
+  # A vector of another format is only text.
+  expect_identical(id_valid(id_nil(), "ulid"), FALSE)
+})

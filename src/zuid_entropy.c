@@ -43,8 +43,18 @@ static int read_urandom(uint8_t *buf, size_t n)
 }
 #endif
 
+/* Set by the tests through zuid_c_entropy_fail(), so that the failure
+ * branches of every generator can be reached. */
+static int entropy_fails;
+
+void zuid_entropy_set_failure(int fail)
+{
+    entropy_fails = fail;
+}
+
 int zuid_entropy(uint8_t *buf, size_t n)
 {
+    if (entropy_fails) return -1;
 #if defined(_WIN32)
     while (n > 0) {
         ULONG chunk = n > 0x10000000u ? 0x10000000u : (ULONG) n;

@@ -33,7 +33,10 @@ id_valid(
 detects it with \code{\link[=id_detect]{id_detect()}}: every element that is not missing must
 resolve to the same format, or the call is a \code{zuid_ambiguous_error}
 naming the candidates or a \code{zuid_mixed_error} naming the formats found.
-Elements that fit no format are \code{NA}, or an error with \code{strict = TRUE}.}
+Elements that fit no format are \code{NA}, or an error with \code{strict = TRUE}.
+When no element fits, or none is present (\code{x} is empty or all \code{NA}),
+there is no format to detect, and the call is a \code{zuid_parse_error}:
+give \code{format}.}
 
 \item{form}{A text form of \code{format}, or \code{NULL} for its canonical text.}
 

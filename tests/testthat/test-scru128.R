@@ -125,3 +125,18 @@ test_that("generated SCRU128 IDs strictly increase and round-trip", {
   expect_error(id_scru128(1, time = 0), class = "zuid_type_error")
   expect_error(id_scru128(1, random = raw(9)), class = "zuid_type_error")
 })
+
+test_that("an overflow at the top of the range is an error, not a reserved value", {
+  local_fresh_state()
+  r <- c(as.raw(1:4), as.raw(rep(0xff, 6)), as.raw(1:4), as.raw(rep(0xff, 6)))
+  expect_error(
+    id_scru128(2, time = 2^48 - 2, random = r),
+    class = "zuid_overflow_error"
+  )
+  x <- id_scru128(1, time = 2^48 - 2, random = r[1:10])
+  expect_true(id_valid(as.character(x), "scru128"))
+  expect_identical(
+    id_scru128(2, time = 1.7e12, random = as.raw(1:20)),
+    id_scru128(2, time = 1.7e12, random = as.raw(1:20))
+  )
+})

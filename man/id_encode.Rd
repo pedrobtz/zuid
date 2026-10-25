@@ -20,8 +20,8 @@ a missing element), or a raw matrix with one element per column. At most
 94 distinct printable ASCII characters other than space. \code{NULL} for
 ShortUUID's.}
 
-\item{sep}{The separator between units for \code{"proquint"} and \code{"words"}.
-It must not contain letters.}
+\item{sep}{The separator between units for \code{"proquint"} and \code{"words"}:
+ASCII characters other than letters.}
 
 \item{text}{A character vector.}
 

@@ -16,9 +16,9 @@ uuid4 time NA
 uuid4 fields 4 rfc NA NA NA 0c155ea7f13a78cd87da2c7ec11365b NA NA NA NA
 uuid4 fields 4 rfc NA NA NA 202972bbc50e7a0e8cdf2173c6186ab NA NA NA NA
 uuid4 fields 4 rfc NA NA NA 343d468fd9227b4f81d42678cb1d6fb NA NA NA NA
-uuid6 1ee833b0-4c28-64b3-b055-7b9fc4e90e33
-uuid6 1ee833b0-4c28-64b4-b055-7b9fc4e90e33
-uuid6 1ee833b0-4c28-64b5-b055-7b9fc4e90e33
+uuid6 1ee833b0-4c28-64b0-b055-7b9fc4e90e33
+uuid6 1ee833b0-4c28-64b1-b055-7b9fc4e90e33
+uuid6 1ee833b0-4c28-64b2-b055-7b9fc4e90e33
 uuid6 time 1700000000123
 uuid6 time 1700000000123
 uuid6 time 1700000000123

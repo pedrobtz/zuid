@@ -19,7 +19,14 @@
 #' (seconds, 10 by default) keeps the last timestamp, as both SCRU
 #' specifications recommend. Further back, `rollback = "error"` raises
 #' `zuid_clock_error`, so that monotonicity is never silently lost, and
-#' `rollback = "reset"` restarts the generator at the new time.
+#' `rollback = "reset"` restarts the generator at the new time. A counter
+#' overflow that would reach the reserved last timestamp is a
+#' `zuid_overflow_error`.
+#'
+#' SCRU64 keeps one state per `node` and `node_bits`, so values for each
+#' node increase however the calls for different nodes interleave. As in
+#' [id_uuid()], a call given both `time` and `random` is a pure function of
+#' its arguments.
 #'
 #' @inheritParams id_uuid
 #' @param random `NULL` to draw from the operating system, or exactly the
@@ -164,9 +171,12 @@ generated <- function(out, format, call = sys.call(-1L)) {
 #' node field, since duplicate node ids across machines are what Snowflake
 #' exists to prevent and only the caller can rule them out. The sequence
 #' starts at zero each tick and increments within it; when it overflows,
-#' generation moves to the next tick. A clock back by up to the option
-#' `zuid.clock_tolerance` (seconds, 0.01 by default) keeps the last tick;
-#' further back is a `zuid_clock_error`.
+#' generation moves to the next tick. One sequence serves every node value
+#' of a layout, so values for different workers interleave without repeats.
+#' A clock back by up to the option `zuid.clock_tolerance` (seconds, 0.01 by
+#' default) keeps the last tick. Further back, `rollback = "error"` raises
+#' `zuid_clock_error`, and `rollback = "reset"` restarts the layout's
+#' generator at the new time, which may repeat values made before.
 #'
 #' @inheritParams id_uuid
 #' @param machine For `id_xid()`, three raw bytes, or `NULL` for the
@@ -180,6 +190,8 @@ generated <- function(out, format, call = sys.call(-1L)) {
 #'   node field, else a named list, such as `list(datacenter = 1, worker = 7)`.
 #' @param time `NULL` for the current time, or a `POSIXct` (or a double of
 #'   milliseconds since 1970) of length 1 or `n`.
+#' @param rollback For `id_snowflake()`, what to do when the clock (or
+#'   `time`) runs back further than the tolerance: `"error"` or `"reset"`.
 #' @return A zuid vector of `n` values.
 #' @examples
 #' id_xid(2)
@@ -217,7 +229,14 @@ id_objectid <- function(n = 1, random = NULL, time = NULL) {
 
 #' @rdname id_xid
 #' @export
-id_snowflake <- function(n = 1, layout, worker, time = NULL) {
+id_snowflake <- function(
+  n = 1,
+  layout,
+  worker,
+  time = NULL,
+  rollback = c("error", "reset")
+) {
+  rollback <- match.arg(rollback)
   if (missing(layout) || missing(worker)) {
     zuid_abort("type", "`layout` and `worker` are required.")
   }
@@ -237,7 +256,8 @@ id_snowflake <- function(n = 1, layout, worker, time = NULL) {
         )
       )
     }
-    worker <- stats::setNames(list(worker), nodes)
+    worker <- list(worker)
+    names(worker) <- nodes
   }
   if (!setequal(names(worker), nodes) || anyDuplicated(names(worker))) {
     zuid_abort(
@@ -284,13 +304,19 @@ id_snowflake <- function(n = 1, layout, worker, time = NULL) {
     unname(p$widths),
     p$kinds,
     unname(node),
-    tolerance
+    layout$epoch,
+    unit,
+    tolerance,
+    rollback == "reset"
   )
   if (is.integer(out) && out > 0L) {
     zuid_abort(
       "clock",
       sprintf(
-        "The clock ran back by more than `zuid.clock_tolerance` at value %d.",
+        paste(
+          "The clock ran back by more than `zuid.clock_tolerance` at value",
+          "%d; use `rollback = \"reset\"` to restart the generator."
+        ),
         out
       )
     )

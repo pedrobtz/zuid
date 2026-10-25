@@ -72,6 +72,7 @@ fixtures:
       upid: 0.3.1
   scru128:
     path: tests/testthat/fixtures/scru128.csv
+    sha256: 09f0fce786cbc6d74d60b71f48927197cd92b08803be7261148fb490c99c89c2
     generator: tools/gen-fixtures
     retrieved: 2026-10-24
     # The Python reference, scru128 3.0.4 (scru128/python), over the field
@@ -83,6 +84,7 @@ fixtures:
       scru128: 3.0.4
   scru64:
     path: tests/testthat/fixtures/scru64.csv
+    sha256: a9bb3f2f89aba84d5c71cb516b7bd9b608c50176fe3ae80eb6d313ff42546b50
     generator: tools/gen-fixtures
     retrieved: 2026-10-24
     # The Python reference, scru64 1.0.2 (scru64/python), over boundaries
@@ -126,12 +128,14 @@ fixtures:
     # holds the same 560 words as the pinned sqids-blocklist table.
   sqids:
     path: tests/testthat/fixtures/sqids.csv
+    sha256: f27b04cf830630860006c50a191d4f40b49ed99c65c14a524510086bfa542d59
     generator: tools/gen-js-fixtures.mjs
     retrieved: 2026-10-24
     javascript:
       sqids: 0.3.0
   cid:
     path: tests/testthat/fixtures/cid.csv
+    sha256: 7f8eaa9082bf4fae54cc8e0934351ff1cb95831e2468c44a1bd890f321169509
     generator: tools/gen-js-fixtures.mjs
     retrieved: 2026-10-24
     # js-multiformats over random digests in 17 multibases; go-cid's string
@@ -148,6 +152,7 @@ fixtures:
     # The customRandom vectors, written into tests/testthat/test-nanoid.R.
   encodings:
     path: tests/testthat/fixtures/encodings.csv
+    sha256: 66cfba5e892e7fa6270cae25ee61ddb41e388b17620aff4a791ba1e648fd2e32
     generator: tools/gen-fixtures
     retrieved: 2026-10-24
     # Output of the reference libraries, design.md D21. The Go libraries
@@ -168,3 +173,10 @@ fixtures:
     # base64sort is base64url translated to the alphabet of
     # draft-davis-uuidrev-alt-uuid-encoding-methods-00, whose vector for
     # RFC 9562's example UUID tests/testthat/test-encode.R checks.
+  determinism:
+    path: tests/testthat/fixtures/determinism.txt
+    generator: tools/gen-determinism
+    sha256: 50f9c0a17b414282bfeb4e57463ae53c005bc2a8eb3e34c96b1fd6a5e66846f7
+    # zuid's own output for fixed time and random input, compared on every
+    # CI leg (design.md section 12). It guards byte identity across
+    # platforms, not correctness. Regenerate only for an intended change.
