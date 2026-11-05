@@ -23,7 +23,8 @@ or a raw vector read batch by batch, for reproducible values; running
 out is a \code{zuid_type_error}.}
 
 \item{numbers}{A numeric vector, or a list of numeric vectors, of whole
-numbers from 0 to 2^53 - 1. \code{NA} or \code{NULL} gives \code{NA}.}
+numbers from 0 to 2^53 - 1. An element that is \code{NULL} or a single \code{NA}
+gives \code{NA}; an element with \code{NA} among other numbers is an error.}
 
 \item{min_length}{The shortest Sqid, 0 to 255.}
 

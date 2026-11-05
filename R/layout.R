@@ -85,10 +85,18 @@ id_layout <- function(
 
 builtin_layout <- function(name, epoch, node_bits, call = sys.call(-1L)) {
   if (name != "sonyflake" && !is.null(epoch)) {
-    zuid_abort("layout", sprintf("The `%s` layout has its own epoch.", name))
+    zuid_abort(
+      "layout",
+      sprintf("The `%s` layout has its own epoch.", name),
+      call = call
+    )
   }
   if (name != "scru64" && !is.null(node_bits)) {
-    zuid_abort("layout", "Only the `scru64` layout takes `node_bits`.")
+    zuid_abort(
+      "layout",
+      "Only the `scru64` layout takes `node_bits`.",
+      call = call
+    )
   }
   switch(
     name,
@@ -99,7 +107,8 @@ builtin_layout <- function(name, epoch, node_bits, call = sys.call(-1L)) {
       epoch = 1288834974657,
       fields = list(datacenter = 5, worker = 5),
       sequence = 12,
-      sign_bit = TRUE
+      sign_bit = TRUE,
+      call = call
     ),
     discord = new_layout(
       name,
@@ -108,7 +117,8 @@ builtin_layout <- function(name, epoch, node_bits, call = sys.call(-1L)) {
       epoch = 1420070400000,
       fields = list(worker = 5, process = 5),
       sequence = 12,
-      sign_bit = FALSE
+      sign_bit = FALSE,
+      call = call
     ),
     instagram = new_layout(
       name,
@@ -117,7 +127,8 @@ builtin_layout <- function(name, epoch, node_bits, call = sys.call(-1L)) {
       epoch = 1314220021721,
       fields = list(shard = 13),
       sequence = 10,
-      sign_bit = FALSE
+      sign_bit = FALSE,
+      call = call
     ),
     sonyflake = {
       if (is.null(epoch)) {
@@ -126,7 +137,8 @@ builtin_layout <- function(name, epoch, node_bits, call = sys.call(-1L)) {
           paste(
             "The `sonyflake` layout needs `epoch`: the reference's default",
             "start time has changed between releases."
-          )
+          ),
+          call = call
         )
       }
       new_layout(
@@ -137,14 +149,16 @@ builtin_layout <- function(name, epoch, node_bits, call = sys.call(-1L)) {
         fields = list(machine = 16),
         sequence = 8,
         sign_bit = TRUE,
-        order = c("time", "sequence", "machine")
+        order = c("time", "sequence", "machine"),
+        call = call
       )
     },
     scru64 = {
       if (!is_whole(node_bits) || node_bits < 1 || node_bits > 23) {
         zuid_abort(
           "layout",
-          "The `scru64` layout needs `node_bits`, a whole number from 1 to 23."
+          "The `scru64` layout needs `node_bits`, a whole number from 1 to 23.",
+          call = call
         )
       }
       new_layout(
@@ -154,7 +168,8 @@ builtin_layout <- function(name, epoch, node_bits, call = sys.call(-1L)) {
         epoch = 0,
         fields = list(node = node_bits),
         sequence = 24 - node_bits,
-        sign_bit = TRUE
+        sign_bit = TRUE,
+        call = call
       )
     },
     zuid_abort(
@@ -163,7 +178,8 @@ builtin_layout <- function(name, epoch, node_bits, call = sys.call(-1L)) {
         "`name` must be one of %s, not \"%s\".",
         "\"twitter\", \"discord\", \"instagram\", \"sonyflake\", \"scru64\"",
         name
-      )
+      ),
+      call = call
     )
   )
 }

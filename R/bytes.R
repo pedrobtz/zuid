@@ -22,7 +22,10 @@
 #' @return `id_format()`: a character vector. `id_bytes()`: a raw matrix
 #'   with the format's width in rows and one column per element, big-endian,
 #'   with missing elements as columns of zeros listed in the attribute `na`.
-#'   `id_from_bytes()`: a zuid vector.
+#'   A CID has no fixed width, so for a CID it is a list of raw vectors
+#'   instead, `NULL` for a missing element. Names become column names, or
+#'   list names. `id_from_bytes()`: a zuid vector, named by the column names
+#'   or list names of `bytes`.
 #' @examples
 #' x <- id_parse("018f6b1c-2d3e-7a4b-8c5d-6e7f8091a2b3", "uuid")
 #' id_format(x, "urn")
@@ -62,6 +65,7 @@ id_bytes <- function(x) {
     )
   }
   out <- .Call(zuid_c_bytes, as.character(x), zuid_format_of(x))
+  colnames(out) <- names(x)
   missing <- which(is.na(x))
   if (length(missing)) {
     attr(out, "na") <- missing
@@ -87,6 +91,7 @@ id_from_bytes <- function(bytes, format, layout = NULL) {
     zuid_abort("type", sprintf("A `%s` is text and has no bytes.", format))
   }
   width <- id_formats()$width[id_formats()$format == format] %/% 8L
+  nms <- if (is.matrix(bytes)) colnames(bytes) else names(bytes)
   if (is.list(bytes)) {
     na <- vapply(bytes, is.null, logical(1))
     ok <- vapply(
@@ -119,6 +124,10 @@ id_from_bytes <- function(bytes, format, layout = NULL) {
     flat <- as.vector(bytes)
     na <- rep(FALSE, length(flat) %/% width)
     na[attr(bytes, "na", exact = TRUE)] <- TRUE
+    if (!is.matrix(bytes)) {
+      # Names of a flat vector name bytes, not elements.
+      nms <- NULL
+    }
   } else {
     zuid_abort(
       "type",
@@ -139,6 +148,7 @@ id_from_bytes <- function(bytes, format, layout = NULL) {
       )
     }
   }
+  names(text) <- nms
   new_zuid(text, format, layout)
 }
 

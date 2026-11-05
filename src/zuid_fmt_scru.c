@@ -100,6 +100,8 @@ const zuid_format zuid_fmt_scru128 = {
 /* 36^12 - 1, the largest 12-digit base36 value, and its timestamp, which
  * is reserved along with 0. 36^12 is 2^24 * 3^24, so the division is exact. */
 #define SCRU64_MAX UINT64_C(4738381338321616895)
+/* scru64/spec reserves timestamps 0 and 36^12 / 2^24 - 1 "for special
+   purposes": such IDs "must not be used or assigned as an identifier". */
 #define SCRU64_MAX_TS (SCRU64_MAX >> 24)
 
 static int base36_digit(char c)

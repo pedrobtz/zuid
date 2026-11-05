@@ -135,3 +135,15 @@ test_that("a custom sequence has at most 31 bits", {
   expect_no_warning(f <- id_fields(x))
   expect_identical(f$sequence, 2147483647L)
 })
+
+test_that("built-in layout errors report id_layout() as their call", {
+  e <- tryCatch(id_layout("nope"), zuid_layout_error = identity)
+  expect_identical(e$call[[1]], as.name("id_layout"))
+  e <- tryCatch(
+    id_layout("scru64", node_bits = 30),
+    zuid_layout_error = identity
+  )
+  expect_identical(e$call[[1]], as.name("id_layout"))
+  e <- tryCatch(id_layout("twitter", epoch = 0), zuid_layout_error = identity)
+  expect_identical(e$call[[1]], as.name("id_layout"))
+})

@@ -24,7 +24,8 @@
 #'   or a raw vector read batch by batch, for reproducible values; running
 #'   out is a `zuid_type_error`.
 #' @param numbers A numeric vector, or a list of numeric vectors, of whole
-#'   numbers from 0 to 2^53 - 1. `NA` or `NULL` gives `NA`.
+#'   numbers from 0 to 2^53 - 1. An element that is `NULL` or a single `NA`
+#'   gives `NA`; an element with `NA` among other numbers is an error.
 #' @param min_length The shortest Sqid, 0 to 255.
 #' @param blocklist `NULL` for the default blocklist, or a character vector
 #'   of words to avoid (`character()` for none).
@@ -120,8 +121,15 @@ sqids <- function(
 }
 
 check_sqids_numbers <- function(v, call = sys.call(-1L)) {
-  if (is.null(v) || anyNA(v)) {
+  if (is.null(v) || (length(v) == 1L && is.na(v))) {
     return(NULL)
+  }
+  if (anyNA(v)) {
+    zuid_abort(
+      "type",
+      "A Sqid encodes all its numbers; an element can't be partly `NA`.",
+      call = call
+    )
   }
   if (!is.numeric(v) || any(v < 0) || any(v != trunc(v))) {
     zuid_abort("type", "Sqids encode non-negative whole numbers.", call = call)

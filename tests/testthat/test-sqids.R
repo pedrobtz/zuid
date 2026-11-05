@@ -230,3 +230,9 @@ test_that("an empty Sqid is valid and combines", {
   y[2] <- ""
   expect_identical(as.character(y), c("", ""))
 })
+
+test_that("a Sqids element is missing whole or not at all", {
+  x <- sqids(list(NA, NULL, c(1, 2)))
+  expect_identical(is.na(x), c(TRUE, TRUE, FALSE))
+  expect_error(sqids(list(c(1, NA))), class = "zuid_type_error")
+})

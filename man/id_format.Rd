@@ -31,7 +31,10 @@ elements back to back.}
 \code{id_format()}: a character vector. \code{id_bytes()}: a raw matrix
 with the format's width in rows and one column per element, big-endian,
 with missing elements as columns of zeros listed in the attribute \code{na}.
-\code{id_from_bytes()}: a zuid vector.
+A CID has no fixed width, so for a CID it is a list of raw vectors
+instead, \code{NULL} for a missing element. Names become column names, or
+list names. \code{id_from_bytes()}: a zuid vector, named by the column names
+or list names of \code{bytes}.
 }
 \description{
 \code{id_format()} writes identifiers in their canonical text or another text

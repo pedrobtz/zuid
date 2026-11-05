@@ -71,9 +71,10 @@ check_text_alphabet <- function(alphabet, format, call = sys.call(-1L)) {
     zuid_abort(
       "type",
       sprintf(
-        "A %s `alphabet` is %d or more distinct printable ASCII characters.",
+        "A %s `alphabet` is %d to %d distinct printable ASCII characters.",
         format,
-        lo
+        lo,
+        hi
       ),
       call = call
     )

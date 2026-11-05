@@ -66,8 +66,8 @@ uuid <- function(
       "dependency",
       sprintf(
         paste(
-          "Version %d UUIDs hash a name with zucrypt,",
-          "which zuid does not use yet."
+          "Version %d UUIDs hash a name and are not generated in zuid",
+          "0.1.0; they parse."
         ),
         version
       )
