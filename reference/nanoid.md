@@ -73,10 +73,10 @@ element with no numbers encodes as `""`, as the specification says, and
 ``` r
 nanoid(2)
 #> <zuid_nanoid[2]>
-#> [1] gU355NQMtvEWukkcNkxjb 7FDS0w58WSeHUM9CBu_wI
+#> [1] fDf5hNNXXwXmeAXwhfy7f cpunbA2DphDEP19enbiB9
 nanoid(2, size = 10, alphabet = "0123456789abcdef")
 #> <zuid_nanoid[2]>
-#> [1] a58760fb71 a3ac36c994
+#> [1] 7d0deca0b1 fcb44224e9
 sqids(c(1, 2, 3))
 #> <zuid_sqids[3]>
 #> [1] Uk gb Ef

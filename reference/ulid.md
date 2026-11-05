@@ -64,11 +64,11 @@ function of its arguments.
 ``` r
 ulid(2)
 #> <zuid_ulid[2]>
-#> [1] 01M6PADAKV28B5K4YCPERJK5W1 01M6PADAKV28B5K4YCPERJK5W2
+#> [1] 01M6PBRB13465EYEH4NW7AD7XR 01M6PBRB13465EYEH4NW7AD7XS
 typeid(2, "user")
 #> <zuid_typeid[2]>
-#> [1] user_01m6padakwebrskcmyckwfbpyh user_01m6padakwebsamf2z9b3v5wgg
+#> [1] user_01m6pbrb14eg7vm1qhaqh3xwpp user_01m6pbrb14eg88vf72rrmyjv7c
 upid(2, "user")
 #> <zuid_upid[2]>
-#> [1] user_2akutdpe5gmjoa2kumq2ha user_2akutdpe7p3yaarv5fjj4a
+#> [1] user_2akutj3g3tc55su5hqiu5a user_2akutj3g2atiuy2we5esca
 ```
