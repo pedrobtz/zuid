@@ -1,6 +1,6 @@
 ## Test environments
 
-* local: macOS 15.7 (x86_64), R 4.5.2
+* local: macOS 26.6 (arm64), R 4.6.1
 * GitHub Actions (pedrobtz/r-actions): macOS, Windows and Ubuntu on
   R-release, Windows on R-devel, and Ubuntu on R-oldrel-1
 * The `clang23`, `ubuntu-clang` and `ubuntu-gcc16` R-devel containers
@@ -23,6 +23,12 @@ The package implements published specifications rather than methods from
 the literature: RFC 9562 for UUIDs (cited in the Description), and the
 specifications of ULID, TypeID, UPID, SCRU128, SCRU64, KSUID, XID, BSON
 ObjectId, NanoID, Cuid2, Sqids, multiformats CID, Proquint and Niceware.
+
+## Relation to 'uuid'
+
+Unlike the 'uuid' package, it covers RFC 9562 versions 6 to 8 and related
+identifier formats, and it never falls back to a non-cryptographic random
+number generator.
 
 ## Data sources and copyright
 

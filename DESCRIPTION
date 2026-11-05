@@ -15,13 +15,15 @@ Description: Parses, validates, inspects and generates universally unique
     such as Crockford base32, base36, base58, base62, base64url, Proquint
     and Niceware words. The same functions read the fields and creation
     time of related identifier formats: Universally Unique Lexicographically
-    Sortable Identifiers (ULID), TypeID, UPID, SCRU128 and SCRU64 (Sortable,
-    Clock and Random number-based Unique identifiers), K-Sortable Unique
-    Identifiers (KSUID), Snowflake, XID, 'MongoDB' ObjectId, NanoID, Cuid2,
-    Sqids and content identifiers (CID). Detection never assumes a format
-    that the input does not prove. Identifiers are generated from the
-    operating system's entropy source, never from R's random number
-    generator. No other package is needed at run time.
+    Sortable Identifiers (ULID), TypeID, Universally Unique Prefixed
+    Lexicographically Sortable Identifiers (UPID), SCRU128 and SCRU64
+    (Sortable, Clock and Random number-based Unique identifiers),
+    K-Sortable Unique Identifiers (KSUID), Snowflake, XID, 'MongoDB'
+    ObjectId, NanoID, Cuid2, Sqids and content identifiers (CID).
+    Detection never assumes a format that the input does not prove.
+    Identifiers are generated from the operating system's entropy source,
+    never from R's random number generator. No other package is needed at
+    run time.
 License: MIT + file LICENSE
 Copyright: See inst/COPYRIGHTS.
 URL: https://github.com/pedrobtz/zuid, https://pedrobtz.github.io/zuid/
