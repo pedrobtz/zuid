@@ -63,7 +63,14 @@ test_that("printing and formatting show the canonical text", {
   expect_identical(unname(format(x))[1], "017f22e2-79b0-7cc3-98c4-dc0c0c07398f")
   expect_output(print(x), "<zuid_uuid\\[3\\]>")
   expect_output(print(x[0]), "<zuid_uuid\\[0\\]>")
-  expect_identical(as.character(x), unname(unclass(x)[1:3]) |> as.vector())
+  expect_identical(
+    as.character(x),
+    c(
+      "017f22e2-79b0-7cc3-98c4-dc0c0c07398f",
+      "c232ab00-9414-11ec-b3c8-9f6bdeced846",
+      NA
+    )
+  )
 })
 
 test_that("a zuid vector is a data frame column", {

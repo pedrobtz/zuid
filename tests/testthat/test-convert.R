@@ -30,7 +30,7 @@ test_that("a ULID read as a UUID reports what its bits say", {
   expect_identical(id_fields(x)$variant, "ncs")
 })
 
-test_that("conversions without a common value are convert errors", {
+test_that("conversions without a common value are type errors", {
   u <- id_parse("01890a5d-ac96-774b-bcce-b302099a8057", "uuid")
   expect_error(id_convert(u, "nope"), class = "zuid_type_error")
   expect_error(id_convert("x", "uuid"), class = "zuid_type_error")

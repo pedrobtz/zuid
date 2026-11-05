@@ -9,9 +9,10 @@
 #'     \item{`tables`}{a data frame with one row per generated table: its
 #'       name, the upstream `repo`, `commit` and `path`, the file's `sha256`,
 #'       and the number of `entries`.}
-#'     \item{`entropy`}{the operating-system entropy source compiled in:
+#'     \item{`entropy`}{the operating-system entropy source in use:
 #'       `"getrandom"`, `"getentropy"`, `"BCryptGenRandom"` or
-#'       `"arc4random_buf"`.}
+#'       `"arc4random_buf"`, or `"/dev/urandom"` once a Linux kernel without
+#'       `getrandom(2)` has fallen back to it.}
 #'     \item{`state`}{the session's monotonic generation state: the last
 #'       version 7 millisecond and counter, the last version 1 and 6 tick
 #'       and clock sequence, and the last ULID millisecond, `NA` before the

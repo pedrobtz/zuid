@@ -1,7 +1,9 @@
+# nocov start
 .onLoad <- function(libname, pkgname) {
   s3_register_vctrs()
   invisible()
 }
+# nocov end
 
 # vctrs methods, registered only when vctrs is loaded, so that zuid vectors
 # combine in tibbles and vctrs::vec_c() without vctrs being a dependency.

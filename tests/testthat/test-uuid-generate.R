@@ -164,7 +164,13 @@ test_that("zuid_info() reports the generation state", {
   info <- zuid_info()
   expect_true(
     info$entropy %in%
-      c("getrandom", "getentropy", "BCryptGenRandom", "arc4random_buf")
+      c(
+        "getrandom",
+        "/dev/urandom",
+        "getentropy",
+        "BCryptGenRandom",
+        "arc4random_buf"
+      )
   )
   expect_true(is.na(info$state$uuid7_last_ms))
   uuid(version = 7, time = 1645557742000)

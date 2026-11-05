@@ -274,7 +274,7 @@ SEXP zuid_c_cid_parse(SEXP x)
     SEXP nms = PROTECT(Rf_allocVector(STRSXP, 6));
     for (int j = 0; j < 6; j++) {
         SET_VECTOR_ELT(out, j, Rf_allocVector(types[j], n));
-        SET_STRING_ELT(nms, j, Rf_mkChar(names[j]));
+        SET_STRING_ELT(nms, j, zuid_mkchar(names[j], strlen(names[j])));
     }
     Rf_setAttrib(out, R_NamesSymbol, nms);
     for (R_xlen_t i = 0; i < n; i++) {

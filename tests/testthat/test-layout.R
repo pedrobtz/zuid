@@ -26,6 +26,7 @@ test_that("layouts compare by value and print as a field diagram", {
 })
 
 test_that("a custom layout is data and must add up", {
+  local_fresh_state()
   l <- id_layout(
     time = list(bits = 41, unit = "ms", epoch = 0),
     fields = list(worker = 10),
