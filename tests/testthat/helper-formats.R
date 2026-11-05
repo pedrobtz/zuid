@@ -1,8 +1,12 @@
 # TypeID's spec/valid.yml and spec/invalid.yml (tools/fixture-sources.yaml)
 # as data frames. A small reader for their flat list of mappings, since zuid
-# has no YAML dependency.
+# has no YAML dependency. The files are Apache-2.0, so .Rbuildignore keeps
+# them out of the package tarball and the tests that read them skip there.
 typeid_fixture <- function(name) {
-  lines <- readLines(test_path("fixtures", "typeid", name), encoding = "UTF-8")
+  testthat::skip_on_cran()
+  path <- test_path("fixtures", "typeid", name)
+  testthat::skip_if_not(file.exists(path), "TypeID fixtures are not built")
+  lines <- readLines(path, encoding = "UTF-8")
   lines <- lines[!grepl("^\\s*(#|$)", lines)]
   starts <- grep("^- ", lines)
   ends <- c(starts[-1L] - 1L, length(lines))

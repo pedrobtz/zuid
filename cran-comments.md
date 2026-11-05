@@ -30,6 +30,5 @@ The package vendors no code. Two tables are data taken unchanged from their
 upstreams and compiled in: the Niceware word list (MIT, Copyright (c) 2016
 yan) and the Sqids blocklist (MIT, Copyright (c) 2023 Sqids).
 `inst/COPYRIGHTS` states their sources, pinned commits and licence, and the
-`Copyright` field points to it. The tests carry TypeID's specification
-fixtures (Apache-2.0, Jetify Inc.), with the licence beside them. The
-three copyright holders are listed in `Authors@R` with the `cph` role.
+`Copyright` field points to it. Both copyright holders are listed in
+`Authors@R` with the `cph` role.
