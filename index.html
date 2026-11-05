@@ -59,7 +59,7 @@
 <!-- badges: start -->
 
 <p>Identifiers arrive as opaque strings: a UUID from a database, a ULID from a log line, a KSUID from an event stream, a Snowflake from a chat platform. Each one carries information, often a creation time, sometimes a node or a counter. Reading it means knowing which format the string is, and that is the step most code guesses at.</p>
-<p>zuid is a complete UUID implementation for R, with the formats around it. The core is <a href="https://www.rfc-editor.org/info/rfc9562/" class="external-link">RFC 9562</a> in full: versions 1 to 8, nil and max, and every text form. Around it are the same 128 bits in other alphabets, and fourteen kindred formats: ULID, TypeID, UPID, SCRU128, SCRU64, KSUID, Snowflake and Sonyflake, XID, ObjectId, NanoID, Cuid2, Sqids and CID. One <code>id_</code> vocabulary works across all of them.</p>
+<p>zuid is a complete UUID implementation for R, with the formats around it. The core is <a href="https://www.rfc-editor.org/info/rfc9562/" class="external-link">RFC 9562</a> in full: versions 1 to 8, nil and max, and every text form. Around it are the same 128 bits in other alphabets, and fourteen kindred formats: ULID, TypeID, UPID, SCRU128, SCRU64, KSUID, Snowflake and Sonyflake, XID, ObjectId, NanoID, Cuid2, Sqids and CID. Each format’s generator is named after it, and one <code>id_</code> vocabulary reads, checks and converts all of them.</p>
 <ul>
 <li>
 <strong>Detection never guesses.</strong> A string that could be two formats is <code>NA</code>, with the candidates listed. A hint settles it.</li>
@@ -137,14 +137,14 @@
 <span><span class="co">#&gt; [1] user_01hxnhrb9yf95rrqbefy0938nk</span></span></code></pre></div>
 <p>Generators read the clock and the operating system’s entropy once per call. Version 7 UUIDs and ULIDs are monotonic within a session:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/id_uuid.html">id_uuid</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="reference/uuid.html">uuid</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt; &lt;zuid_uuid[3]&gt;</span></span>
-<span><span class="co">#&gt; [1] 01a16ff6-c119-75e9-99de-dabb1581c624 01a16ff6-c119-75ea-af79-c40bd646988c</span></span>
-<span><span class="co">#&gt; [3] 01a16ff6-c119-75eb-8aed-1f58c8fc069e</span></span>
-<span><span class="fu"><a href="reference/id_ulid.html">id_ulid</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 01a1ab9e-45b4-733a-8622-f01f4357e063 01a1ab9e-45b4-733b-ba6a-ac9443264140</span></span>
+<span><span class="co">#&gt; [3] 01a1ab9e-45b4-733c-b6d1-18c903b1debd</span></span>
+<span><span class="fu"><a href="reference/ulid.html">ulid</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt; &lt;zuid_ulid[2]&gt;</span></span>
-<span><span class="co">#&gt; [1] 01M5QZDG8T7HPF5DZRYSN82N5G 01M5QZDG8T7HPF5DZRYSN82N5H</span></span></code></pre></div>
-<p>Every function starts with <code>id_</code> and takes the vector first. A function that inspects returns <code>NA</code> where the input says nothing; a function that builds raises a classed <code>zuid_error</code>.</p>
+<span><span class="co">#&gt; [1] 01M6NSWHDP667MEMNBW2F8SFFY 01M6NSWHDP667MEMNBW2F8SFFZ</span></span></code></pre></div>
+<p>A generator is named after its format, as in <code><a href="reference/uuid.html">uuid()</a></code> and <code><a href="reference/ulid.html">ulid()</a></code>. Every function that takes identifiers starts with <code>id_</code> and takes the vector first. A function that inspects returns <code>NA</code> where the input says nothing; a function that builds raises a classed <code>zuid_error</code>.</p>
 </div>
 <div class="section level2">
 <h2 id="learn-more">Learn more<a class="anchor" aria-label="anchor" href="#learn-more"></a>

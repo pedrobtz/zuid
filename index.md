@@ -11,8 +11,9 @@ it. The core is [RFC 9562](https://www.rfc-editor.org/info/rfc9562/) in
 full: versions 1 to 8, nil and max, and every text form. Around it are
 the same 128 bits in other alphabets, and fourteen kindred formats:
 ULID, TypeID, UPID, SCRU128, SCRU64, KSUID, Snowflake and Sonyflake,
-XID, ObjectId, NanoID, Cuid2, Sqids and CID. One `id_` vocabulary works
-across all of them.
+XID, ObjectId, NanoID, Cuid2, Sqids and CID. Each format’s generator is
+named after it, and one `id_` vocabulary reads, checks and converts all
+of them.
 
 - **Detection never guesses.** A string that could be two formats is
   `NA`, with the candidates listed. A hint settles it.
@@ -130,18 +131,21 @@ call. Version 7 UUIDs and ULIDs are monotonic within a session:
 
 ``` r
 
-id_uuid(3)
+uuid(3)
 #> <zuid_uuid[3]>
-#> [1] 01a16ff6-c119-75e9-99de-dabb1581c624 01a16ff6-c119-75ea-af79-c40bd646988c
-#> [3] 01a16ff6-c119-75eb-8aed-1f58c8fc069e
-id_ulid(2)
+#> [1] 01a1ab9e-45b4-733a-8622-f01f4357e063 01a1ab9e-45b4-733b-ba6a-ac9443264140
+#> [3] 01a1ab9e-45b4-733c-b6d1-18c903b1debd
+ulid(2)
 #> <zuid_ulid[2]>
-#> [1] 01M5QZDG8T7HPF5DZRYSN82N5G 01M5QZDG8T7HPF5DZRYSN82N5H
+#> [1] 01M6NSWHDP667MEMNBW2F8SFFY 01M6NSWHDP667MEMNBW2F8SFFZ
 ```
 
-Every function starts with `id_` and takes the vector first. A function
-that inspects returns `NA` where the input says nothing; a function that
-builds raises a classed `zuid_error`.
+A generator is named after its format, as in
+[`uuid()`](https://pedrobtz.github.io/zuid/reference/uuid.md) and
+[`ulid()`](https://pedrobtz.github.io/zuid/reference/ulid.md). Every
+function that takes identifiers starts with `id_` and takes the vector
+first. A function that inspects returns `NA` where the input says
+nothing; a function that builds raises a classed `zuid_error`.
 
 ## Learn more
 

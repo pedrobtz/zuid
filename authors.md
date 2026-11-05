@@ -10,9 +10,6 @@
 - **Sqids**. Copyright holder.  
   Authors of the Sqids blocklist, compiled into src/zuid_tables.c
 
-- **Jetify Inc.**. Copyright holder.  
-  TypeID specification fixtures, tests/testthat/fixtures/typeid/
-
 ## Citation
 
 Source:

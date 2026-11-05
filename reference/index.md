@@ -23,28 +23,28 @@
   [`print(`*`<zuid_layout>`*`)`](https://pedrobtz.github.io/zuid/reference/id_layout.md)
   [`format(`*`<zuid_layout>`*`)`](https://pedrobtz.github.io/zuid/reference/id_layout.md)
   : Snowflake and SCRU64 layouts
-- [`id_nanoid()`](https://pedrobtz.github.io/zuid/reference/id_nanoid.md)
-  [`id_sqids()`](https://pedrobtz.github.io/zuid/reference/id_nanoid.md)
-  : Generate NanoIDs and Sqids
-- [`id_nil()`](https://pedrobtz.github.io/zuid/reference/id_nil.md)
-  [`id_max()`](https://pedrobtz.github.io/zuid/reference/id_nil.md) :
-  The nil and max UUIDs
 - [`id_parse()`](https://pedrobtz.github.io/zuid/reference/id_parse.md)
   [`id_valid()`](https://pedrobtz.github.io/zuid/reference/id_parse.md)
   : Parse and validate identifiers
-- [`id_scru128()`](https://pedrobtz.github.io/zuid/reference/id_scru128.md)
-  [`id_scru64()`](https://pedrobtz.github.io/zuid/reference/id_scru128.md)
-  [`id_ksuid()`](https://pedrobtz.github.io/zuid/reference/id_scru128.md)
-  : Generate SCRU128, SCRU64 and KSUID values
-- [`id_ulid()`](https://pedrobtz.github.io/zuid/reference/id_ulid.md)
-  [`id_typeid()`](https://pedrobtz.github.io/zuid/reference/id_ulid.md)
-  [`id_upid()`](https://pedrobtz.github.io/zuid/reference/id_ulid.md) :
+- [`nanoid()`](https://pedrobtz.github.io/zuid/reference/nanoid.md)
+  [`sqids()`](https://pedrobtz.github.io/zuid/reference/nanoid.md) :
+  Generate NanoIDs and Sqids
+- [`scru128()`](https://pedrobtz.github.io/zuid/reference/scru128.md)
+  [`scru64()`](https://pedrobtz.github.io/zuid/reference/scru128.md)
+  [`ksuid()`](https://pedrobtz.github.io/zuid/reference/scru128.md) :
+  Generate SCRU128, SCRU64 and KSUID values
+- [`ulid()`](https://pedrobtz.github.io/zuid/reference/ulid.md)
+  [`typeid()`](https://pedrobtz.github.io/zuid/reference/ulid.md)
+  [`upid()`](https://pedrobtz.github.io/zuid/reference/ulid.md) :
   Generate ULIDs, TypeIDs and UPIDs
-- [`id_uuid()`](https://pedrobtz.github.io/zuid/reference/id_uuid.md) :
+- [`uuid()`](https://pedrobtz.github.io/zuid/reference/uuid.md) :
   Generate UUIDs
-- [`id_xid()`](https://pedrobtz.github.io/zuid/reference/id_xid.md)
-  [`id_objectid()`](https://pedrobtz.github.io/zuid/reference/id_xid.md)
-  [`id_snowflake()`](https://pedrobtz.github.io/zuid/reference/id_xid.md)
-  : Generate XIDs, ObjectIds and Snowflakes
+- [`uuid_nil()`](https://pedrobtz.github.io/zuid/reference/uuid_nil.md)
+  [`uuid_max()`](https://pedrobtz.github.io/zuid/reference/uuid_nil.md)
+  : The nil and max UUIDs
+- [`xid()`](https://pedrobtz.github.io/zuid/reference/xid.md)
+  [`objectid()`](https://pedrobtz.github.io/zuid/reference/xid.md)
+  [`snowflake()`](https://pedrobtz.github.io/zuid/reference/xid.md) :
+  Generate XIDs, ObjectIds and Snowflakes
 - [`zuid_info()`](https://pedrobtz.github.io/zuid/reference/zuid_info.md)
   : Describe this build of zuid

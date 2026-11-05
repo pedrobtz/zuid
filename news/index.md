@@ -8,10 +8,10 @@
 - A generator call given both `time` and `random` is a pure function of
   its arguments: the same arguments give the same identifiers, and the
   session’s monotonic state is left alone.
-- [`id_snowflake()`](https://pedrobtz.github.io/zuid/reference/id_xid.md)
+- [`snowflake()`](https://pedrobtz.github.io/zuid/reference/xid.md)
   takes `rollback = "reset"`, and keeps one sequence per layout shared
   by every worker, so alternating workers never repeat a value.
-  [`id_scru64()`](https://pedrobtz.github.io/zuid/reference/id_scru128.md)
+  [`scru64()`](https://pedrobtz.github.io/zuid/reference/scru128.md)
   keeps one state per node.
 - Version 7 UUIDs, TypeIDs, SCRU128 and SCRU64 raise
   `zuid_overflow_error` at the end of their time range instead of
@@ -27,9 +27,8 @@
   a `hint`. `id_parse(format = NULL)` detects one format for the whole
   vector, or raises `zuid_ambiguous_error` or `zuid_mixed_error`.
 - NanoID, Cuid2, Sqids and CID parse and validate, and
-  [`id_nanoid()`](https://pedrobtz.github.io/zuid/reference/id_nanoid.md)
-  and
-  [`id_sqids()`](https://pedrobtz.github.io/zuid/reference/id_nanoid.md)
+  [`nanoid()`](https://pedrobtz.github.io/zuid/reference/nanoid.md) and
+  [`sqids()`](https://pedrobtz.github.io/zuid/reference/nanoid.md)
   generate.
   [`id_parse()`](https://pedrobtz.github.io/zuid/reference/id_parse.md)
   and
@@ -42,10 +41,9 @@
   [`id_bytes()`](https://pedrobtz.github.io/zuid/reference/id_format.md)
   gives a CID’s binary form.
 - XID, ObjectId and Snowflake: parsing, fields and
-  [`id_xid()`](https://pedrobtz.github.io/zuid/reference/id_xid.md),
-  [`id_objectid()`](https://pedrobtz.github.io/zuid/reference/id_xid.md)
-  and
-  [`id_snowflake()`](https://pedrobtz.github.io/zuid/reference/id_xid.md).
+  [`xid()`](https://pedrobtz.github.io/zuid/reference/xid.md),
+  [`objectid()`](https://pedrobtz.github.io/zuid/reference/xid.md) and
+  [`snowflake()`](https://pedrobtz.github.io/zuid/reference/xid.md).
   [`id_layout()`](https://pedrobtz.github.io/zuid/reference/id_layout.md)
   gives the Twitter, Discord, Instagram, Sonyflake and SCRU64 layouts
   and builds custom ones; a Snowflake is read and generated only under a
@@ -53,10 +51,9 @@
   [`id_convert()`](https://pedrobtz.github.io/zuid/reference/id_convert.md)
   moves between `xid` and `objectid`.
 - SCRU128, SCRU64 and KSUID parse, validate and read their fields, and
-  [`id_scru128()`](https://pedrobtz.github.io/zuid/reference/id_scru128.md),
-  [`id_scru64()`](https://pedrobtz.github.io/zuid/reference/id_scru128.md)
-  and
-  [`id_ksuid()`](https://pedrobtz.github.io/zuid/reference/id_scru128.md)
+  [`scru128()`](https://pedrobtz.github.io/zuid/reference/scru128.md),
+  [`scru64()`](https://pedrobtz.github.io/zuid/reference/scru128.md) and
+  [`ksuid()`](https://pedrobtz.github.io/zuid/reference/scru128.md)
   generate them. The SCRU generators follow their references: monotonic,
   with counter overflow moving the timestamp forward, and a clock
   rollback beyond the tolerance a `zuid_clock_error` unless
@@ -66,13 +63,12 @@
   [`id_valid()`](https://pedrobtz.github.io/zuid/reference/id_parse.md),
   [`id_fields()`](https://pedrobtz.github.io/zuid/reference/id_fields.md)
   and the rest read them, and
-  [`id_ulid()`](https://pedrobtz.github.io/zuid/reference/id_ulid.md),
-  [`id_typeid()`](https://pedrobtz.github.io/zuid/reference/id_ulid.md)
-  and
-  [`id_upid()`](https://pedrobtz.github.io/zuid/reference/id_ulid.md)
-  generate them. ULIDs from one session strictly increase, by the
-  specification’s rule, with `zuid_overflow_error` when the random
-  component would overflow.
+  [`ulid()`](https://pedrobtz.github.io/zuid/reference/ulid.md),
+  [`typeid()`](https://pedrobtz.github.io/zuid/reference/ulid.md) and
+  [`upid()`](https://pedrobtz.github.io/zuid/reference/ulid.md) generate
+  them. ULIDs from one session strictly increase, by the specification’s
+  rule, with `zuid_overflow_error` when the random component would
+  overflow.
 - [`id_convert()`](https://pedrobtz.github.io/zuid/reference/id_convert.md)
   moves values between `uuid`, `ulid`, `typeid` and `upid`, keeping the
   bytes; other pairs are a `zuid_convert_error`.
@@ -88,7 +84,7 @@
   [`id_format()`](https://pedrobtz.github.io/zuid/reference/id_format.md)
   and
   [`id_parse()`](https://pedrobtz.github.io/zuid/reference/id_parse.md).
-- [`id_uuid()`](https://pedrobtz.github.io/zuid/reference/id_uuid.md)
+- [`uuid()`](https://pedrobtz.github.io/zuid/reference/uuid.md)
   generates UUID versions 1, 4, 6, 7 (the default) and 8 from the
   operating system’s entropy source, never R’s random number generator.
   Version 7 values from one session strictly increase, and `random` and
@@ -114,8 +110,9 @@
   move between text forms and bytes;
   [`id_from_bytes()`](https://pedrobtz.github.io/zuid/reference/id_format.md)
   has no default format.
-- [`id_nil()`](https://pedrobtz.github.io/zuid/reference/id_nil.md),
-  [`id_max()`](https://pedrobtz.github.io/zuid/reference/id_nil.md) and
+- [`uuid_nil()`](https://pedrobtz.github.io/zuid/reference/uuid_nil.md),
+  [`uuid_max()`](https://pedrobtz.github.io/zuid/reference/uuid_nil.md)
+  and
   [`id_formats()`](https://pedrobtz.github.io/zuid/reference/id_formats.md).
 - zuid vectors keep their class through subsetting, assignment,
   [`c()`](https://rdrr.io/r/base/c.html),
