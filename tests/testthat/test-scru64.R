@@ -71,13 +71,22 @@ test_that("generated SCRU64 IDs strictly increase and round-trip", {
     scru64(1, node = 1, node_bits = 8, time = 1.7e12 - 60000),
     class = "zuid_clock_error"
   )
-  expect_no_error(scru64(
+  r <- scru64(
     1,
     node = 1,
     node_bits = 8,
     time = 1.7e12 - 60000,
     rollback = "reset"
-  ))
+  )
+  expect_identical(id_time(r, "ms"), floor((1.7e12 - 60000) / 256) * 256)
+})
+
+test_that("a SCRU64 rollback within the tolerance keeps increasing", {
+  local_fresh_state()
+  a <- scru64(1, node = 1, node_bits = 8, time = 1.7e12)
+  b <- scru64(1, node = 1, node_bits = 8, time = 1.7e12 - 5000)
+  expect_true(strictly_increasing(c(a, b)))
+  expect_identical(id_time(b, "ms"), id_time(a, "ms"))
 })
 
 test_that("node and node_bits are required and checked", {

@@ -218,3 +218,21 @@ test_that("id_valid() checks a zuid vector under its own parameters", {
   # A vector of another format is only text.
   expect_identical(id_valid(uuid_nil(), "ulid"), FALSE)
 })
+
+test_that("an empty Sqid is valid and combines", {
+  x <- sqids(list(numeric(), c(1, 2)))
+  expect_identical(as.character(x)[[1]], "")
+  expect_identical(id_valid(x, "sqids", level = "syntax"), c(TRUE, TRUE))
+  expect_identical(id_valid(x, "sqids"), c(TRUE, TRUE))
+  expect_identical(id_fields(x)$numbers[[1]], numeric())
+  expect_identical(as.character(c(x, x[1])), c("", as.character(x)[2], ""))
+  y <- x
+  y[2] <- ""
+  expect_identical(as.character(y), c("", ""))
+})
+
+test_that("a Sqids element is missing whole or not at all", {
+  x <- sqids(list(NA, NULL, c(1, 2)))
+  expect_identical(is.na(x), c(TRUE, TRUE, FALSE))
+  expect_error(sqids(list(c(1, NA))), class = "zuid_type_error")
+})

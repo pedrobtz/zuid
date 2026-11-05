@@ -26,6 +26,6 @@ test_that("table entry counts match the recorded sources", {
   tables <- zuid_info()$tables
   expect_identical(
     tables$entries[match(c("niceware_words", "sqids_blocklist"), tables$table)],
-    c(length(zuid:::niceware_words), length(zuid:::sqids_blocklist))
+    c(65536L, 560L)
   )
 })

@@ -1,5 +1,7 @@
 test_that("every valid TypeID fixture decodes to its prefix and UUID", {
   v <- typeid_fixture("valid.yml")
+  # The row count recorded in tools/fixture-sources.yaml.
+  expect_identical(nrow(v), 9L)
   x <- id_parse(v$typeid, "typeid")
   expect_identical(as.character(x), v$typeid)
   expect_identical(id_fields(x)$prefix, v$prefix)
@@ -21,6 +23,7 @@ test_that("every valid TypeID fixture encodes from its prefix and UUID", {
 
 test_that("every invalid TypeID fixture is rejected", {
   i <- typeid_fixture("invalid.yml")
+  expect_identical(nrow(i), 21L)
   expect_identical(id_valid(i$typeid, "typeid"), rep(FALSE, nrow(i)))
   expect_true(all(is.na(id_parse(i$typeid, "typeid"))))
 })

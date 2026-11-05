@@ -237,7 +237,7 @@ test_that("bytes come as a raw vector, a list or a matrix", {
   )
   expect_identical(
     id_encode(id_bytes(x), "base58"),
-    c("Xe22UfxT3rxcKJEAfL5373", NA)
+    c(a = "Xe22UfxT3rxcKJEAfL5373", b = NA)
   )
   expect_identical(
     id_decode(c(k = "Xe22UfxT3rxcKJEAfL5373"), "base58"),

@@ -56,12 +56,9 @@ as_zuid_like <- function(value, like, call = sys.call(-1L)) {
   format <- zuid_format_of(like)
   if (is_zuid(value)) {
     if (!identical(stored_params(value), stored_params(like))) {
+      same_layout <- identical(attr(value, "layout"), attr(like, "layout"))
       zuid_abort(
-        if (identical(attr(value, "layout"), attr(like, "layout"))) {
-          "type"
-        } else {
-          "layout"
-        },
+        if (same_layout) "type" else "layout",
         "Can't combine zuid vectors with different layouts or alphabets.",
         call = call
       )
@@ -187,10 +184,7 @@ Ops.zuid <- function(e1, e2) {
   }
   like <- if (is_zuid(e1)) e1 else e2
   canon <- function(v) {
-    if (is_zuid(v)) {
-      return(as.character(v))
-    }
-    if (!is.character(v)) {
+    if (is_zuid(v) || !is.character(v)) {
       return(as.character(v))
     }
     # A string that does not parse cannot equal any identifier, so it is

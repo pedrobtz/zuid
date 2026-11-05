@@ -124,22 +124,26 @@ is_whole <- function(x) {
 # The text a generator entry point returned, or the condition it signalled:
 # NULL for an entropy failure, a positive integer for the position of a
 # clock rollback, a negative one for a timestamp past the format's range.
-generated <- function(out, format, call = sys.call(-1L)) {
+generated <- function(
+  out,
+  format,
+  layout = NULL,
+  tolerance = "zuid.rollback_tolerance",
+  overflow = sprintf("past the largest %s timestamp", format),
+  call = sys.call(-1L)
+) {
   if (is.null(out)) {
-    zuid_abort(
-      "entropy",
-      "The operating system's entropy source failed.",
-      call = call
-    )
+    abort_entropy(call = call)
   }
   if (is.integer(out) && out > 0L) {
     zuid_abort(
       "clock",
       sprintf(
         paste(
-          "The clock ran back by more than `zuid.rollback_tolerance` at value",
-          "%d; use `rollback = \"reset\"` to restart the generator."
+          "The clock ran back by more than `%s` at value %d;",
+          "use `rollback = \"reset\"` to restart the generator."
         ),
+        tolerance,
         out
       ),
       call = call
@@ -148,11 +152,11 @@ generated <- function(out, format, call = sys.call(-1L)) {
   if (is.integer(out)) {
     zuid_abort(
       "overflow",
-      sprintf("Value %d is past the largest %s timestamp.", -out, format),
+      sprintf("Value %d is %s.", -out, overflow),
       call = call
     )
   }
-  new_zuid(out, format)
+  new_zuid(out, format, layout)
 }
 
 #' Generate XIDs, ObjectIds and Snowflakes
@@ -188,8 +192,6 @@ generated <- function(out, format, call = sys.call(-1L)) {
 #' @param layout An [id_layout()].
 #' @param worker The node fields' values: one number when the layout has one
 #'   node field, else a named list, such as `list(datacenter = 1, worker = 7)`.
-#' @param time `NULL` for the current time, or a `POSIXct` (or a double of
-#'   milliseconds since 1970) of length 1 or `n`.
 #' @param rollback For `snowflake()`, what to do when the clock (or
 #'   `time`) runs back further than the tolerance: `"error"` or `"reset"`.
 #' @return A zuid vector of `n` values.
@@ -250,7 +252,10 @@ snowflake <- function(
       zuid_abort(
         "type",
         sprintf(
-          "This layout has %d node fields; give `worker` as a named list of %s.",
+          paste(
+            "This layout has %d node fields; give `worker` as a named list",
+            "of %s."
+          ),
           length(nodes),
           paste(nodes, collapse = ", ")
         )
@@ -309,25 +314,13 @@ snowflake <- function(
     tolerance,
     rollback == "reset"
   )
-  if (is.integer(out) && out > 0L) {
-    zuid_abort(
-      "clock",
-      sprintf(
-        paste(
-          "The clock ran back by more than `zuid.clock_tolerance` at value",
-          "%d; use `rollback = \"reset\"` to restart the generator."
-        ),
-        out
-      )
-    )
-  }
-  if (is.integer(out)) {
-    zuid_abort(
-      "overflow",
-      sprintf("Value %d is past the layout's time range.", -out)
-    )
-  }
-  new_zuid(out, "snowflake", layout)
+  generated(
+    out,
+    "snowflake",
+    layout,
+    tolerance = "zuid.clock_tolerance",
+    overflow = "past the layout's time range"
+  )
 }
 
 # Whole seconds since 1970 per value, for the 32-bit second formats.
@@ -337,19 +330,4 @@ generation_seconds <- function(time, n, what, call = sys.call(-1L)) {
     us <- rep(as.numeric(Sys.time()) * 1e6, n)
   }
   floor(us / 1e6)
-}
-
-# Seconds. The option may be a number of seconds or a difftime.
-clock_tolerance <- function() {
-  tol <- getOption("zuid.clock_tolerance", 0.01)
-  if (inherits(tol, "difftime")) {
-    tol <- as.numeric(tol, units = "secs")
-  }
-  if (!is.numeric(tol) || length(tol) != 1L || is.na(tol) || tol < 0) {
-    zuid_abort(
-      "type",
-      "The option `zuid.clock_tolerance` must be a non-negative number of seconds."
-    )
-  }
-  tol
 }

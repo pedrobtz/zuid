@@ -66,3 +66,17 @@ test_that("nil and max are the all-zero and all-one UUIDs", {
   expect_identical(id_bytes(uuid_max())[, 1], as.raw(rep(0xff, 16)))
   expect_s3_class(uuid_nil(), "zuid_uuid")
 })
+
+test_that("names survive id_bytes() and id_from_bytes()", {
+  x <- id_parse(
+    c(a = "018f6b1c-2d3e-7a4b-8c5d-6e7f8091a2b3", b = NA),
+    "uuid"
+  )
+  b <- id_bytes(x)
+  expect_identical(colnames(b), c("a", "b"))
+  expect_identical(names(id_from_bytes(b, "uuid")), c("a", "b"))
+  l <- list(a = b[, 1], b = NULL)
+  expect_identical(names(id_from_bytes(l, "uuid")), c("a", "b"))
+  expect_null(names(id_from_bytes(as.vector(b[, 1]), "uuid")))
+  expect_null(colnames(id_bytes(unname(x))))
+})

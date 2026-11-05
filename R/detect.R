@@ -46,20 +46,11 @@ id_detect <- function(x, hint = NULL, layout = NULL) {
   if (!length(x)) {
     return(structure(character(), candidates = list()))
   }
+  kind <- layout_kind(layout)
   passes <- vapply(
     pool,
     function(f) {
-      lay <- if (
-        f %in%
-          c("snowflake", "scru64") &&
-          !is.null(layout) &&
-          (f == "scru64") == (layout$name == "scru64")
-      ) {
-        layout
-      } else {
-        NULL
-      }
-      ok <- id_valid(x, f, layout = lay)
+      ok <- id_valid(x, f, layout = if (identical(f, kind)) layout)
       ok & !is.na(ok)
     },
     logical(length(x))
@@ -68,7 +59,7 @@ id_detect <- function(x, hint = NULL, layout = NULL) {
     passes <- matrix(passes, nrow = length(x), dimnames = list(NULL, pool))
   }
   # SCRU64 is chosen only under a SCRU64 layout.
-  choosable <- pool != "scru64" | (!is.null(layout) && layout$name == "scru64")
+  choosable <- pool != "scru64" | identical(kind, "scru64")
   # Over the pass matrix at once: the candidates in pool order, and the
   # answer where exactly one choosable format passes.
   hit <- which(passes, arr.ind = TRUE)
@@ -118,11 +109,18 @@ detection_pool <- function(hint, layout, call = sys.call(-1L)) {
     }
     pool <- c(intersect(structured, hint), setdiff(unique(hint), structured))
   }
-  snowflake_layout <- !is.null(layout) && layout$name != "scru64"
-  if (!snowflake_layout) {
+  if (!identical(layout_kind(layout), "snowflake")) {
     pool <- setdiff(pool, "snowflake")
   }
   pool
+}
+
+# The format a layout is for: "scru64", "snowflake", or NULL for no layout.
+layout_kind <- function(layout) {
+  if (is.null(layout)) {
+    return(NULL)
+  }
+  if (layout$name == "scru64") "scru64" else "snowflake"
 }
 
 # The one format every element of `x` resolves to, for id_parse().

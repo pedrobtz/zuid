@@ -415,7 +415,11 @@ What each carries, and what `id_fields()` can therefore read:
 - **`scru64`.** Time in 256 ms units in the upper bits and a 24-bit tail
   split into a node id of `node_bits` (1 to 23) and a counter. 12 base36
   characters, below 2⁶³ so it fits a signed 64-bit integer. The split is
-  a layout (§6.8), given as `node_bits` or a hint.
+  a layout (§6.8), given as `node_bits` or a hint. Timestamps 0 and
+  36¹² / 2²⁴ − 1 (282429536480) are reserved and fail `structure`: the
+  `scru64/spec` README says IDs with them "are reserved for special
+  purposes … and must not be used or assigned as an identifier of
+  anything".
 - **`ksuid`.** 32 bits of seconds since `1400000000`
   (2014-05-13T16:53:20Z) and 128 random bits. Base62 over `0-9A-Za-z`
   preserves order; the maximum is `aWgEPTl1tmebfsQzFP4bxwgy80V`.

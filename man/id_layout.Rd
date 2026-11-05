@@ -59,7 +59,7 @@ The built-in layouts:\tabular{llll}{
    \code{discord} \tab 42 bits, ms, from 2015-01-01 \tab \code{worker} 5, \code{process} 5 \tab 12 \cr
    \code{instagram} \tab 41 bits, ms, from 2011-08-24T21:07:01.721Z \tab \code{shard} 13 \tab 10 \cr
    \code{sonyflake} \tab 39 bits, 10 ms, from \code{epoch} \tab \code{machine} 16, after the sequence \tab 8 \cr
-   \code{scru64} \tab 39 bits, 256 ms, from 1970 \tab \code{node} of \code{node_bits} \tab 24 − \code{node_bits} \cr
+   \code{scru64} \tab 39 bits, 256 ms, from 1970 \tab \code{node} of \code{node_bits} \tab 24 - \code{node_bits} \cr
 }
 
 
@@ -69,7 +69,8 @@ start time between releases, so \code{epoch} is required for it.
 
 A custom layout gives \code{time}, \code{fields}, \code{sequence} and \code{sign_bit}. The
 bits must add up to 64, or 63 with the sign bit, and each part must have
-fewer than 54 bits, so that it reads exactly as a double.
+fewer than 54 bits, so that it reads exactly as a double. The sequence
+has at most 31 bits, so that \code{\link[=id_fields]{id_fields()}} returns it as an integer.
 }
 \examples{
 id_layout("twitter")

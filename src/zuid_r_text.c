@@ -203,7 +203,13 @@ SEXP zuid_c_sqids_parse(SEXP x, SEXP alphabet, SEXP min_length,
         }
         const char *c = CHAR(s);
         size_t len = (size_t) LENGTH(s);
-        int syntax = len > 0;
+        /* The specification encodes no numbers as the empty string. */
+        if (len == 0) {
+            SET_VECTOR_ELT(nums, i, Rf_allocVector(REALSXP, 0));
+            INTEGER(level)[i] = 3;
+            continue;
+        }
+        int syntax = 1;
         for (size_t k = 0; k < len && syntax; k++) {
             unsigned char ch = (unsigned char) c[k];
             syntax = ch <= 127 && arg.s.present[ch];
@@ -211,7 +217,9 @@ SEXP zuid_c_sqids_parse(SEXP x, SEXP alphabet, SEXP min_length,
         INTEGER(level)[i] = syntax ? 1 : 0;
         if (!syntax) continue;
         const void *vmax = vmaxget();
-        uint64_t *v = (uint64_t *) R_alloc(len, sizeof(uint64_t));
+        /* A prefix, then numbers of at least one symbol each, separated:
+           no more than len / 2 + 1 of them. */
+        uint64_t *v = (uint64_t *) R_alloc(len / 2 + 1, sizeof(uint64_t));
         long count = zuid_sqids_decode(&arg.s, c, len, v);
         if (count > 0) {
             char *buf = R_alloc(zuid_sqids_max_len(&arg.s, (size_t) count), 1);
@@ -266,7 +274,7 @@ SEXP zuid_c_cid_parse(SEXP x)
     SEXP nms = PROTECT(Rf_allocVector(STRSXP, 6));
     for (int j = 0; j < 6; j++) {
         SET_VECTOR_ELT(out, j, Rf_allocVector(types[j], n));
-        SET_STRING_ELT(nms, j, Rf_mkChar(names[j]));
+        SET_STRING_ELT(nms, j, zuid_mkchar(names[j], strlen(names[j])));
     }
     Rf_setAttrib(out, R_NamesSymbol, nms);
     for (R_xlen_t i = 0; i < n; i++) {

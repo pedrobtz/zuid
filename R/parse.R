@@ -109,13 +109,9 @@ id_parse <- function(
 
 # A zuid vector's own parameters stand unless the call gives others.
 with_own_params <- function(params, x, default_min_length) {
-  own <- zuid_params(x)
-  if (is.null(params$layout)) {
-    params$layout <- own$layout
-  }
-  if (is.null(params$alphabet)) {
-    params$alphabet <- own$alphabet
-  }
+  own <- stored_params(x)
+  params$layout <- params$layout %||% own$layout
+  params$alphabet <- params$alphabet %||% own$alphabet
   if (default_min_length) {
     params$min_length <- own$min_length
   }
@@ -260,21 +256,6 @@ layout_levels <- function(x, level, layout, now) {
 
 level_number <- function(level) {
   match(level, c("syntax", "structure", "strict"))
-}
-
-# Seconds. The option may be a number of seconds or a difftime.
-time_tolerance <- function() {
-  tol <- getOption("zuid.time_tolerance", 86400)
-  if (inherits(tol, "difftime")) {
-    tol <- as.numeric(tol, units = "secs")
-  }
-  if (!is.numeric(tol) || length(tol) != 1L || is.na(tol) || tol < 0) {
-    zuid_abort(
-      "type",
-      "The option `zuid.time_tolerance` must be a non-negative number of seconds."
-    )
-  }
-  tol
 }
 
 known_formats <- function() {

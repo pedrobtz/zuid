@@ -43,6 +43,11 @@ static int read_urandom(uint8_t *buf, size_t n)
 }
 #endif
 
+#if defined(__linux__)
+/* Set once the /dev/urandom fallback has run, for zuid_entropy_source(). */
+static int urandom_used;
+#endif
+
 /* Set by the tests through zuid_c_entropy_fail(), so that the failure
  * branches of every generator can be reached. */
 static int entropy_fails;
@@ -70,7 +75,10 @@ int zuid_entropy(uint8_t *buf, size_t n)
     while (n > 0) {
         ssize_t got = getrandom(buf, n, 0);
         if (got < 0 && errno == EINTR) continue;
-        if (got < 0 && errno == ENOSYS) return read_urandom(buf, n);
+        if (got < 0 && errno == ENOSYS) {
+            urandom_used = 1;
+            return read_urandom(buf, n);
+        }
         if (got <= 0) return -1;
         buf += got;
         n -= (size_t) got;
@@ -96,7 +104,7 @@ const char *zuid_entropy_source(void)
 #if defined(_WIN32)
     return "BCryptGenRandom";
 #elif defined(__linux__)
-    return "getrandom";
+    return urandom_used ? "/dev/urandom" : "getrandom";
 #elif defined(__APPLE__)
     return "getentropy";
 #else

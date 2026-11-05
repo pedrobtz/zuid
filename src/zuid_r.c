@@ -254,7 +254,7 @@ SEXP zuid_c_fields(SEXP x, SEXP format)
                         STRSXP,  INTSXP,  STRSXP, STRSXP, INTSXP};
     for (int j = 0; j < 10; j++) {
         SET_VECTOR_ELT(out, j, Rf_allocVector(types[j], n));
-        SET_STRING_ELT(nms, j, Rf_mkChar(names[j]));
+        SET_STRING_ELT(nms, j, zuid_mkchar(names[j], strlen(names[j])));
     }
     Rf_setAttrib(out, R_NamesSymbol, nms);
     double *ts = REAL(VECTOR_ELT(out, 0)), *tns = REAL(VECTOR_ELT(out, 1));
@@ -301,7 +301,7 @@ SEXP zuid_c_formats(void)
     for (int j = 0; j < ncol; j++) {
         int is_int = j >= 2 && j <= 4;
         SET_VECTOR_ELT(out, j, Rf_allocVector(is_int ? INTSXP : STRSXP, n));
-        SET_STRING_ELT(nms, j, Rf_mkChar(names[j]));
+        SET_STRING_ELT(nms, j, zuid_mkchar(names[j], strlen(names[j])));
     }
     Rf_setAttrib(out, R_NamesSymbol, nms);
     for (int i = 0; i < n; i++) {

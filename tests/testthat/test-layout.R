@@ -26,6 +26,7 @@ test_that("layouts compare by value and print as a field diagram", {
 })
 
 test_that("a custom layout is data and must add up", {
+  local_fresh_state()
   l <- id_layout(
     time = list(bits = 41, unit = "ms", epoch = 0),
     fields = list(worker = 10),
@@ -114,4 +115,35 @@ test_that("a SCRU64 layout reads its node and counter", {
     id_parse("0u2pf62ji4b9", "scru64", layout = id_layout("twitter")),
     class = "zuid_layout_error"
   )
+})
+
+test_that("a custom sequence has at most 31 bits", {
+  expect_error(
+    id_layout(
+      time = list(bits = 11, unit = "ms", epoch = 0),
+      fields = list(worker = 10),
+      sequence = 42
+    ),
+    class = "zuid_layout_error"
+  )
+  lay <- id_layout(
+    time = list(bits = 22, unit = "ms", epoch = 0),
+    fields = list(worker = 10),
+    sequence = 31
+  )
+  x <- id_parse("9223372036854775807", "snowflake", layout = lay)
+  expect_no_warning(f <- id_fields(x))
+  expect_identical(f$sequence, 2147483647L)
+})
+
+test_that("built-in layout errors report id_layout() as their call", {
+  e <- tryCatch(id_layout("nope"), zuid_layout_error = identity)
+  expect_identical(e$call[[1]], as.name("id_layout"))
+  e <- tryCatch(
+    id_layout("scru64", node_bits = 30),
+    zuid_layout_error = identity
+  )
+  expect_identical(e$call[[1]], as.name("id_layout"))
+  e <- tryCatch(id_layout("twitter", epoch = 0), zuid_layout_error = identity)
+  expect_identical(e$call[[1]], as.name("id_layout"))
 })

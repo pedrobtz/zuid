@@ -65,7 +65,7 @@ SEXP zuid_c_state(void)
                            "uuid1_clock_seq",  "ulid_last_ms"};
     SEXP out = PROTECT(Rf_allocVector(VECSXP, 6));
     SEXP nms = PROTECT(Rf_allocVector(STRSXP, 6));
-    for (int i = 0; i < 6; i++) SET_STRING_ELT(nms, i, Rf_mkChar(names[i]));
+    for (int i = 0; i < 6; i++) SET_STRING_ELT(nms, i, zuid_mkchar(names[i], strlen(names[i])));
     Rf_setAttrib(out, R_NamesSymbol, nms);
     const char *src = zuid_entropy_source();
     SET_VECTOR_ELT(out, 0, Rf_ScalarString(zuid_mkchar(src, strlen(src))));

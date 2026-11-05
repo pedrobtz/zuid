@@ -13,9 +13,10 @@ A list with elements:
 \item{\code{tables}}{a data frame with one row per generated table: its
 name, the upstream \code{repo}, \code{commit} and \code{path}, the file's \code{sha256},
 and the number of \code{entries}.}
-\item{\code{entropy}}{the operating-system entropy source compiled in:
+\item{\code{entropy}}{the operating-system entropy source in use:
 \code{"getrandom"}, \code{"getentropy"}, \code{"BCryptGenRandom"} or
-\code{"arc4random_buf"}.}
+\code{"arc4random_buf"}, or \code{"/dev/urandom"} once a Linux kernel without
+\code{getrandom(2)} has fallen back to it.}
 \item{\code{state}}{the session's monotonic generation state: the last
 version 7 millisecond and counter, the last version 1 and 6 tick
 and clock sequence, and the last ULID millisecond, \code{NA} before the

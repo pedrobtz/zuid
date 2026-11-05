@@ -23,9 +23,15 @@
   `min_length` for NanoID and Sqids, and the parameters travel with the
   vector. `id_fields()` reads a Sqid's numbers and a CID's version, codec,
   hash function and digest, and `id_bytes()` gives a CID's binary form.
+  A Sqid of no numbers is `""` and parses back, as the specification says;
+  a NanoID has at least one symbol. A `sqids()` element that is partly
+  `NA` is an error.
+* `id_bytes()` and `id_from_bytes()` keep names, as column names or list
+  names. For a CID, `id_bytes()` returns a list of raw vectors.
 * XID, ObjectId and Snowflake: parsing, fields and `xid()`,
   `objectid()` and `snowflake()`. `id_layout()` gives the Twitter,
-  Discord, Instagram, Sonyflake and SCRU64 layouts and builds custom ones; a
+  Discord, Instagram, Sonyflake and SCRU64 layouts and builds custom ones,
+  whose sequence has at most 31 bits so it reads as an integer; a
   Snowflake is read and generated only under a layout, which travels with
   the vector. `id_convert()` moves between `xid` and `objectid`.
 * SCRU128, SCRU64 and KSUID parse, validate and read their fields, and

@@ -60,7 +60,7 @@ id_convert <- function(x, to, prefix = NULL) {
   bytes <- id_bytes(x)
   if (to == "typeid") {
     suffix <- tolower(id_encode(bytes, "base32"))
-    prefix <- if (is.null(prefix)) "" else prefix
+    prefix <- prefix %||% ""
     text <- if (nzchar(prefix)) paste0(prefix, "_", suffix) else suffix
     text[is.na(suffix)] <- NA_character_
     out <- new_zuid(text, "typeid")

@@ -5,6 +5,8 @@
 
 #include "zuid_formats.h"
 
+/* The stubs are never called, by design. */
+/* # nocov start */
 static int no_form(const char *form)
 {
     (void) form;
@@ -47,6 +49,8 @@ static void no_fields(const uint8_t *b, const zuid_prefix *pfx, zuid_fields *f)
     zuid_fields_clear(f);
 }
 
+/* # nocov end */
+
 #define TEXT_FORMAT(id, name, cls, min, max, alphabet, case_rule)           \
     const zuid_format id = {name,      cls,       0,         min,           \
                             max,       alphabet,  case_rule, NULL,          \
@@ -57,7 +61,7 @@ TEXT_FORMAT(zuid_fmt_nanoid, "nanoid", ZUID_CLASS_SYNTACTIC, 1, 0,
             "A-Za-z0-9_- (or the caller's)", "case-sensitive");
 TEXT_FORMAT(zuid_fmt_cuid2, "cuid2", ZUID_CLASS_SYNTACTIC, 2, 32, "0-9a-z",
             "lower");
-TEXT_FORMAT(zuid_fmt_sqids, "sqids", ZUID_CLASS_ENCODING, 1, 0,
+TEXT_FORMAT(zuid_fmt_sqids, "sqids", ZUID_CLASS_ENCODING, 0, 0,
             "a-zA-Z0-9 (or the caller's)", "case-sensitive");
 TEXT_FORMAT(zuid_fmt_cid, "cid", ZUID_CLASS_STRUCTURED, 2, 0,
             "a multibase", "the multibase's");

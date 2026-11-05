@@ -8,33 +8,20 @@ test_that("detection follows section 6.2 for every collision it names", {
 })
 
 test_that("no encoding or syntactic format is chosen without a hint (D10)", {
-  withr::local_seed(1)
+  random <- as.raw(rep(0:255, 64))
   x <- c(
-    as.character(nanoid(50)),
+    as.character(nanoid(50, random = random)),
     as.character(nanoid(
       50,
       size = 12,
-      alphabet = "0123456789abcdefghijklmnopqrstuvwxyz"
+      alphabet = "0123456789abcdefghijklmnopqrstuvwxyz",
+      random = random
     )),
     as.character(sqids(1:50)),
     "tz4a98xxat96iws9zmbrgj3a"
   )
   d <- id_detect(x)
-  chosen <- unique(d[!is.na(d)])
-  expect_true(all(
-    chosen %in%
-      c(
-        "uuid",
-        "ulid",
-        "typeid",
-        "upid",
-        "scru128",
-        "ksuid",
-        "xid",
-        "objectid",
-        "cid"
-      )
-  ))
+  expect_true(all(is.na(d)))
   expect_false(any(
     c("nanoid", "cuid2", "sqids") %in% unlist(attr(d, "candidates"))
   ))
