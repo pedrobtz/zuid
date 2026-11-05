@@ -17,3 +17,4 @@
 ^\.worktrees$
 ^tools/fuzz$
 ^README\.Rmd$
+^tests/testthat/fixtures/typeid$

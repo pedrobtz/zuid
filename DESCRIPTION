@@ -7,9 +7,7 @@ Authors@R: c(
     person("yan", role = "cph",
            comment = "Author of the Niceware word list, compiled into src/zuid_tables.c"),
     person("Sqids", role = "cph",
-           comment = "Authors of the Sqids blocklist, compiled into src/zuid_tables.c"),
-    person("Jetify Inc.", role = "cph",
-           comment = "TypeID specification fixtures, tests/testthat/fixtures/typeid/")
+           comment = "Authors of the Sqids blocklist, compiled into src/zuid_tables.c")
   )
 Description: Parses, validates, inspects and generates universally unique
     identifiers (UUIDs) of every version defined by RFC 9562
