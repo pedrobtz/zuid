@@ -115,3 +115,22 @@ test_that("a SCRU64 layout reads its node and counter", {
     class = "zuid_layout_error"
   )
 })
+
+test_that("a custom sequence has at most 31 bits", {
+  expect_error(
+    id_layout(
+      time = list(bits = 11, unit = "ms", epoch = 0),
+      fields = list(worker = 10),
+      sequence = 42
+    ),
+    class = "zuid_layout_error"
+  )
+  lay <- id_layout(
+    time = list(bits = 22, unit = "ms", epoch = 0),
+    fields = list(worker = 10),
+    sequence = 31
+  )
+  x <- id_parse("9223372036854775807", "snowflake", layout = lay)
+  expect_no_warning(f <- id_fields(x))
+  expect_identical(f$sequence, 2147483647L)
+})

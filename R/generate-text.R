@@ -11,10 +11,12 @@
 #' given, and padded to `min_length`. A numeric vector gives one Sqid per
 #' number; a list gives one per element, encoding all its numbers. An ID
 #' that contains a blocklisted word is re-encoded with the next offset; when
-#' every offset is blocked, the result is a `zuid_encode_error`.
+#' every offset is blocked, the result is a `zuid_encode_error`. An element
+#' with no numbers encodes as `""`, as the specification says, and `""`
+#' parses back to no numbers.
 #'
 #' @param n The number of NanoIDs.
-#' @param size Symbols per NanoID, 21 by default.
+#' @param size Symbols per NanoID, 1 to 65536, 21 by default.
 #' @param alphabet The symbols, or `NULL` for the format's default:
 #'   `A-Za-z0-9_-` for NanoID and `a-zA-Z0-9` for Sqids. 1 to 256 printable
 #'   ASCII characters for NanoID, 3 to 255 for Sqids, all distinct.
@@ -35,8 +37,8 @@
 #' @export
 nanoid <- function(n = 1, size = 21, alphabet = NULL, random = NULL) {
   n <- check_count(n)
-  if (!is_whole(size) || size < 0 || size > 65536) {
-    zuid_abort("type", "`size` must be a whole number from 0 to 65536.")
+  if (!is_whole(size) || size < 1 || size > 65536) {
+    zuid_abort("type", "`size` must be a whole number from 1 to 65536.")
   }
   if (is.null(alphabet)) {
     alphabet <- nanoid_alphabet

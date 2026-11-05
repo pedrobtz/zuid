@@ -13,7 +13,6 @@ test_that("NanoID 6's customRandom vectors hold", {
     as.character(nanoid(1, 4, "abcd", random = seq10[1:4])),
     "dddc"
   )
-  expect_identical(as.character(nanoid(1, 0, "abc")), "")
   expect_identical(
     as.character(nanoid(1, 8, "abc", random = as.raw(rep(1, 16)))),
     "bbbbbbbb"
@@ -56,6 +55,7 @@ test_that("set.seed() does not change NanoIDs, and bad arguments are type errors
   expect_false(any(a == nanoid(2)))
   expect_error(nanoid(1, random = raw(3)), class = "zuid_type_error")
   expect_error(nanoid(1, size = -1), class = "zuid_type_error")
+  expect_error(nanoid(1, size = 0), class = "zuid_type_error")
   expect_error(nanoid(1, alphabet = "aa"), class = "zuid_type_error")
   expect_error(nanoid(1, alphabet = ""), class = "zuid_type_error")
   expect_error(nanoid(1, random = 1:3), class = "zuid_type_error")

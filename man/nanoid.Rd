@@ -12,7 +12,7 @@ sqids(numbers, alphabet = NULL, min_length = 0, blocklist = NULL)
 \arguments{
 \item{n}{The number of NanoIDs.}
 
-\item{size}{Symbols per NanoID, 21 by default.}
+\item{size}{Symbols per NanoID, 1 to 65536, 21 by default.}
 
 \item{alphabet}{The symbols, or \code{NULL} for the format's default:
 \verb{A-Za-z0-9_-} for NanoID and \code{a-zA-Z0-9} for Sqids. 1 to 256 printable
@@ -46,7 +46,9 @@ specification's algorithm: the default alphabet and blocklist unless
 given, and padded to \code{min_length}. A numeric vector gives one Sqid per
 number; a list gives one per element, encoding all its numbers. An ID
 that contains a blocklisted word is re-encoded with the next offset; when
-every offset is blocked, the result is a \code{zuid_encode_error}.
+every offset is blocked, the result is a \code{zuid_encode_error}. An element
+with no numbers encodes as \code{""}, as the specification says, and \code{""}
+parses back to no numbers.
 }
 \examples{
 nanoid(2)
