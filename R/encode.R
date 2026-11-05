@@ -168,7 +168,10 @@ check_alphabet <- function(alphabet, form, call = sys.call(-1L)) {
   if (!ok) {
     zuid_abort(
       "type",
-      "`alphabet` must be 2 to 94 distinct printable ASCII characters, no space.",
+      paste(
+        "`alphabet` must be 2 to 94 distinct printable ASCII characters,",
+        "no space."
+      ),
       call = call
     )
   }

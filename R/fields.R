@@ -72,10 +72,10 @@ id_fields <- function(x) {
     sequence = cols$sequence,
     random = cols$random,
     prefix = cols$prefix,
-    codec = if (is.null(cols$codec)) na_chr else cols$codec,
-    hash = if (is.null(cols$hash)) na_chr else cols$hash,
-    digest = if (is.null(cols$digest)) na_chr else cols$digest,
-    numbers = I(if (is.null(cols$numbers)) vector("list", n) else cols$numbers),
+    codec = cols$codec %||% na_chr,
+    hash = cols$hash %||% na_chr,
+    digest = cols$digest %||% na_chr,
+    numbers = I(cols$numbers %||% vector("list", n)),
     stringsAsFactors = FALSE
   )
 }
@@ -117,9 +117,10 @@ field_columns <- function(x) {
   ok <- !is.na(x)
   bytes <- .Call(zuid_c_bytes, as.character(x)[ok], zuid_format_of(x))
   parts <- layout_unpack(as.vector(bytes), layout)
-  ms <- layout$epoch + parts$time * layout_units[[layout$unit]]
-  cols$time_s[ok] <- floor(ms / 1000)
-  cols$time_ns[ok] <- (ms - floor(ms / 1000) * 1000) * 1e6
+  ms <- time_field_ms(parts$time, layout)
+  secs <- floor(ms / 1000)
+  cols$time_s[ok] <- secs
+  cols$time_ns[ok] <- (ms - secs * 1000) * 1e6
   cols$time_unit[ok] <- layout$unit
   nodes <- names(layout$fields)
   cols$node[ok] <- do.call(

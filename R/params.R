@@ -5,14 +5,8 @@
 
 param_names <- c("layout", "alphabet", "min_length", "blocklist")
 
-zuid_params <- function(x) {
-  out <- lapply(param_names, function(p) attr(x, p, exact = TRUE))
-  names(out) <- param_names
-  if (is.null(out$min_length)) {
-    out$min_length <- 0
-  }
-  out
-}
+# Base R has `%||%` from 4.4 only.
+`%||%` <- function(x, y) if (is.null(x)) y else x
 
 # The parameters a format takes, checked, with the defaults dropped.
 check_params <- function(params, format, call = sys.call(-1L)) {
@@ -31,10 +25,7 @@ check_params <- function(params, format, call = sys.call(-1L)) {
       alphabet <- NULL
     }
   }
-  min_length <- params$min_length
-  if (is.null(min_length)) {
-    min_length <- 0
-  }
+  min_length <- params$min_length %||% 0
   if (!is_whole(min_length) || min_length < 0 || min_length > 255) {
     zuid_abort(
       "type",
@@ -90,11 +81,7 @@ check_text_alphabet <- function(alphabet, format, call = sys.call(-1L)) {
 }
 
 parse_text_format <- function(x, format, params) {
-  alphabet <- if (is.null(params$alphabet)) {
-    default_alphabet(format)
-  } else {
-    params$alphabet
-  }
+  alphabet <- params$alphabet %||% default_alphabet(format)
   level <- switch(
     format,
     nanoid = .Call(zuid_c_charset, x, alphabet),
@@ -103,7 +90,7 @@ parse_text_format <- function(x, format, params) {
       zuid_c_sqids_parse,
       x,
       alphabet,
-      if (is.null(params$min_length)) 0L else params$min_length,
+      params$min_length %||% 0L,
       params$blocklist
     )[[1L]],
     cid = .Call(zuid_c_cid_parse, x)$level
@@ -141,12 +128,8 @@ text_format_fields <- function(x, format, params) {
     cols[c("version", "codec", "hash", "digest")] <-
       cid[c("version", "codec", "hash", "digest")]
   } else if (format == "sqids") {
-    alphabet <- if (is.null(params$alphabet)) {
-      sqids_alphabet
-    } else {
-      params$alphabet
-    }
-    min_length <- if (is.null(params$min_length)) 0L else params$min_length
+    alphabet <- params$alphabet %||% default_alphabet(format)
+    min_length <- params$min_length %||% 0L
     cols$numbers <- .Call(
       zuid_c_sqids_parse,
       as.character(x),

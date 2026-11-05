@@ -18,7 +18,8 @@
 #'
 #' A clock that runs back by up to the option `zuid.rollback_tolerance`
 #' (seconds, 10 by default) keeps generation increasing from the last value.
-#' Further back, version 7 restarts at the new time and versions 1 and 6
+#' A `time` that runs back is treated as the clock is, so within the
+#' tolerance a version 7 value keeps the latest time so far. Further back, version 7 restarts at the new time and versions 1 and 6
 #' increment the clock sequence. Values that would pass the last instant
 #' the time field holds are a `zuid_overflow_error`.
 #'
@@ -64,7 +65,10 @@ uuid <- function(
     zuid_abort(
       "dependency",
       sprintf(
-        "Version %d UUIDs hash a name with zucrypt, which zuid does not use yet.",
+        paste(
+          "Version %d UUIDs hash a name with zucrypt,",
+          "which zuid does not use yet."
+        ),
         version
       )
     )
@@ -181,33 +185,21 @@ generation_time <- function(time, n, range_us, what, call = sys.call(-1L)) {
   rep_len(us, n)
 }
 
+# Microseconds from 1582-10-15, the Gregorian epoch, to 1970-01-01.
+gregorian_offset_us <- 12219292800 * 1e6
+
 uuid_time_range <- function(version) {
   if (version == 7L) {
     c(0, (2^48 - 1) * 1e3)
   } else {
     # 2^60 - 1 ticks, less the Gregorian offset, in microseconds: the
     # largest double below it, since the exact bound is past 2^53.
-    c(-12219292800 * 1e6, 103072857660684688)
+    c(-gregorian_offset_us, 103072857660684688)
   }
 }
 
 # 48 bits of milliseconds: ULID, and UPID's 40 bits of 256 ms.
 ms48_range <- c(0, (2^48 - 1) * 1e3)
-
-# Seconds. The option may be a number of seconds or a difftime.
-rollback_tolerance <- function() {
-  tol <- getOption("zuid.rollback_tolerance", 10)
-  if (inherits(tol, "difftime")) {
-    tol <- as.numeric(tol, units = "secs")
-  }
-  if (!is.numeric(tol) || length(tol) != 1L || is.na(tol) || tol < 0) {
-    zuid_abort(
-      "type",
-      "The option `zuid.rollback_tolerance` must be a non-negative number of seconds."
-    )
-  }
-  tol
-}
 
 #' Generate ULIDs, TypeIDs and UPIDs
 #'
@@ -248,13 +240,16 @@ ulid <- function(n = 1, random = NULL, time = NULL) {
   time_us <- generation_time(time, n, ms48_range, "ULID")
   out <- .Call(zuid_c_ulid, n, time_us, random, rollback_tolerance() * 1000)
   if (is.null(out)) {
-    zuid_abort("entropy", "The operating system's entropy source failed.")
+    abort_entropy()
   }
   if (is.integer(out)) {
     zuid_abort(
       "overflow",
       sprintf(
-        "Value %d overflows the 80-bit random component within its millisecond.",
+        paste(
+          "Value %d overflows the 80-bit random component",
+          "within its millisecond."
+        ),
         out
       )
     )
@@ -292,7 +287,7 @@ upid <- function(n = 1, prefix, random = NULL, time = NULL) {
   time_us <- generation_time(time, n, ms48_range, "UPID")
   out <- .Call(zuid_c_upid, n, time_us, random, upid_tail(prefix))
   if (is.null(out)) {
-    zuid_abort("entropy", "The operating system's entropy source failed.")
+    abort_entropy()
   }
   new_zuid(out, "upid")
 }
@@ -324,8 +319,12 @@ check_typeid_prefix <- function(prefix, call = sys.call(-1L)) {
 # The last three bytes of a UPID: the prefix, padded to four characters
 # with "z", in 20 bits, then the version nibble, 6 ("a").
 upid_tail <- function(prefix) {
-  symbols <- strsplit("234567abcdefghijklmnopqrstuvwxyz", "")[[1L]]
-  chars <- strsplit(substr(paste0(prefix, "zzzz"), 1L, 4L), "")[[1L]]
+  symbols <- strsplit("234567abcdefghijklmnopqrstuvwxyz", "", fixed = TRUE)[[
+    1L
+  ]]
+  chars <- strsplit(substr(paste0(prefix, "zzzz"), 1L, 4L), "", fixed = TRUE)[[
+    1L
+  ]]
   v <- sum((match(chars, symbols) - 1) * 32^(3:0)) * 16 + 6
   as.raw(c(v %/% 65536, (v %/% 256) %% 256, v %% 256))
 }

@@ -29,7 +29,6 @@ Other contributors:
 \itemize{
   \item yan (Author of the Niceware word list, compiled into src/zuid_tables.c) [copyright holder]
   \item Sqids (Authors of the Sqids blocklist, compiled into src/zuid_tables.c) [copyright holder]
-  \item Jetify Inc. (TypeID specification fixtures, tests/testthat/fixtures/typeid/) [copyright holder]
 }
 
 }

@@ -53,7 +53,7 @@ nanoid <- function(n = 1, size = 21, alphabet = NULL, random = NULL) {
     )
   }
   if (is.null(out)) {
-    zuid_abort("entropy", "The operating system's entropy source failed.")
+    abort_entropy()
   }
   new_zuid(
     out,
@@ -127,7 +127,10 @@ check_sqids_numbers <- function(v, call = sys.call(-1L)) {
   if (any(v > 2^53 - 1)) {
     zuid_abort(
       "encode",
-      "Sqids numbers above 2^53 - 1 need 64-bit integers, which zuid does not use yet.",
+      paste(
+        "Sqids numbers above 2^53 - 1 need 64-bit integers,",
+        "which zuid does not use yet."
+      ),
       call = call
     )
   }

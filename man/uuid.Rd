@@ -59,7 +59,8 @@ session strictly increase in time.
 
 A clock that runs back by up to the option \code{zuid.rollback_tolerance}
 (seconds, 10 by default) keeps generation increasing from the last value.
-Further back, version 7 restarts at the new time and versions 1 and 6
+A \code{time} that runs back is treated as the clock is, so within the
+tolerance a version 7 value keeps the latest time so far. Further back, version 7 restarts at the new time and versions 1 and 6
 increment the clock sequence. Values that would pass the last instant
 the time field holds are a \code{zuid_overflow_error}.
 

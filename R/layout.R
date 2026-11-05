@@ -14,7 +14,7 @@
 #' | `discord` | 42 bits, ms, from 2015-01-01 | `worker` 5, `process` 5 | 12 |
 #' | `instagram` | 41 bits, ms, from 2011-08-24T21:07:01.721Z | `shard` 13 | 10 |
 #' | `sonyflake` | 39 bits, 10 ms, from `epoch` | `machine` 16, after the sequence | 8 |
-#' | `scru64` | 39 bits, 256 ms, from 1970 | `node` of `node_bits` | 24 − `node_bits` |
+#' | `scru64` | 39 bits, 256 ms, from 1970 | `node` of `node_bits` | 24 - `node_bits` |
 #'
 #' Twitter, Sonyflake and SCRU64 keep the top bit as a sign bit; Discord and
 #' Instagram use all 64 bits. Sonyflake's reference has changed its default
@@ -22,7 +22,8 @@
 #'
 #' A custom layout gives `time`, `fields`, `sequence` and `sign_bit`. The
 #' bits must add up to 64, or 63 with the sign bit, and each part must have
-#' fewer than 54 bits, so that it reads exactly as a double.
+#' fewer than 54 bits, so that it reads exactly as a double. The sequence
+#' has at most 31 bits, so that [id_fields()] returns it as an integer.
 #'
 #' @param name A built-in layout, or `NULL` for a custom one.
 #' @param epoch For `"sonyflake"` (required) or a custom layout, the time
@@ -75,7 +76,7 @@ id_layout <- function(
     "custom",
     time_bits = time$bits,
     unit = time$unit,
-    epoch = if (is.null(time$epoch)) epoch else time$epoch,
+    epoch = time$epoch %||% epoch,
     fields = fields,
     sequence = sequence,
     sign_bit = sign_bit
@@ -93,30 +94,30 @@ builtin_layout <- function(name, epoch, node_bits, call = sys.call(-1L)) {
     name,
     twitter = new_layout(
       name,
-      41,
-      "ms",
-      1288834974657,
-      list(datacenter = 5, worker = 5),
-      12,
-      TRUE
+      time_bits = 41,
+      unit = "ms",
+      epoch = 1288834974657,
+      fields = list(datacenter = 5, worker = 5),
+      sequence = 12,
+      sign_bit = TRUE
     ),
     discord = new_layout(
       name,
-      42,
-      "ms",
-      1420070400000,
-      list(worker = 5, process = 5),
-      12,
-      FALSE
+      time_bits = 42,
+      unit = "ms",
+      epoch = 1420070400000,
+      fields = list(worker = 5, process = 5),
+      sequence = 12,
+      sign_bit = FALSE
     ),
     instagram = new_layout(
       name,
-      41,
-      "ms",
-      1314220021721,
-      list(shard = 13),
-      10,
-      FALSE
+      time_bits = 41,
+      unit = "ms",
+      epoch = 1314220021721,
+      fields = list(shard = 13),
+      sequence = 10,
+      sign_bit = FALSE
     ),
     sonyflake = {
       if (is.null(epoch)) {
@@ -130,12 +131,12 @@ builtin_layout <- function(name, epoch, node_bits, call = sys.call(-1L)) {
       }
       new_layout(
         name,
-        39,
-        "10ms",
-        epoch,
-        list(machine = 16),
-        8,
-        TRUE,
+        time_bits = 39,
+        unit = "10ms",
+        epoch = epoch,
+        fields = list(machine = 16),
+        sequence = 8,
+        sign_bit = TRUE,
         order = c("time", "sequence", "machine")
       )
     },
@@ -148,12 +149,12 @@ builtin_layout <- function(name, epoch, node_bits, call = sys.call(-1L)) {
       }
       new_layout(
         name,
-        39,
-        "256ms",
-        0,
-        list(node = node_bits),
-        24 - node_bits,
-        TRUE
+        time_bits = 39,
+        unit = "256ms",
+        epoch = 0,
+        fields = list(node = node_bits),
+        sequence = 24 - node_bits,
+        sign_bit = TRUE
       )
     },
     zuid_abort(
@@ -213,6 +214,9 @@ new_layout <- function(
       any(widths > 53)
   ) {
     bad("Every field must have a whole number of bits from 1 to 53.")
+  }
+  if (sequence > 31) {
+    bad("The sequence must have at most 31 bits.")
   }
   if (!isTRUE(sign_bit) && !isFALSE(sign_bit)) {
     bad("`sign_bit` must be `TRUE` or `FALSE`.")
@@ -348,7 +352,12 @@ layout_unpack <- function(bytes, layout) {
 }
 
 layout_time_ms <- function(bytes, layout) {
-  layout$epoch + layout_unpack(bytes, layout)$time * layout_units[[layout$unit]]
+  time_field_ms(layout_unpack(bytes, layout)$time, layout)
+}
+
+# Milliseconds since 1970 for a layout's time field.
+time_field_ms <- function(time, layout) {
+  layout$epoch + time * layout_units[[layout$unit]]
 }
 
 named_integers <- function(x, names) {
