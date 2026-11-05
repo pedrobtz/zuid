@@ -86,3 +86,14 @@ test_that("CIDs round-trip through bytes", {
   )
   expect_error(id_convert(x, "uuid"), class = "zuid_convert_error")
 })
+
+test_that("a CID with an unregistered codec or hash reads it in hex", {
+  # 0x99 as a varint is 99 01.
+  codec <- paste0("f01", "9901", "1220", strrep("ab", 32))
+  hash <- paste0("f01", "55", "9901", "04", strrep("ab", 4))
+  expect_identical(id_valid(c(codec, hash), "cid"), c(TRUE, TRUE))
+  f <- id_fields(id_parse(c(codec, hash), "cid"))
+  expect_identical(f$codec, c("0x99", "raw"))
+  expect_identical(f$hash, c("sha2-256", "0x99"))
+  expect_identical(f$digest, c(strrep("ab", 32), strrep("ab", 4)))
+})
