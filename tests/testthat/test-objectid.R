@@ -37,14 +37,14 @@ test_that("an XID and an ObjectId convert keeping their bytes", {
 
 test_that("generated ObjectIds round-trip and count up", {
   local_fresh_state()
-  x <- id_objectid(1e4)
+  x <- objectid(1e4)
   expect_identical(id_parse(as.character(x), "objectid"), x)
   expect_identical(id_from_bytes(id_bytes(x), "objectid"), x)
   f <- id_fields(x)
   expect_length(unique(f$random), 1L)
   expect_identical(diff(f$sequence) %% 2^24, rep(1, 1e4 - 1))
   expect_true(all(id_valid(as.character(x), "objectid", level = "strict")))
-  y <- id_objectid(
+  y <- objectid(
     2,
     random = as.raw(c(0xe0, 0xc9, 0x17, 0xe9, 0xc4, 0x71, 0x41, 0x61)),
     time = 0x56e1fc72 * 1000

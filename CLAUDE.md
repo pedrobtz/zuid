@@ -11,9 +11,9 @@ monotonic generation, every RFC text form. The first ring re-encodes the same
 bytes (Crockford base32, base36, base58, base62, base64url, Base62sort and
 Base64sort, any alphabet, Proquint, Niceware words). The second ring is the
 kindred formats: ULID, TypeID, UPID, SCRU128, SCRU64, KSUID, Snowflake and
-Sonyflake, XID, ObjectId, NanoID, Cuid2, Sqids and CID. One `id_` vocabulary
-detects, parses, validates, reads fields and time, converts and generates
-across all of them. No `Imports` and no vendored code. v0.1.0 has no
+Sonyflake, XID, ObjectId, NanoID, Cuid2, Sqids and CID. Generators are named
+after their format (`uuid()`, `ulid()`), and one `id_` vocabulary detects,
+parses, validates, reads fields and time, and converts across all of them. No `Imports` and no vendored code. v0.1.0 has no
 interface with other `zu*` packages: Arrow interchange (`zuarrow`), integers
 (`zuint`), name-based UUIDs and CID generation (`zucrypt`) and exact instants
 (`zutempo`) come after it, as `Suggests`. It is not a hashing package, not a

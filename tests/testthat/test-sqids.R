@@ -3,13 +3,13 @@
 # reference, sqids 0.3.0, over random numbers, alphabets and min lengths.
 
 test_that("the specification's encoding tests hold", {
-  expect_identical(as.character(id_sqids(list(c(1, 2, 3)))), "86Rf07")
+  expect_identical(as.character(sqids(list(c(1, 2, 3)))), "86Rf07")
   expect_identical(
-    as.character(id_sqids(0:9)),
+    as.character(sqids(0:9)),
     c("bM", "Uk", "gb", "Ef", "Vq", "uw", "OI", "AX", "p6", "nJ")
   )
   expect_identical(
-    as.character(id_sqids(lapply(0:9, function(i) c(0, i)))),
+    as.character(sqids(lapply(0:9, function(i) c(0, i)))),
     c(
       "SvIz",
       "n3qa",
@@ -24,7 +24,7 @@ test_that("the specification's encoding tests hold", {
     )
   )
   expect_identical(
-    as.character(id_sqids(lapply(0:9, function(i) c(i, 0)))),
+    as.character(sqids(lapply(0:9, function(i) c(i, 0)))),
     c(
       "SvIz",
       "nWqP",
@@ -39,10 +39,10 @@ test_that("the specification's encoding tests hold", {
     )
   )
   many <- list(c(0, 0, 0, 1, 2, 3, 100, 1000, 1e5, 1e6, 2^53 - 1), 0:99)
-  expect_identical(sqids_numbers(id_sqids(many)), lapply(many, as.numeric))
-  expect_identical(as.character(id_sqids(list(numeric()))), "")
-  expect_error(id_sqids(-1), class = "zuid_type_error")
-  expect_error(id_sqids(2^53), class = "zuid_encode_error")
+  expect_identical(sqids_numbers(sqids(many)), lapply(many, as.numeric))
+  expect_identical(as.character(sqids(list(numeric()))), "")
+  expect_error(sqids(-1), class = "zuid_type_error")
+  expect_error(sqids(2^53), class = "zuid_encode_error")
 })
 
 test_that("the specification's min_length tests hold", {
@@ -62,65 +62,65 @@ test_that("the specification's min_length tests hold", {
     `65` = paste0(long, "yf1")
   )
   for (m in names(map)) {
-    x <- id_sqids(list(c(1, 2, 3)), min_length = as.integer(m))
+    x <- sqids(list(c(1, 2, 3)), min_length = as.integer(m))
     expect_identical(as.character(x), map[[m]], label = m)
     y <- id_parse(map[[m]], "sqids", min_length = as.integer(m))
     expect_identical(sqids_numbers(y), list(c(1, 2, 3)), label = m)
   }
   expect_identical(
-    as.character(id_sqids(list(c(0, 0)), min_length = 62)),
+    as.character(sqids(list(c(0, 0)), min_length = 62)),
     "SvIzsqYMyQwI3GWgJAe17URxX8V924Co0DaTZLtFjHriEn5bPhcSkfmvOslpBu"
   )
-  expect_error(id_sqids(1, min_length = 256), class = "zuid_type_error")
-  expect_error(id_sqids(1, min_length = -1), class = "zuid_type_error")
+  expect_error(sqids(1, min_length = 256), class = "zuid_type_error")
+  expect_error(sqids(1, min_length = -1), class = "zuid_type_error")
 })
 
 test_that("the specification's blocklist tests hold", {
-  expect_identical(as.character(id_sqids(4572721)), "JExTR")
+  expect_identical(as.character(sqids(4572721)), "JExTR")
   expect_identical(
-    as.character(id_sqids(4572721, blocklist = character())),
+    as.character(sqids(4572721, blocklist = character())),
     "aho1e"
   )
   # "aho1e" decodes, but it is not the canonical Sqid of its number.
   expect_false(id_valid("aho1e", "sqids"))
   expect_true(id_valid("aho1e", "sqids", level = "syntax"))
-  expect_identical(as.character(id_sqids(1e5, blocklist = "ArUO")), "QyG4")
+  expect_identical(as.character(sqids(1e5, blocklist = "ArUO")), "QyG4")
   expect_identical(
-    as.character(id_sqids(
+    as.character(sqids(
       list(c(1e6, 2e6)),
       blocklist = c("JSwXFaosAN", "OCjV9JK64o", "rBHf", "79SM", "7tE6")
     )),
     "1aYeB7bRUt"
   )
-  expect_identical(as.character(id_sqids(100, blocklist = "hey")), "86u")
-  expect_identical(as.character(id_sqids(100, blocklist = "86u")), "sec")
-  expect_identical(as.character(id_sqids(1e6, blocklist = "vFo")), "gMvFo")
+  expect_identical(as.character(sqids(100, blocklist = "hey")), "86u")
+  expect_identical(as.character(sqids(100, blocklist = "86u")), "sec")
+  expect_identical(as.character(sqids(1e6, blocklist = "vFo")), "gMvFo")
   four <- list(c(100, 202, 303, 404))
   expect_identical(
-    as.character(id_sqids(four, blocklist = "lP3i")),
+    as.character(sqids(four, blocklist = "lP3i")),
     "oDqljxrokxRt"
   )
   expect_identical(
-    as.character(id_sqids(four, blocklist = "1HkYs")),
+    as.character(sqids(four, blocklist = "1HkYs")),
     "oDqljxrokxRt"
   )
   seven <- list(c(101, 202, 303, 404, 505, 606, 707))
   expect_identical(
-    as.character(id_sqids(seven, blocklist = "0hfxX")),
+    as.character(sqids(seven, blocklist = "0hfxX")),
     "862REt0hfxXVdsLG8vGWD"
   )
   expect_identical(
-    as.character(id_sqids(seven, blocklist = "hfxX")),
+    as.character(sqids(seven, blocklist = "hfxX")),
     "seu8n1jO9C4KQQDxdOxsK"
   )
-  x <- id_sqids(
+  x <- sqids(
     list(c(1, 2, 3)),
     alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
     blocklist = "sxnzkl"
   )
   expect_identical(as.character(x), "IBSHOZ")
   expect_error(
-    id_sqids(
+    sqids(
       list(0),
       alphabet = "abc",
       min_length = 3,
@@ -131,7 +131,7 @@ test_that("the specification's blocklist tests hold", {
 })
 
 test_that("the specification's alphabet tests hold", {
-  x <- id_sqids(list(c(1, 2, 3)), alphabet = "0123456789abcdef")
+  x <- sqids(list(c(1, 2, 3)), alphabet = "0123456789abcdef")
   expect_identical(as.character(x), "489158")
   expect_identical(
     sqids_numbers(id_parse("489158", "sqids", alphabet = "0123456789abcdef")),
@@ -141,12 +141,12 @@ test_that("the specification's alphabet tests hold", {
     "abc",
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_+|{}[];:'\"/?.>,<`~"
   )) {
-    y <- id_sqids(list(c(1, 2, 3)), alphabet = a)
+    y <- sqids(list(c(1, 2, 3)), alphabet = a)
     expect_identical(sqids_numbers(y), list(c(1, 2, 3)))
   }
-  expect_error(id_sqids(1, alphabet = "ë1092"), class = "zuid_type_error")
-  expect_error(id_sqids(1, alphabet = "aabcdefg"), class = "zuid_type_error")
-  expect_error(id_sqids(1, alphabet = "ab"), class = "zuid_type_error")
+  expect_error(sqids(1, alphabet = "ë1092"), class = "zuid_type_error")
+  expect_error(sqids(1, alphabet = "aabcdefg"), class = "zuid_type_error")
+  expect_error(sqids(1, alphabet = "ab"), class = "zuid_type_error")
 })
 
 test_that("the JavaScript reference's Sqids hold both ways", {
@@ -155,7 +155,7 @@ test_that("the JavaScript reference's Sqids hold both ways", {
     numbers <- as.numeric(strsplit(f$numbers[i], " ")[[1]])
     if (is.na(f$id[i])) {
       expect_error(
-        id_sqids(
+        sqids(
           list(numbers),
           alphabet = f$alphabet[i],
           min_length = f$min_length[i]
@@ -164,7 +164,7 @@ test_that("the JavaScript reference's Sqids hold both ways", {
       )
       next
     }
-    x <- id_sqids(
+    x <- sqids(
       list(numbers),
       alphabet = f$alphabet[i],
       min_length = f$min_length[i]
@@ -181,10 +181,10 @@ test_that("the JavaScript reference's Sqids hold both ways", {
 })
 
 test_that("the parameters travel with the vector", {
-  x <- id_sqids(1:3, alphabet = "0123456789abcdef", min_length = 8)
+  x <- sqids(1:3, alphabet = "0123456789abcdef", min_length = 8)
   expect_identical(attr(x, "alphabet"), "0123456789abcdef")
   expect_identical(attr(x, "min_length"), 8L)
-  x[2] <- as.character(id_sqids(
+  x[2] <- as.character(sqids(
     9,
     alphabet = "0123456789abcdef",
     min_length = 8
@@ -192,8 +192,8 @@ test_that("the parameters travel with the vector", {
   expect_identical(sqids_numbers(x), list(1, 9, 3))
   expect_identical(id_parse(x), x)
   expect_identical(sqids_numbers(c(x, x)), rep(list(1, 9, 3), 2))
-  expect_error(c(x, id_sqids(1)), class = "zuid_type_error")
-  expect_null(attr(id_sqids(1), "alphabet"))
+  expect_error(c(x, sqids(1)), class = "zuid_type_error")
+  expect_null(attr(sqids(1), "alphabet"))
   expect_error(id_bytes(x), class = "zuid_type_error")
   expect_identical(id_format(x), as.character(x))
   expect_error(
@@ -207,14 +207,14 @@ test_that("the parameters travel with the vector", {
 })
 
 test_that("id_valid() checks a zuid vector under its own parameters", {
-  s <- id_sqids(c(1, 2), alphabet = "abcdefghij", min_length = 6)
+  s <- sqids(c(1, 2), alphabet = "abcdefghij", min_length = 6)
   expect_identical(id_valid(s, "sqids"), c(TRUE, TRUE))
   expect_identical(
     id_valid(as.character(s), "sqids", alphabet = "abcdefghij", min_length = 6),
     c(TRUE, TRUE)
   )
-  n <- id_nanoid(2, 8, alphabet = "xyz")
+  n <- nanoid(2, 8, alphabet = "xyz")
   expect_identical(id_valid(n, "nanoid"), c(TRUE, TRUE))
   # A vector of another format is only text.
-  expect_identical(id_valid(id_nil(), "ulid"), FALSE)
+  expect_identical(id_valid(uuid_nil(), "ulid"), FALSE)
 })

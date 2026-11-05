@@ -34,7 +34,7 @@ test_that("the reference's rejections hold", {
 test_that("generation follows the reference generator", {
   local_fresh_state()
   t <- 1.7e12
-  x <- id_scru64(
+  x <- scru64(
     3,
     node = 5,
     node_bits = 20,
@@ -47,7 +47,7 @@ test_that("generation follows the reference generator", {
   expect_identical(v, tick * 2^24 + 5 * 16 + c(6, 7, 8))
   # The counter overflows into the next tick: from 6, ten values fill the
   # counter and the eleventh moves on, renewed from its own seed.
-  more <- id_scru64(
+  more <- scru64(
     11,
     node = 5,
     node_bits = 20,
@@ -62,16 +62,16 @@ test_that("generation follows the reference generator", {
 
 test_that("generated SCRU64 IDs strictly increase and round-trip", {
   local_fresh_state()
-  x <- id_scru64(1e4, node = 1, node_bits = 8, time = 1.7e12)
+  x <- scru64(1e4, node = 1, node_bits = 8, time = 1.7e12)
   expect_true(strictly_increasing(x))
   expect_identical(id_parse(as.character(x), "scru64"), x)
   expect_identical(id_from_bytes(id_bytes(x), "scru64"), x)
   expect_true(all(id_valid(as.character(x), "scru64", level = "strict")))
   expect_error(
-    id_scru64(1, node = 1, node_bits = 8, time = 1.7e12 - 60000),
+    scru64(1, node = 1, node_bits = 8, time = 1.7e12 - 60000),
     class = "zuid_clock_error"
   )
-  expect_no_error(id_scru64(
+  expect_no_error(scru64(
     1,
     node = 1,
     node_bits = 8,
@@ -81,22 +81,22 @@ test_that("generated SCRU64 IDs strictly increase and round-trip", {
 })
 
 test_that("node and node_bits are required and checked", {
-  expect_error(id_scru64(1), class = "zuid_type_error")
-  expect_error(id_scru64(1, node = 1), class = "zuid_type_error")
+  expect_error(scru64(1), class = "zuid_type_error")
+  expect_error(scru64(1, node = 1), class = "zuid_type_error")
   expect_error(
-    id_scru64(1, node = 256, node_bits = 8),
+    scru64(1, node = 256, node_bits = 8),
     class = "zuid_type_error"
   )
   expect_error(
-    id_scru64(1, node = 1, node_bits = 24),
+    scru64(1, node = 1, node_bits = 24),
     class = "zuid_type_error"
   )
   expect_error(
-    id_scru64(1, node = 1.5, node_bits = 8),
+    scru64(1, node = 1.5, node_bits = 8),
     class = "zuid_type_error"
   )
   expect_error(
-    id_scru64(1, node = 1, node_bits = 8, random = raw(2)),
+    scru64(1, node = 1, node_bits = 8, random = raw(2)),
     class = "zuid_type_error"
   )
 })
@@ -104,7 +104,7 @@ test_that("node and node_bits are required and checked", {
 test_that("an overflow into the reserved last tick is an error", {
   local_fresh_state()
   expect_error(
-    id_scru64(
+    scru64(
       2,
       node = 1,
       node_bits = 8,
@@ -118,9 +118,9 @@ test_that("an overflow into the reserved last tick is an error", {
 test_that("each node keeps its own state", {
   local_fresh_state()
   t <- as.POSIXct("2024-01-01", tz = "UTC")
-  a <- id_scru64(1, node = 1, node_bits = 23, time = t)
-  b <- id_scru64(1, node = 2, node_bits = 23, time = t)
-  c <- id_scru64(1, node = 1, node_bits = 23, time = t)
+  a <- scru64(1, node = 1, node_bits = 23, time = t)
+  b <- scru64(1, node = 2, node_bits = 23, time = t)
+  c <- scru64(1, node = 1, node_bits = 23, time = t)
   expect_false(a == c)
   expect_true(strictly_increasing(c(a, c)))
   expect_false(b == a)

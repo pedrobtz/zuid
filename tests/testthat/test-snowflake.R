@@ -65,11 +65,11 @@ test_that("Snowflakes sort numerically, not as text", {
   expect_identical(as.character(sort(x)), c("3", "20", "100"))
 })
 
-test_that("id_snowflake() packs the layout and counts within a tick", {
+test_that("snowflake() packs the layout and counts within a tick", {
   local_fresh_state()
   tw <- id_layout("twitter")
   t <- 1288834974657 + 41944705796
-  x <- id_snowflake(3, tw, list(datacenter = 1, worker = 7), time = t)
+  x <- snowflake(3, tw, list(datacenter = 1, worker = 7), time = t)
   f <- id_fields(x)
   expect_identical(f$sequence, 0:2)
   expect_identical(f$node, rep("datacenter=1,worker=7", 3))
@@ -81,27 +81,27 @@ test_that("id_snowflake() packs the layout and counts within a tick", {
 test_that("the sequence overflows into the next tick", {
   local_fresh_state()
   ig <- id_layout("instagram")
-  x <- id_snowflake(1025, ig, 3, time = 1.6e12)
+  x <- snowflake(1025, ig, 3, time = 1.6e12)
   f <- id_fields(x)
   expect_identical(f$sequence[1024:1025], c(1023L, 0L))
   expect_identical(diff(id_time(x, "ms"))[1024], 1)
   expect_true(strictly_increasing(x))
   # Ticks an overflow moved ahead to are not a clock rollback.
-  expect_no_error(id_snowflake(5000, ig, 3, time = 1.6e12))
+  expect_no_error(snowflake(5000, ig, 3, time = 1.6e12))
 })
 
 test_that("a clock rollback beyond zuid.clock_tolerance is a clock error", {
   local_fresh_state()
   tw <- id_layout("twitter")
-  a <- id_snowflake(1, tw, list(datacenter = 0, worker = 0), time = 1.7e12)
-  b <- id_snowflake(1, tw, list(datacenter = 0, worker = 0), time = 1.7e12 - 5)
+  a <- snowflake(1, tw, list(datacenter = 0, worker = 0), time = 1.7e12)
+  b <- snowflake(1, tw, list(datacenter = 0, worker = 0), time = 1.7e12 - 5)
   expect_true(strictly_increasing(c(a, b)))
   expect_error(
-    id_snowflake(1, tw, list(datacenter = 0, worker = 0), time = 1.7e12 - 100),
+    snowflake(1, tw, list(datacenter = 0, worker = 0), time = 1.7e12 - 100),
     class = "zuid_clock_error"
   )
   withr::local_options(zuid.clock_tolerance = 1)
-  expect_no_error(id_snowflake(
+  expect_no_error(snowflake(
     1,
     tw,
     list(datacenter = 0, worker = 0),
@@ -122,7 +122,7 @@ test_that("generated Snowflakes round-trip under every built-in layout", {
   )
   for (nm in names(layouts)) {
     l <- layouts[[nm]][[1]]
-    x <- id_snowflake(1e4, l, layouts[[nm]][[2]])
+    x <- snowflake(1e4, l, layouts[[nm]][[2]])
     expect_identical(
       id_parse(as.character(x), "snowflake", layout = l),
       x,
@@ -143,22 +143,22 @@ test_that("generated Snowflakes round-trip under every built-in layout", {
 
 test_that("worker is required and must fit the layout", {
   tw <- id_layout("twitter")
-  expect_error(id_snowflake(1, tw), class = "zuid_type_error")
-  expect_error(id_snowflake(1, worker = 1), class = "zuid_type_error")
-  expect_error(id_snowflake(1, tw, 1), class = "zuid_type_error")
+  expect_error(snowflake(1, tw), class = "zuid_type_error")
+  expect_error(snowflake(1, worker = 1), class = "zuid_type_error")
+  expect_error(snowflake(1, tw, 1), class = "zuid_type_error")
   expect_error(
-    id_snowflake(1, tw, list(datacenter = 32, worker = 0)),
+    snowflake(1, tw, list(datacenter = 32, worker = 0)),
     class = "zuid_type_error"
   )
   expect_error(
-    id_snowflake(1, tw, list(datacenter = 1)),
+    snowflake(1, tw, list(datacenter = 1)),
     class = "zuid_type_error"
   )
   expect_error(
-    id_snowflake(1, tw, list(datacenter = 1, worker = 1), time = 0),
+    snowflake(1, tw, list(datacenter = 1, worker = 1), time = 0),
     class = "zuid_type_error"
   )
-  expect_error(id_snowflake(1, list(), 1), class = "zuid_layout_error")
+  expect_error(snowflake(1, list(), 1), class = "zuid_layout_error")
 })
 
 test_that("alternating workers within one tick never repeat a value", {
@@ -166,9 +166,9 @@ test_that("alternating workers within one tick never repeat a value", {
   lay <- id_layout("instagram")
   t0 <- as.POSIXct("2024-01-01", tz = "UTC")
   x <- c(
-    id_snowflake(1, lay, 1, time = t0),
-    id_snowflake(1, lay, 2, time = t0),
-    id_snowflake(1, lay, 1, time = t0)
+    snowflake(1, lay, 1, time = t0),
+    snowflake(1, lay, 2, time = t0),
+    snowflake(1, lay, 1, time = t0)
   )
   expect_false(anyDuplicated(as.character(x)) > 0)
   expect_identical(id_fields(x)$sequence, 0:2)
@@ -184,9 +184,9 @@ test_that("layouts with the same widths and other epochs keep separate state", {
   )
   w <- list(datacenter = 1, worker = 1)
   t <- as.POSIXct("2024-01-01", tz = "UTC")
-  expect_no_error(id_snowflake(1, tw, w, time = t))
-  expect_no_error(id_snowflake(1, other, w, time = t - 3600))
-  expect_no_error(id_snowflake(1, tw, w, time = t))
+  expect_no_error(snowflake(1, tw, w, time = t))
+  expect_no_error(snowflake(1, other, w, time = t - 3600))
+  expect_no_error(snowflake(1, tw, w, time = t))
 })
 
 test_that("rollback = \"reset\" recovers after a future time", {
@@ -194,9 +194,9 @@ test_that("rollback = \"reset\" recovers after a future time", {
   tw <- id_layout("twitter")
   w <- list(datacenter = 1, worker = 1)
   t <- as.POSIXct("2024-01-01", tz = "UTC")
-  id_snowflake(1, tw, w, time = t + 3600)
-  expect_error(id_snowflake(1, tw, w, time = t), class = "zuid_clock_error")
-  x <- id_snowflake(1, tw, w, time = t, rollback = "reset")
+  snowflake(1, tw, w, time = t + 3600)
+  expect_error(snowflake(1, tw, w, time = t), class = "zuid_clock_error")
+  x <- snowflake(1, tw, w, time = t, rollback = "reset")
   expect_equal(as.numeric(id_time(x)), as.numeric(t))
-  expect_no_error(id_snowflake(1, tw, w, time = t))
+  expect_no_error(snowflake(1, tw, w, time = t))
 })

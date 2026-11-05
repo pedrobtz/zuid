@@ -45,11 +45,11 @@
 #'   milliseconds since 1970) of length 1 or `n`.
 #' @return A zuid vector of `n` UUIDs.
 #' @examples
-#' id_uuid(3)
-#' id_uuid(2, version = 4)
-#' id_uuid(version = 7, time = as.POSIXct("2022-02-22 19:22:22", tz = "UTC"))
+#' uuid(3)
+#' uuid(2, version = 4)
+#' uuid(version = 7, time = as.POSIXct("2022-02-22 19:22:22", tz = "UTC"))
 #' @export
-id_uuid <- function(
+uuid <- function(
   n = 1,
   version = 7,
   namespace = NULL,
@@ -211,38 +211,38 @@ rollback_tolerance <- function() {
 
 #' Generate ULIDs, TypeIDs and UPIDs
 #'
-#' `id_ulid()` generates ULIDs: 48 bits of milliseconds and 80 random bits.
+#' `ulid()` generates ULIDs: 48 bits of milliseconds and 80 random bits.
 #' Values from one session strictly increase, by the specification's rule:
 #' within a millisecond, the random component of the last value plus one.
 #' That overflows only after 2^80 values in one millisecond, which is a
 #' `zuid_overflow_error`.
 #'
-#' `id_typeid()` generates TypeIDs: a version 7 UUID, as [id_uuid()] makes
+#' `typeid()` generates TypeIDs: a version 7 UUID, as [uuid()] makes
 #' it, under `prefix`.
 #'
-#' `id_upid()` generates UPIDs: 40 bits of time in 256 ms units, 64 random
+#' `upid()` generates UPIDs: 40 bits of time in 256 ms units, 64 random
 #' bits, the prefix and the current version, as the reference does. UPIDs
 #' are not monotonic within 256 ms.
 #'
 #' Entropy comes from the operating system, never from R's random number
-#' generator, and the clock rollback rule of [id_uuid()] applies to ULIDs.
+#' generator, and the clock rollback rule of [uuid()] applies to ULIDs.
 #' As there, a call given both `time` and `random` is a pure function of its
 #' arguments.
 #'
-#' @inheritParams id_uuid
-#' @param prefix For `id_typeid()`, the type: up to 63 lowercase letters and
+#' @inheritParams uuid
+#' @param prefix For `typeid()`, the type: up to 63 lowercase letters and
 #'   underscores, starting and ending with a letter, or `""` for none. For
-#'   `id_upid()`, one to four characters of `234567` and `a` to `z`, padded
+#'   `upid()`, one to four characters of `234567` and `a` to `z`, padded
 #'   on the right with `z` as the reference pads it.
 #' @param random `NULL` to draw from the operating system, or exactly the
 #'   bytes needed: 10 per value for ULIDs and TypeIDs, 8 for UPIDs.
 #' @return A zuid vector of `n` values.
 #' @examples
-#' id_ulid(2)
-#' id_typeid(2, "user")
-#' id_upid(2, "user")
+#' ulid(2)
+#' typeid(2, "user")
+#' upid(2, "user")
 #' @export
-id_ulid <- function(n = 1, random = NULL, time = NULL) {
+ulid <- function(n = 1, random = NULL, time = NULL) {
   n <- check_count(n)
   check_random(random, 10 * n)
   time_us <- generation_time(time, n, ms48_range, "ULID")
@@ -262,21 +262,21 @@ id_ulid <- function(n = 1, random = NULL, time = NULL) {
   new_zuid(out, "ulid")
 }
 
-#' @rdname id_ulid
+#' @rdname ulid
 #' @export
-id_typeid <- function(n = 1, prefix, random = NULL, time = NULL) {
+typeid <- function(n = 1, prefix, random = NULL, time = NULL) {
   if (missing(prefix)) {
     zuid_abort("type", "`prefix` is required; use `\"\"` for none.")
   }
   check_typeid_prefix(prefix)
   n <- check_count(n)
   check_random(random, 10 * n)
-  id_convert(id_uuid(n, 7, random = random, time = time), "typeid", prefix)
+  id_convert(uuid(n, 7, random = random, time = time), "typeid", prefix)
 }
 
-#' @rdname id_ulid
+#' @rdname ulid
 #' @export
-id_upid <- function(n = 1, prefix, random = NULL, time = NULL) {
+upid <- function(n = 1, prefix, random = NULL, time = NULL) {
   if (missing(prefix)) {
     zuid_abort("type", "`prefix` is required.")
   }

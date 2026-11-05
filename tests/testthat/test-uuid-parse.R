@@ -64,8 +64,8 @@ test_that("structure requires the RFC variant, except for nil and max", {
     expect_true(id_valid(s, "uuid", level = "syntax"))
     expect_false(id_valid(s, "uuid", level = "structure"))
   }
-  expect_true(id_valid(as.character(id_nil()), "uuid", level = "strict"))
-  expect_true(id_valid(as.character(id_max()), "uuid", level = "strict"))
+  expect_true(id_valid(as.character(uuid_nil()), "uuid", level = "strict"))
+  expect_true(id_valid(as.character(uuid_max()), "uuid", level = "strict"))
   expect_true(is.na(id_parse(ncs, "uuid")))
   expect_identical(as.character(id_parse(ncs, "uuid", level = "syntax")), ncs)
 })

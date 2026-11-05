@@ -58,29 +58,29 @@ test_that("TypeIDs sort by prefix, then by the UUID's bytes", {
   )
 })
 
-test_that("id_typeid() makes version 7 UUIDs under a prefix", {
+test_that("typeid() makes version 7 UUIDs under a prefix", {
   local_fresh_state()
-  x <- id_typeid(1e4, "user")
+  x <- typeid(1e4, "user")
   expect_true(all(startsWith(as.character(x), "user_")))
   expect_identical(unique(id_version(x)), 7L)
   expect_identical(id_parse(as.character(x), "typeid"), x)
   expect_true(strictly_increasing(x))
   local_fresh_state()
-  t <- id_typeid(1, "", random = as.raw(1:10), time = 0)
+  t <- typeid(1, "", random = as.raw(1:10), time = 0)
   local_fresh_state()
-  u <- id_uuid(1, random = as.raw(1:10), time = 0)
+  u <- uuid(1, random = as.raw(1:10), time = 0)
   expect_identical(as.character(t), tolower(id_format(u, "base32")))
   expect_true(all(id_valid(
-    as.character(id_typeid(3, "")),
+    as.character(typeid(3, "")),
     "typeid",
     level = "strict"
   )))
 })
 
 test_that("bad TypeID prefixes are type errors", {
-  expect_error(id_typeid(1, "User"), class = "zuid_type_error")
-  expect_error(id_typeid(1, "_user"), class = "zuid_type_error")
-  expect_error(id_typeid(1, strrep("a", 64)), class = "zuid_type_error")
-  expect_error(id_typeid(1), class = "zuid_type_error")
-  expect_no_error(id_typeid(1, strrep("a", 63)))
+  expect_error(typeid(1, "User"), class = "zuid_type_error")
+  expect_error(typeid(1, "_user"), class = "zuid_type_error")
+  expect_error(typeid(1, strrep("a", 64)), class = "zuid_type_error")
+  expect_error(typeid(1), class = "zuid_type_error")
+  expect_no_error(typeid(1, strrep("a", 63)))
 })

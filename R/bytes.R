@@ -144,19 +144,19 @@ id_from_bytes <- function(bytes, format, layout = NULL) {
 
 #' The nil and max UUIDs
 #'
-#' @return A zuid vector of one UUID: all bits zero (`id_nil()`) or all bits
-#'   one (`id_max()`).
+#' @return A zuid vector of one UUID: all bits zero (`uuid_nil()`) or all bits
+#'   one (`uuid_max()`).
 #' @examples
-#' id_nil()
-#' id_max()
+#' uuid_nil()
+#' uuid_max()
 #' @export
-id_nil <- function() {
+uuid_nil <- function() {
   new_zuid("00000000-0000-0000-0000-000000000000", "uuid")
 }
 
-#' @rdname id_nil
+#' @rdname uuid_nil
 #' @export
-id_max <- function() {
+uuid_max <- function() {
   new_zuid("ffffffff-ffff-ffff-ffff-ffffffffffff", "uuid")
 }
 

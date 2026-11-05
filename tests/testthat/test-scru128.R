@@ -67,7 +67,7 @@ test_that("generation follows the specification's counters", {
     r(c(5, 6, 7, 8), c(9, 9, 9), c(9, 9, 9)),
     r(c(0, 0, 0, 0), c(0, 0, 1), c(0, 0, 2))
   )
-  x <- id_scru128(3, random = random, time = c(1e12, 1e12, 1e12 + 1))
+  x <- scru128(3, random = random, time = c(1e12, 1e12, 1e12 + 1))
   f <- id_fields(x)
   expect_identical(id_time(x, "ms"), c(1e12, 1e12, 1e12 + 1))
   # counter_lo seeded, then incremented within the millisecond, then renewed.
@@ -75,7 +75,7 @@ test_that("generation follows the specification's counters", {
   # counter_hi is renewed only once the timestamp has moved a second.
   expect_identical(f$node, rep("000007", 3))
   expect_identical(f$random, c("01020304", "05060708", "00000000"))
-  y <- id_scru128(
+  y <- scru128(
     1,
     random = r(c(0, 0, 0, 0), c(0, 0, 0), c(0, 0, 5)),
     time = 1e12 + 1000
@@ -94,7 +94,7 @@ test_that("a counter overflow moves the timestamp forward", {
     as.raw(c(0, 0, 3)),
     as.raw(c(0, 0, 4))
   )
-  x <- id_scru128(2, random = random, time = 1e12)
+  x <- scru128(2, random = random, time = 1e12)
   expect_identical(id_time(x, "ms"), c(1e12, 1e12 + 1))
   expect_identical(id_fields(x)$node, c("ffffff", "000000"))
   expect_identical(id_fields(x)$sequence, c(16777215L, 3L))
@@ -102,41 +102,41 @@ test_that("a counter overflow moves the timestamp forward", {
 
 test_that("a clock rollback is kept, raised or reset (D18)", {
   local_fresh_state()
-  a <- id_scru128(1, time = 1.7e12)
-  b <- id_scru128(1, time = 1.7e12 - 5000)
+  a <- scru128(1, time = 1.7e12)
+  b <- scru128(1, time = 1.7e12 - 5000)
   expect_true(strictly_increasing(c(a, b)))
   expect_identical(id_time(b, "ms"), 1.7e12)
-  expect_error(id_scru128(1, time = 1.7e12 - 60000), class = "zuid_clock_error")
-  c <- id_scru128(1, time = 1.7e12 - 60000, rollback = "reset")
+  expect_error(scru128(1, time = 1.7e12 - 60000), class = "zuid_clock_error")
+  c <- scru128(1, time = 1.7e12 - 60000, rollback = "reset")
   expect_identical(id_time(c, "ms"), 1.7e12 - 60000)
 })
 
 test_that("generated SCRU128 IDs strictly increase and round-trip", {
   local_fresh_state()
-  x <- id_scru128(1e4, time = 1.7e12)
+  x <- scru128(1e4, time = 1.7e12)
   expect_true(strictly_increasing(x))
   expect_identical(id_parse(as.character(x), "scru128"), x)
   expect_identical(id_from_bytes(id_bytes(x), "scru128"), x)
   expect_true(all(id_valid(
-    as.character(id_scru128(3)),
+    as.character(scru128(3)),
     "scru128",
     level = "strict"
   )))
-  expect_error(id_scru128(1, time = 0), class = "zuid_type_error")
-  expect_error(id_scru128(1, random = raw(9)), class = "zuid_type_error")
+  expect_error(scru128(1, time = 0), class = "zuid_type_error")
+  expect_error(scru128(1, random = raw(9)), class = "zuid_type_error")
 })
 
 test_that("an overflow at the top of the range is an error, not a reserved value", {
   local_fresh_state()
   r <- c(as.raw(1:4), as.raw(rep(0xff, 6)), as.raw(1:4), as.raw(rep(0xff, 6)))
   expect_error(
-    id_scru128(2, time = 2^48 - 2, random = r),
+    scru128(2, time = 2^48 - 2, random = r),
     class = "zuid_overflow_error"
   )
-  x <- id_scru128(1, time = 2^48 - 2, random = r[1:10])
+  x <- scru128(1, time = 2^48 - 2, random = r[1:10])
   expect_true(id_valid(as.character(x), "scru128"))
   expect_identical(
-    id_scru128(2, time = 1.7e12, random = as.raw(1:20)),
-    id_scru128(2, time = 1.7e12, random = as.raw(1:20))
+    scru128(2, time = 1.7e12, random = as.raw(1:20)),
+    scru128(2, time = 1.7e12, random = as.raw(1:20))
   )
 })
