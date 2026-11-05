@@ -76,9 +76,11 @@ A zuid vector of `n` UUIDs.
 
 A clock that runs back by up to the option `zuid.rollback_tolerance`
 (seconds, 10 by default) keeps generation increasing from the last
-value. Further back, version 7 restarts at the new time and versions 1
-and 6 increment the clock sequence. Values that would pass the last
-instant the time field holds are a `zuid_overflow_error`.
+value. A `time` that runs back is treated as the clock is, so within the
+tolerance a version 7 value keeps the latest time so far. Further back,
+version 7 restarts at the new time and versions 1 and 6 increment the
+clock sequence. Values that would pass the last instant the time field
+holds are a `zuid_overflow_error`.
 
 With both `time` and `random` given, a call is a pure function of its
 arguments: the same arguments give the same UUIDs, and the session's
@@ -93,12 +95,12 @@ works. Version 2 is not generated: RFC 9562 leaves it to DCE Security.
 ``` r
 uuid(3)
 #> <zuid_uuid[3]>
-#> [1] 01a1abbc-9e8a-7483-82cf-f3e10c5aac08 01a1abbc-9e8a-7484-be84-4a692ef80439
-#> [3] 01a1abbc-9e8a-7485-87ef-5b9ec248a457
+#> [1] 01a1aca6-ab12-72e2-9878-dc0a4545f9a0 01a1aca6-ab12-72e3-b242-25b426f0ec9b
+#> [3] 01a1aca6-ab12-72e4-a3e4-a190ba791675
 uuid(2, version = 4)
 #> <zuid_uuid[2]>
-#> [1] 48de18e6-a4ca-4beb-891d-026239248161 1a672b53-8b4b-4d59-a656-b58f3af69eda
+#> [1] 9d83a2f9-da60-4868-830b-a3a1adfcd945 aa9d1202-4eb9-43e1-98ee-caa8057d63f4
 uuid(version = 7, time = as.POSIXct("2022-02-22 19:22:22", tz = "UTC"))
 #> <zuid_uuid[1]>
-#> [1] 017f22e2-79b0-7578-a4a9-87a3f49c5094
+#> [1] 017f22e2-79b0-7492-83dc-4cb7e657dfd7
 ```

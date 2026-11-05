@@ -34,7 +34,7 @@ id_formats()
 #> 10 snowflake structured    64        1       20
 #> 11    nanoid  syntactic    NA        1       NA
 #> 12     cuid2  syntactic    NA        2       32
-#> 13     sqids   encoding    NA        1       NA
+#> 13     sqids   encoding    NA        0       NA
 #> 14       cid structured    NA        2       NA
 #>                                            alphabet                        case
 #> 1                                            0-9a-f lower; either case on input

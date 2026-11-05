@@ -84,11 +84,11 @@ layout's generator at the new time, which may repeat values made before.
 ``` r
 xid(2)
 #> <zuid_xid[2]>
-#> [1] dbm7k0vgji9hi6miadl0 dbm7k0vgji9hi6miadlg
+#> [1] dbmbbrkiv4jhjgj2a4i0 dbmbbrkiv4jhjgj2a4ig
 objectid(2)
 #> <zuid_objectid[2]>
-#> [1] 6aec7a03274b2c0a98be05a7 6aec7a03274b2c0a98be05a8
+#> [1] 6aecb5eebe7a1486f28c7cae 6aecb5eebe7a1486f28c7caf
 snowflake(2, id_layout("twitter"), list(datacenter = 1, worker = 7))
 #> <zuid_snowflake[2]>
-#> [1] 2118323392351465472 2118323392351465473
+#> [1] 2118387727639670784 2118387727639670785
 ```

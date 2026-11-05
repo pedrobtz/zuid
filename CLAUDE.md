@@ -186,10 +186,14 @@ documentation and a `NEWS.md` entry.
 - **The pretest is automated and does not read `cran-comments.md`.** A
   NOTE that is explained but not fixed gets the upload archived. Fix the
   NOTE, as under Vendored native code, instead of justifying it.
-- **After acceptance,** `pkg-post-cran` tags the submitted commit with
-  the bare version, `0.1.0` (no `v`), publishes the GitHub release,
-  bumps to `0.1.0.9000`, closes the version’s parent issue and moves the
-  board card.
+- **Commit `CRAN-SUBMISSION` after submitting.** It is in
+  `.Rbuildignore`, not `.gitignore`. Pushing it to `main` runs
+  `cran-release.yml`, which tags the submitted commit with the bare
+  version, `0.1.0` (no `v`), publishes the GitHub release and opens the
+  `0.1.0.9000` bump pull request. Merge the bump only after CRAN
+  accepts.
+- **After acceptance,** `pkg-post-cran` closes the version’s parent
+  issue and moves the board card.
 
 ## Editing rules
 
@@ -213,8 +217,9 @@ instead of writing bespoke ones, and pin a released tag rather than
 `main`. Pin a workflow that holds a write token, such as `coverage.yml`,
 to a commit, with the tag in a comment. The `R-CMD-check` workflow must
 call `r-cmd-check.yml`, because a hand-rolled one does not count as the
-pre-submission check. This package calls `r-cmd-check.yml` and
-`coverage.yml`; the pkgdown site is built by a local `pkgdown.yaml`.
+pre-submission check. This package calls `r-cmd-check.yml`,
+`coverage.yml` and `cran-release.yml`; the pkgdown site is built by a
+local `pkgdown.yaml`.
 
 Small edits get a small run. The shared workflows look at the files a
 pull request changes, compared with its merge base:

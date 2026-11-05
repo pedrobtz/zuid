@@ -139,7 +139,9 @@
 <li>
 <strong>The pretest is automated and does not read <code>cran-comments.md</code>.</strong> A NOTE that is explained but not fixed gets the upload archived. Fix the NOTE, as under Vendored native code, instead of justifying it.</li>
 <li>
-<strong>After acceptance,</strong> <code>pkg-post-cran</code> tags the submitted commit with the bare version, <code>0.1.0</code> (no <code>v</code>), publishes the GitHub release, bumps to <code>0.1.0.9000</code>, closes the version’s parent issue and moves the board card.</li>
+<strong>Commit <code>CRAN-SUBMISSION</code> after submitting.</strong> It is in <code>.Rbuildignore</code>, not <code>.gitignore</code>. Pushing it to <code>main</code> runs <code>cran-release.yml</code>, which tags the submitted commit with the bare version, <code>0.1.0</code> (no <code>v</code>), publishes the GitHub release and opens the <code>0.1.0.9000</code> bump pull request. Merge the bump only after CRAN accepts.</li>
+<li>
+<strong>After acceptance,</strong> <code>pkg-post-cran</code> closes the version’s parent issue and moves the board card.</li>
 </ul></div>
 <div class="section level2">
 <h2 id="editing-rules">Editing rules<a class="anchor" aria-label="anchor" href="#editing-rules"></a></h2>
@@ -153,7 +155,7 @@
 </ul></div>
 <div class="section level2">
 <h2 id="continuous-integration">Continuous integration<a class="anchor" aria-label="anchor" href="#continuous-integration"></a></h2>
-<p>Workflows come from <code>pedrobtz/r-actions</code>. Call those reusable workflows instead of writing bespoke ones, and pin a released tag rather than <code>main</code>. Pin a workflow that holds a write token, such as <code>coverage.yml</code>, to a commit, with the tag in a comment. The <code>R-CMD-check</code> workflow must call <code>r-cmd-check.yml</code>, because a hand-rolled one does not count as the pre-submission check. This package calls <code>r-cmd-check.yml</code> and <code>coverage.yml</code>; the pkgdown site is built by a local <code>pkgdown.yaml</code>.</p>
+<p>Workflows come from <code>pedrobtz/r-actions</code>. Call those reusable workflows instead of writing bespoke ones, and pin a released tag rather than <code>main</code>. Pin a workflow that holds a write token, such as <code>coverage.yml</code>, to a commit, with the tag in a comment. The <code>R-CMD-check</code> workflow must call <code>r-cmd-check.yml</code>, because a hand-rolled one does not count as the pre-submission check. This package calls <code>r-cmd-check.yml</code>, <code>coverage.yml</code> and <code>cran-release.yml</code>; the pkgdown site is built by a local <code>pkgdown.yaml</code>.</p>
 <p>Small edits get a small run. The shared workflows look at the files a pull request changes, compared with its merge base:</p>
 <ul><li>
 <strong>Markdown only</strong>, such as <code>README.md</code>, <code>NEWS.md</code> or <code>cran-comments.md</code>, skips every check. Only coverage and the pkgdown site run.</li>

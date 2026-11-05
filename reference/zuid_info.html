@@ -61,9 +61,10 @@ name, the upstream <code>repo</code>, <code>commit</code> and <code>path</code>,
 and the number of <code>entries</code>.</p></dd>
 
 <dt><code>entropy</code></dt>
-<dd><p>the operating-system entropy source compiled in:
+<dd><p>the operating-system entropy source in use:
 <code>"getrandom"</code>, <code>"getentropy"</code>, <code>"BCryptGenRandom"</code> or
-<code>"arc4random_buf"</code>.</p></dd>
+<code>"arc4random_buf"</code>, or <code>"/dev/urandom"</code> once a Linux kernel without
+<code>getrandom(2)</code> has fallen back to it.</p></dd>
 
 <dt><code>state</code></dt>
 <dd><p>the session's monotonic generation state: the last
@@ -99,7 +100,7 @@ first value.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.645558e+12</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $state$uuid7_counter</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1400</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1170</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $state$uuid1_last_ticks</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] NA</span>
@@ -108,7 +109,7 @@ first value.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $state$ulid_last_ms</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.793883e+12</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.793898e+12</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>

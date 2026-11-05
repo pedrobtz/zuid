@@ -23,7 +23,7 @@ sqids(numbers, alphabet = NULL, min_length = 0, blocklist = NULL)
 
 - size:
 
-  Symbols per NanoID, 21 by default.
+  Symbols per NanoID, 1 to 65536, 21 by default.
 
 - alphabet:
 
@@ -40,7 +40,8 @@ sqids(numbers, alphabet = NULL, min_length = 0, blocklist = NULL)
 - numbers:
 
   A numeric vector, or a list of numeric vectors, of whole numbers from
-  0 to 2^53 - 1. `NA` or `NULL` gives `NA`.
+  0 to 2^53 - 1. An element that is `NULL` or a single `NA` gives `NA`;
+  an element with `NA` among other numbers is an error.
 
 - min_length:
 
@@ -63,17 +64,19 @@ specification's algorithm: the default alphabet and blocklist unless
 given, and padded to `min_length`. A numeric vector gives one Sqid per
 number; a list gives one per element, encoding all its numbers. An ID
 that contains a blocklisted word is re-encoded with the next offset;
-when every offset is blocked, the result is a `zuid_encode_error`.
+when every offset is blocked, the result is a `zuid_encode_error`. An
+element with no numbers encodes as `""`, as the specification says, and
+`""` parses back to no numbers.
 
 ## Examples
 
 ``` r
 nanoid(2)
 #> <zuid_nanoid[2]>
-#> [1] Hw4MS3vzBJGruZ5mqOKS1 KmoUy2ZBTURZj9h-TIoBn
+#> [1] gU355NQMtvEWukkcNkxjb 7FDS0w58WSeHUM9CBu_wI
 nanoid(2, size = 10, alphabet = "0123456789abcdef")
 #> <zuid_nanoid[2]>
-#> [1] b829a8b166 737be12f2c
+#> [1] a58760fb71 a3ac36c994
 sqids(c(1, 2, 3))
 #> <zuid_sqids[3]>
 #> [1] Uk gb Ef

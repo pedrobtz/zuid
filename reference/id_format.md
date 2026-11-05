@@ -46,8 +46,11 @@ id_from_bytes(bytes, format, layout = NULL)
 
 `id_format()`: a character vector. `id_bytes()`: a raw matrix with the
 format's width in rows and one column per element, big-endian, with
-missing elements as columns of zeros listed in the attribute `na`.
-`id_from_bytes()`: a zuid vector.
+missing elements as columns of zeros listed in the attribute `na`. A CID
+has no fixed width, so for a CID it is a list of raw vectors instead,
+`NULL` for a missing element. Names become column names, or list names.
+`id_from_bytes()`: a zuid vector, named by the column names or list
+names of `bytes`.
 
 ## Details
 

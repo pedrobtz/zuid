@@ -70,7 +70,7 @@ likely. When rejection uses up a batch, another is drawn.</p>
 
 
 <dt id="arg-size">size<a class="anchor" aria-label="anchor" href="#arg-size"></a></dt>
-<dd><p>Symbols per NanoID, 21 by default.</p></dd>
+<dd><p>Symbols per NanoID, 1 to 65536, 21 by default.</p></dd>
 
 
 <dt id="arg-alphabet">alphabet<a class="anchor" aria-label="anchor" href="#arg-alphabet"></a></dt>
@@ -87,7 +87,8 @@ out is a <code>zuid_type_error</code>.</p></dd>
 
 <dt id="arg-numbers">numbers<a class="anchor" aria-label="anchor" href="#arg-numbers"></a></dt>
 <dd><p>A numeric vector, or a list of numeric vectors, of whole
-numbers from 0 to 2^53 - 1. <code>NA</code> or <code>NULL</code> gives <code>NA</code>.</p></dd>
+numbers from 0 to 2^53 - 1. An element that is <code>NULL</code> or a single <code>NA</code>
+gives <code>NA</code>; an element with <code>NA</code> among other numbers is an error.</p></dd>
 
 
 <dt id="arg-min-length">min_length<a class="anchor" aria-label="anchor" href="#arg-min-length"></a></dt>
@@ -110,17 +111,19 @@ specification's algorithm: the default alphabet and blocklist unless
 given, and padded to <code>min_length</code>. A numeric vector gives one Sqid per
 number; a list gives one per element, encoding all its numbers. An ID
 that contains a blocklisted word is re-encoded with the next offset; when
-every offset is blocked, the result is a <code>zuid_encode_error</code>.</p>
+every offset is blocked, the result is a <code>zuid_encode_error</code>. An element
+with no numbers encodes as <code>""</code>, as the specification says, and <code>""</code>
+parses back to no numbers.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">nanoid</span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;zuid_nanoid[2]&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] Hw4MS3vzBJGruZ5mqOKS1 KmoUy2ZBTURZj9h-TIoBn</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] gU355NQMtvEWukkcNkxjb 7FDS0w58WSeHUM9CBu_wI</span>
 <span class="r-in"><span><span class="fu">nanoid</span><span class="op">(</span><span class="fl">2</span>, size <span class="op">=</span> <span class="fl">10</span>, alphabet <span class="op">=</span> <span class="st">"0123456789abcdef"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;zuid_nanoid[2]&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] b829a8b166 737be12f2c</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] a58760fb71 a3ac36c994</span>
 <span class="r-in"><span><span class="fu">sqids</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;zuid_sqids[3]&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] Uk gb Ef</span>

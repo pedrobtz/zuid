@@ -90,7 +90,10 @@ elements back to back.</p></dd>
     <p><code>id_format()</code>: a character vector. <code>id_bytes()</code>: a raw matrix
 with the format's width in rows and one column per element, big-endian,
 with missing elements as columns of zeros listed in the attribute <code>na</code>.
-<code>id_from_bytes()</code>: a zuid vector.</p>
+A CID has no fixed width, so for a CID it is a list of raw vectors
+instead, <code>NULL</code> for a missing element. Names become column names, or
+list names. <code>id_from_bytes()</code>: a zuid vector, named by the column names
+or list names of <code>bytes</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

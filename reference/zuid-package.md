@@ -40,6 +40,3 @@ Other contributors:
 
 - Sqids (Authors of the Sqids blocklist, compiled into
   src/zuid_tables.c) \[copyright holder\]
-
-- Jetify Inc. (TypeID specification fixtures,
-  tests/testthat/fixtures/typeid/) \[copyright holder\]

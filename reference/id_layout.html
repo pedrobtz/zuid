@@ -122,12 +122,13 @@ vector of widths, most significant first.</p></dd>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The built-in layouts:</p><table class="table table"><tr><td>Name</td><td>Time</td><td>Node fields</td><td>Sequence</td></tr><tr><td><code>twitter</code></td><td>41 bits, ms, from 2010-11-04T01:42:54.657Z</td><td><code>datacenter</code> 5, <code>worker</code> 5</td><td>12</td></tr><tr><td><code>discord</code></td><td>42 bits, ms, from 2015-01-01</td><td><code>worker</code> 5, <code>process</code> 5</td><td>12</td></tr><tr><td><code>instagram</code></td><td>41 bits, ms, from 2011-08-24T21:07:01.721Z</td><td><code>shard</code> 13</td><td>10</td></tr><tr><td><code>sonyflake</code></td><td>39 bits, 10 ms, from <code>epoch</code></td><td><code>machine</code> 16, after the sequence</td><td>8</td></tr><tr><td><code>scru64</code></td><td>39 bits, 256 ms, from 1970</td><td><code>node</code> of <code>node_bits</code></td><td>24 − <code>node_bits</code></td></tr></table><p>Twitter, Sonyflake and SCRU64 keep the top bit as a sign bit; Discord and
+    <p>The built-in layouts:</p><table class="table table"><tr><td>Name</td><td>Time</td><td>Node fields</td><td>Sequence</td></tr><tr><td><code>twitter</code></td><td>41 bits, ms, from 2010-11-04T01:42:54.657Z</td><td><code>datacenter</code> 5, <code>worker</code> 5</td><td>12</td></tr><tr><td><code>discord</code></td><td>42 bits, ms, from 2015-01-01</td><td><code>worker</code> 5, <code>process</code> 5</td><td>12</td></tr><tr><td><code>instagram</code></td><td>41 bits, ms, from 2011-08-24T21:07:01.721Z</td><td><code>shard</code> 13</td><td>10</td></tr><tr><td><code>sonyflake</code></td><td>39 bits, 10 ms, from <code>epoch</code></td><td><code>machine</code> 16, after the sequence</td><td>8</td></tr><tr><td><code>scru64</code></td><td>39 bits, 256 ms, from 1970</td><td><code>node</code> of <code>node_bits</code></td><td>24 - <code>node_bits</code></td></tr></table><p>Twitter, Sonyflake and SCRU64 keep the top bit as a sign bit; Discord and
 Instagram use all 64 bits. Sonyflake's reference has changed its default
 start time between releases, so <code>epoch</code> is required for it.</p>
 <p>A custom layout gives <code>time</code>, <code>fields</code>, <code>sequence</code> and <code>sign_bit</code>. The
 bits must add up to 64, or 63 with the sign bit, and each part must have
-fewer than 54 bits, so that it reads exactly as a double.</p>
+fewer than 54 bits, so that it reads exactly as a double. The sequence
+has at most 31 bits, so that <code><a href="id_fields.html">id_fields()</a></code> returns it as an integer.</p>
     </div>
 
     <div class="section level2">

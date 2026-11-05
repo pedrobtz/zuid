@@ -25,8 +25,10 @@ A list with elements:
 
 - `entropy`:
 
-  the operating-system entropy source compiled in: `"getrandom"`,
-  `"getentropy"`, `"BCryptGenRandom"` or `"arc4random_buf"`.
+  the operating-system entropy source in use: `"getrandom"`,
+  `"getentropy"`, `"BCryptGenRandom"` or `"arc4random_buf"`, or
+  `"/dev/urandom"` once a Linux kernel without `getrandom(2)` has fallen
+  back to it.
 
 - `state`:
 
@@ -60,7 +62,7 @@ zuid_info()
 #> [1] 1.645558e+12
 #> 
 #> $state$uuid7_counter
-#> [1] 1400
+#> [1] 1170
 #> 
 #> $state$uuid1_last_ticks
 #> [1] NA
@@ -69,7 +71,7 @@ zuid_info()
 #> [1] NA
 #> 
 #> $state$ulid_last_ms
-#> [1] 1.793883e+12
+#> [1] 1.793898e+12
 #> 
 #> 
 ```

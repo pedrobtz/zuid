@@ -39,15 +39,25 @@
   reads a Sqid’s numbers and a CID’s version, codec, hash function and
   digest, and
   [`id_bytes()`](https://pedrobtz.github.io/zuid/reference/id_format.md)
-  gives a CID’s binary form.
+  gives a CID’s binary form. A Sqid of no numbers is `""` and parses
+  back, as the specification says; a NanoID has at least one symbol. A
+  [`sqids()`](https://pedrobtz.github.io/zuid/reference/nanoid.md)
+  element that is partly `NA` is an error.
+- [`id_bytes()`](https://pedrobtz.github.io/zuid/reference/id_format.md)
+  and
+  [`id_from_bytes()`](https://pedrobtz.github.io/zuid/reference/id_format.md)
+  keep names, as column names or list names. For a CID,
+  [`id_bytes()`](https://pedrobtz.github.io/zuid/reference/id_format.md)
+  returns a list of raw vectors.
 - XID, ObjectId and Snowflake: parsing, fields and
   [`xid()`](https://pedrobtz.github.io/zuid/reference/xid.md),
   [`objectid()`](https://pedrobtz.github.io/zuid/reference/xid.md) and
   [`snowflake()`](https://pedrobtz.github.io/zuid/reference/xid.md).
   [`id_layout()`](https://pedrobtz.github.io/zuid/reference/id_layout.md)
   gives the Twitter, Discord, Instagram, Sonyflake and SCRU64 layouts
-  and builds custom ones; a Snowflake is read and generated only under a
-  layout, which travels with the vector.
+  and builds custom ones, whose sequence has at most 31 bits so it reads
+  as an integer; a Snowflake is read and generated only under a layout,
+  which travels with the vector.
   [`id_convert()`](https://pedrobtz.github.io/zuid/reference/id_convert.md)
   moves between `xid` and `objectid`.
 - SCRU128, SCRU64 and KSUID parse, validate and read their fields, and

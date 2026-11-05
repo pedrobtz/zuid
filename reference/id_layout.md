@@ -83,7 +83,7 @@ The built-in layouts:
 | `discord` | 42 bits, ms, from 2015-01-01 | `worker` 5, `process` 5 | 12 |
 | `instagram` | 41 bits, ms, from 2011-08-24T21:07:01.721Z | `shard` 13 | 10 |
 | `sonyflake` | 39 bits, 10 ms, from `epoch` | `machine` 16, after the sequence | 8 |
-| `scru64` | 39 bits, 256 ms, from 1970 | `node` of `node_bits` | 24 − `node_bits` |
+| `scru64` | 39 bits, 256 ms, from 1970 | `node` of `node_bits` | 24 - `node_bits` |
 
 Twitter, Sonyflake and SCRU64 keep the top bit as a sign bit; Discord
 and Instagram use all 64 bits. Sonyflake's reference has changed its
@@ -91,7 +91,10 @@ default start time between releases, so `epoch` is required for it.
 
 A custom layout gives `time`, `fields`, `sequence` and `sign_bit`. The
 bits must add up to 64, or 63 with the sign bit, and each part must have
-fewer than 54 bits, so that it reads exactly as a double.
+fewer than 54 bits, so that it reads exactly as a double. The sequence
+has at most 31 bits, so that
+[`id_fields()`](https://pedrobtz.github.io/zuid/reference/id_fields.md)
+returns it as an integer.
 
 ## Examples
 
