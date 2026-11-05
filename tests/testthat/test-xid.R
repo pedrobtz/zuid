@@ -34,8 +34,8 @@ test_that("XID text is checked as rs/xid checks it", {
   expect_true(id_valid("c6e52g2mrqcjl44hf170", "xid"))
 })
 
-test_that("id_xid() uses the machine, process and counter it is given", {
-  x <- id_xid(
+test_that("xid() uses the machine, process and counter it is given", {
+  x <- xid(
     3,
     process = 0x1e428,
     random = as.raw(c(0x60, 0xf4, 0x86, 0xff, 0xff, 0xfe)),
@@ -49,21 +49,21 @@ test_that("id_xid() uses the machine, process and counter it is given", {
       "4d88e15b60f486e428000000"
     )
   )
-  y <- id_xid(1, machine = as.raw(1:3), random = raw(6), time = 0)
+  y <- xid(1, machine = as.raw(1:3), random = raw(6), time = 0)
   expect_identical(id_fields(y)$node, "010203")
 })
 
 test_that("generated XIDs share the session's machine and count up", {
   local_fresh_state()
-  x <- id_xid(1e4)
+  x <- xid(1e4)
   expect_identical(id_parse(as.character(x), "xid"), x)
   expect_identical(id_from_bytes(id_bytes(x), "xid"), x)
   f <- id_fields(x)
   expect_length(unique(f$node), 1L)
   expect_identical(unique(f$process), as.integer(Sys.getpid() %% 65536))
   expect_identical(diff(f$sequence) %% 2^24, rep(1, 1e4 - 1))
-  expect_identical(id_fields(id_xid(1))$node, f$node[1])
-  expect_error(id_xid(1, machine = raw(2)), class = "zuid_type_error")
-  expect_error(id_xid(1, random = raw(5)), class = "zuid_type_error")
-  expect_error(id_xid(1, time = -1), class = "zuid_type_error")
+  expect_identical(id_fields(xid(1))$node, f$node[1])
+  expect_error(xid(1, machine = raw(2)), class = "zuid_type_error")
+  expect_error(xid(1, random = raw(5)), class = "zuid_type_error")
+  expect_error(xid(1, time = -1), class = "zuid_type_error")
 })

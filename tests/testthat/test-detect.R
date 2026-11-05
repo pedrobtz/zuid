@@ -10,13 +10,13 @@ test_that("detection follows section 6.2 for every collision it names", {
 test_that("no encoding or syntactic format is chosen without a hint (D10)", {
   withr::local_seed(1)
   x <- c(
-    as.character(id_nanoid(50)),
-    as.character(id_nanoid(
+    as.character(nanoid(50)),
+    as.character(nanoid(
       50,
       size = 12,
       alphabet = "0123456789abcdefghijklmnopqrstuvwxyz"
     )),
-    as.character(id_sqids(1:50)),
+    as.character(sqids(1:50)),
     "tz4a98xxat96iws9zmbrgj3a"
   )
   d <- id_detect(x)

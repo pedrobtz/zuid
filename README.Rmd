@@ -30,8 +30,8 @@ The core is [RFC 9562](https://www.rfc-editor.org/info/rfc9562/) in full:
 versions 1 to 8, nil and max, and every text form. Around it are the same
 128 bits in other alphabets, and fourteen kindred formats: ULID, TypeID,
 UPID, SCRU128, SCRU64, KSUID, Snowflake and Sonyflake, XID, ObjectId,
-NanoID, Cuid2, Sqids and CID. One `id_` vocabulary works across all of
-them.
+NanoID, Cuid2, Sqids and CID. Each format's generator is named after it,
+and one `id_` vocabulary reads, checks and converts all of them.
 
 * **Detection never guesses.** A string that could be two formats is `NA`,
   with the candidates listed. A hint settles it.
@@ -115,11 +115,13 @@ Generators read the clock and the operating system's entropy once per call.
 Version 7 UUIDs and ULIDs are monotonic within a session:
 
 ```{r}
-id_uuid(3)
-id_ulid(2)
+uuid(3)
+ulid(2)
 ```
 
-Every function starts with `id_` and takes the vector first. A function
+A generator is named after its format, as in `uuid()` and `ulid()`. Every
+function that takes identifiers starts with `id_` and takes the vector
+first. A function
 that inspects returns `NA` where the input says nothing; a function that
 builds raises a classed `zuid_error`.
 

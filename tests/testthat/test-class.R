@@ -15,8 +15,8 @@ test_that("assignment parses character values and refuses invalid ones", {
   x <- uuids()
   x[3] <- "1EC9414C-232A-6B00-B3C8-9F6BDECED846"
   expect_identical(as.character(x[[3]]), "1ec9414c-232a-6b00-b3c8-9f6bdeced846")
-  x[[1]] <- id_nil()
-  expect_identical(x[1], id_nil()[1] |> stats::setNames("a"))
+  x[[1]] <- uuid_nil()
+  expect_identical(x[1], uuid_nil()[1] |> stats::setNames("a"))
   x[2] <- NA
   expect_true(is.na(x[2]))
   expect_error(x[1] <- "nope", class = "zuid_parse_error")
@@ -24,10 +24,10 @@ test_that("assignment parses character values and refuses invalid ones", {
 })
 
 test_that("c() combines zuid vectors and parseable text of one format", {
-  x <- c(id_nil(), "017F22E2-79B0-7CC3-98C4-DC0C0C07398F", NULL, id_max())
+  x <- c(uuid_nil(), "017F22E2-79B0-7CC3-98C4-DC0C0C07398F", NULL, uuid_max())
   expect_s3_class(x, "zuid_uuid")
   expect_identical(as.character(x)[2], "017f22e2-79b0-7cc3-98c4-dc0c0c07398f")
-  expect_error(c(id_nil(), "nope"), class = "zuid_parse_error")
+  expect_error(c(uuid_nil(), "nope"), class = "zuid_parse_error")
 })
 
 test_that("comparison is on values, sorting on bytes", {
@@ -37,9 +37,9 @@ test_that("comparison is on values, sorting on bytes", {
     c(TRUE, FALSE, NA)
   )
   expect_identical(unname(x != "nope"), c(TRUE, TRUE, NA))
-  expect_true(id_nil() == id_nil())
+  expect_true(uuid_nil() == uuid_nil())
   expect_identical(
-    as.character(sort(c(id_max(), id_nil(), x[1]))),
+    as.character(sort(c(uuid_max(), uuid_nil(), x[1]))),
     c(
       "00000000-0000-0000-0000-000000000000",
       "017f22e2-79b0-7cc3-98c4-dc0c0c07398f",

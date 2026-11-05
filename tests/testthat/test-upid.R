@@ -53,20 +53,20 @@ test_that("UPID text is checked as the reference checks it", {
   )
 })
 
-test_that("id_upid() pads the prefix, keeps the time to 256 ms and round-trips", {
-  x <- id_upid(1e4, "ab")
+test_that("upid() pads the prefix, keeps the time to 256 ms and round-trips", {
+  x <- upid(1e4, "ab")
   expect_true(all(startsWith(as.character(x), "abzz_")))
   expect_identical(id_parse(as.character(x), "upid"), x)
   expect_identical(id_from_bytes(id_bytes(x), "upid"), x)
   expect_true(all(id_valid(as.character(x), "upid", level = "strict")))
-  y <- id_upid(1, "user", random = as.raw(1:8), time = 1720366572288 + 255)
+  y <- upid(1, "user", random = as.raw(1:8), time = 1720366572288 + 255)
   expect_identical(id_time(y, "ms"), 1720366572288)
   expect_identical(
     id_encode(id_bytes(y), "hex"),
     "01908dd6a30102030405060708d61576"
   )
-  expect_error(id_upid(1, "users"), class = "zuid_type_error")
-  expect_error(id_upid(1, "us1"), class = "zuid_type_error")
-  expect_error(id_upid(1, ""), class = "zuid_type_error")
-  expect_error(id_upid(1, "user", random = raw(7)), class = "zuid_type_error")
+  expect_error(upid(1, "users"), class = "zuid_type_error")
+  expect_error(upid(1, "us1"), class = "zuid_type_error")
+  expect_error(upid(1, ""), class = "zuid_type_error")
+  expect_error(upid(1, "user", random = raw(7)), class = "zuid_type_error")
 })

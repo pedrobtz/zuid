@@ -1,12 +1,12 @@
 #' Generate NanoIDs and Sqids
 #'
-#' `id_nanoid()` generates NanoIDs: `size` symbols drawn uniformly from
+#' `nanoid()` generates NanoIDs: `size` symbols drawn uniformly from
 #' `alphabet`, by NanoID 6's `customRandom()`. Random bytes come in batches,
 #' each read from its last byte, and a byte at or above the largest multiple
 #' of the alphabet's size below 256 is rejected, so every symbol is equally
 #' likely. When rejection uses up a batch, another is drawn.
 #'
-#' `id_sqids()` encodes non-negative whole numbers as Sqids, by the
+#' `sqids()` encodes non-negative whole numbers as Sqids, by the
 #' specification's algorithm: the default alphabet and blocklist unless
 #' given, and padded to `min_length`. A numeric vector gives one Sqid per
 #' number; a list gives one per element, encoding all its numbers. An ID
@@ -18,7 +18,7 @@
 #' @param alphabet The symbols, or `NULL` for the format's default:
 #'   `A-Za-z0-9_-` for NanoID and `a-zA-Z0-9` for Sqids. 1 to 256 printable
 #'   ASCII characters for NanoID, 3 to 255 for Sqids, all distinct.
-#' @param random For `id_nanoid()`, `NULL` to draw from the operating system,
+#' @param random For `nanoid()`, `NULL` to draw from the operating system,
 #'   or a raw vector read batch by batch, for reproducible values; running
 #'   out is a `zuid_type_error`.
 #' @param numbers A numeric vector, or a list of numeric vectors, of whole
@@ -28,12 +28,12 @@
 #'   of words to avoid (`character()` for none).
 #' @return A zuid vector.
 #' @examples
-#' id_nanoid(2)
-#' id_nanoid(2, size = 10, alphabet = "0123456789abcdef")
-#' id_sqids(c(1, 2, 3))
-#' id_sqids(list(c(1, 2, 3)), min_length = 10)
+#' nanoid(2)
+#' nanoid(2, size = 10, alphabet = "0123456789abcdef")
+#' sqids(c(1, 2, 3))
+#' sqids(list(c(1, 2, 3)), min_length = 10)
 #' @export
-id_nanoid <- function(n = 1, size = 21, alphabet = NULL, random = NULL) {
+nanoid <- function(n = 1, size = 21, alphabet = NULL, random = NULL) {
   n <- check_count(n)
   if (!is_whole(size) || size < 0 || size > 65536) {
     zuid_abort("type", "`size` must be a whole number from 0 to 65536.")
@@ -62,9 +62,9 @@ id_nanoid <- function(n = 1, size = 21, alphabet = NULL, random = NULL) {
   )
 }
 
-#' @rdname id_nanoid
+#' @rdname nanoid
 #' @export
-id_sqids <- function(
+sqids <- function(
   numbers,
   alphabet = NULL,
   min_length = 0,

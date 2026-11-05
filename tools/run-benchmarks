@@ -60,25 +60,25 @@ if (!only_baseline) {
   if (status != 0L) stop("R CMD INSTALL failed", call. = FALSE)
   suppressMessages(library(zuid, lib.loc = lib))
   uuids <- id_parse(uuid_text, "uuid")
-  ksuid_text <- as.character(id_ksuid(n))
+  ksuid_text <- as.character(ksuid(n))
   mixed <- c(
     uuid_text[seq_len(n / 4)],
-    as.character(id_ulid(n / 4)),
+    as.character(ulid(n / 4)),
     ksuid_text[seq_len(n / 4)],
-    as.character(id_xid(n / 4))
+    as.character(xid(n / 4))
   )
   bytes <- id_bytes(uuids)
   cat("\n")
   time_it("`id_parse()` of UUID strings", function() id_parse(uuid_text, "uuid"))
-  time_it("`id_uuid(version = 7)`", function() id_uuid(n, version = 7))
-  time_it("`id_uuid(version = 4)`", function() id_uuid(n, version = 4))
-  time_it("`id_ulid()`", function() id_ulid(n))
+  time_it("`uuid(version = 7)`", function() uuid(n, version = 7))
+  time_it("`uuid(version = 4)`", function() uuid(n, version = 4))
+  time_it("`ulid()`", function() ulid(n))
   time_it("`id_format(form = \"base62\")`", function() id_format(uuids, "base62"))
   time_it("`id_format(form = \"words\")`", function() id_format(uuids, "words"))
   time_it("`id_parse()` of KSUID strings", function() id_parse(ksuid_text, "ksuid"))
   time_it("`id_detect()` of mixed strings", function() id_detect(mixed))
   time_it("`id_fields()`", function() id_fields(uuids))
-  time_it("`id_sqids()` of single integers", function() id_sqids(seq_len(n)))
+  time_it("`sqids()` of single integers", function() sqids(seq_len(n)))
   time_it("`id_bytes()`", function() id_bytes(uuids))
   time_it("`id_from_bytes()`", function() id_from_bytes(bytes, "uuid"))
 }

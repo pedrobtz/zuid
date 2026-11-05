@@ -62,7 +62,7 @@ test_that("id_format() writes every hex form", {
 })
 
 test_that("nil and max are the all-zero and all-one UUIDs", {
-  expect_identical(id_bytes(id_nil())[, 1], raw(16))
-  expect_identical(id_bytes(id_max())[, 1], as.raw(rep(0xff, 16)))
-  expect_s3_class(id_nil(), "zuid_uuid")
+  expect_identical(id_bytes(uuid_nil())[, 1], raw(16))
+  expect_identical(id_bytes(uuid_max())[, 1], as.raw(rep(0xff, 16)))
+  expect_s3_class(uuid_nil(), "zuid_uuid")
 })

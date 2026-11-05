@@ -1,18 +1,18 @@
 #' Generate SCRU128, SCRU64 and KSUID values
 #'
-#' `id_scru128()` generates SCRU128 IDs by the specification's generator:
+#' `scru128()` generates SCRU128 IDs by the specification's generator:
 #' 48 bits of milliseconds, a 24-bit `counter_hi` renewed once a second, a
 #' 24-bit `counter_lo` renewed each millisecond and incremented within it,
 #' and 32 random bits. Values from one session strictly increase; a counter
 #' overflow moves the timestamp forward instead of waiting.
 #'
-#' `id_scru64()` generates SCRU64 IDs for one node, as the reference
+#' `scru64()` generates SCRU64 IDs for one node, as the reference
 #' generator does: 256 ms ticks, then `node` in `node_bits` bits, then a
 #' counter renewed at each tick and incremented within it. `node` and
 #' `node_bits` are required, since only the caller can know that no other
 #' generator uses the same node.
 #'
-#' `id_ksuid()` generates KSUIDs: seconds since 2014-05-13T16:53:20Z and
+#' `ksuid()` generates KSUIDs: seconds since 2014-05-13T16:53:20Z and
 #' 128 random bits. KSUIDs are not monotonic within a second.
 #'
 #' A clock that runs back by up to the option `zuid.rollback_tolerance`
@@ -25,10 +25,10 @@
 #'
 #' SCRU64 keeps one state per `node` and `node_bits`, so values for each
 #' node increase however the calls for different nodes interleave. As in
-#' [id_uuid()], a call given both `time` and `random` is a pure function of
+#' [uuid()], a call given both `time` and `random` is a pure function of
 #' its arguments.
 #'
-#' @inheritParams id_uuid
+#' @inheritParams uuid
 #' @param random `NULL` to draw from the operating system, or exactly the
 #'   bytes needed: 10 per value for SCRU128 (4 of entropy, then the seeds of
 #'   `counter_lo` and `counter_hi`), 3 per value for SCRU64 (the counter's
@@ -39,11 +39,11 @@
 #'   tolerance: `"error"` or `"reset"`.
 #' @return A zuid vector of `n` values.
 #' @examples
-#' id_scru128(2)
-#' id_scru64(2, node = 42, node_bits = 8)
-#' id_ksuid(2)
+#' scru128(2)
+#' scru64(2, node = 42, node_bits = 8)
+#' ksuid(2)
 #' @export
-id_scru128 <- function(
+scru128 <- function(
   n = 1,
   random = NULL,
   time = NULL,
@@ -65,9 +65,9 @@ id_scru128 <- function(
   generated(out, "scru128")
 }
 
-#' @rdname id_scru128
+#' @rdname scru128
 #' @export
-id_scru64 <- function(
+scru64 <- function(
   n = 1,
   node,
   node_bits,
@@ -106,9 +106,9 @@ id_scru64 <- function(
   generated(out, "scru64")
 }
 
-#' @rdname id_scru128
+#' @rdname scru128
 #' @export
-id_ksuid <- function(n = 1, random = NULL, time = NULL) {
+ksuid <- function(n = 1, random = NULL, time = NULL) {
   n <- check_count(n)
   check_random(random, 16 * n)
   range <- (1400000000 + c(0, 2^32 - 1)) * 1e6 + c(0, 999999)
@@ -157,17 +157,17 @@ generated <- function(out, format, call = sys.call(-1L)) {
 
 #' Generate XIDs, ObjectIds and Snowflakes
 #'
-#' `id_xid()` generates XIDs: seconds since 1970, a 3-byte machine id, a
+#' `xid()` generates XIDs: seconds since 1970, a 3-byte machine id, a
 #' 2-byte process id and a 3-byte counter. The reference derives the machine
 #' id from the host name through MD5; zuid draws three random bytes once per
 #' session instead, and `machine` takes the reference's bytes when they
 #' matter. The process id is R's, masked to 16 bits. The counter starts at a
 #' random value once per session and increments, wrapping at 2^24.
 #'
-#' `id_objectid()` generates BSON ObjectIds: seconds, a 5-byte random value
+#' `objectid()` generates BSON ObjectIds: seconds, a 5-byte random value
 #' drawn once per session, and a 3-byte counter started at a random value.
 #'
-#' `id_snowflake()` generates Snowflakes under a layout. `worker` sets every
+#' `snowflake()` generates Snowflakes under a layout. `worker` sets every
 #' node field, since duplicate node ids across machines are what Snowflake
 #' exists to prevent and only the caller can rule them out. The sequence
 #' starts at zero each tick and increments within it; when it overflows,
@@ -178,27 +178,27 @@ generated <- function(out, format, call = sys.call(-1L)) {
 #' `zuid_clock_error`, and `rollback = "reset"` restarts the layout's
 #' generator at the new time, which may repeat values made before.
 #'
-#' @inheritParams id_uuid
-#' @param machine For `id_xid()`, three raw bytes, or `NULL` for the
+#' @inheritParams uuid
+#' @param machine For `xid()`, three raw bytes, or `NULL` for the
 #'   session's random ones.
-#' @param process For `id_xid()`, the process id, `Sys.getpid()` by default.
-#' @param random `NULL`, or for reproducible values: 6 bytes for `id_xid()`
-#'   (machine, then the counter's start) and 8 for `id_objectid()` (the
+#' @param process For `xid()`, the process id, `Sys.getpid()` by default.
+#' @param random `NULL`, or for reproducible values: 6 bytes for `xid()`
+#'   (machine, then the counter's start) and 8 for `objectid()` (the
 #'   random value, then the counter's start), used for this call only.
 #' @param layout An [id_layout()].
 #' @param worker The node fields' values: one number when the layout has one
 #'   node field, else a named list, such as `list(datacenter = 1, worker = 7)`.
 #' @param time `NULL` for the current time, or a `POSIXct` (or a double of
 #'   milliseconds since 1970) of length 1 or `n`.
-#' @param rollback For `id_snowflake()`, what to do when the clock (or
+#' @param rollback For `snowflake()`, what to do when the clock (or
 #'   `time`) runs back further than the tolerance: `"error"` or `"reset"`.
 #' @return A zuid vector of `n` values.
 #' @examples
-#' id_xid(2)
-#' id_objectid(2)
-#' id_snowflake(2, id_layout("twitter"), list(datacenter = 1, worker = 7))
+#' xid(2)
+#' objectid(2)
+#' snowflake(2, id_layout("twitter"), list(datacenter = 1, worker = 7))
 #' @export
-id_xid <- function(
+xid <- function(
   n = 1,
   machine = NULL,
   process = Sys.getpid(),
@@ -218,18 +218,18 @@ id_xid <- function(
   generated(out, "xid")
 }
 
-#' @rdname id_xid
+#' @rdname xid
 #' @export
-id_objectid <- function(n = 1, random = NULL, time = NULL) {
+objectid <- function(n = 1, random = NULL, time = NULL) {
   n <- check_count(n)
   check_random(random, 8)
   secs <- generation_seconds(time, n, "ObjectId")
   generated(.Call(zuid_c_objectid, secs, random), "objectid")
 }
 
-#' @rdname id_xid
+#' @rdname xid
 #' @export
-id_snowflake <- function(
+snowflake <- function(
   n = 1,
   layout,
   worker,

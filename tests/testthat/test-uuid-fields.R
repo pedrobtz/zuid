@@ -51,7 +51,7 @@ test_that("versions 3, 5 and 8 report the version only", {
 })
 
 test_that("nil and max report versions 0 and 15 and no variant", {
-  f <- id_fields(c(id_nil(), id_max()))
+  f <- id_fields(c(uuid_nil(), uuid_max()))
   expect_identical(f$version, c(0L, 15L))
   expect_true(all(is.na(f$variant)))
 })

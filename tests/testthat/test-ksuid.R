@@ -56,11 +56,11 @@ test_that("KSUIDs sort by time and are case-sensitive", {
 })
 
 test_that("generated KSUIDs round-trip and use the given bytes", {
-  x <- id_ksuid(1e4)
+  x <- ksuid(1e4)
   expect_identical(id_parse(as.character(x), "ksuid"), x)
   expect_identical(id_from_bytes(id_bytes(x), "ksuid"), x)
   expect_true(all(id_valid(as.character(x), "ksuid", level = "strict")))
-  y <- id_ksuid(
+  y <- ksuid(
     1,
     random = as.raw(1:16),
     time = (1400000000 + 107608047) * 1000 + 999
@@ -69,6 +69,6 @@ test_that("generated KSUIDs round-trip and use the given bytes", {
     id_encode(id_bytes(y), "hex"),
     "0669f7ef0102030405060708090a0b0c0d0e0f10"
   )
-  expect_error(id_ksuid(1, time = 0), class = "zuid_type_error")
-  expect_error(id_ksuid(1, random = raw(15)), class = "zuid_type_error")
+  expect_error(ksuid(1, time = 0), class = "zuid_type_error")
+  expect_error(ksuid(1, random = raw(15)), class = "zuid_type_error")
 })

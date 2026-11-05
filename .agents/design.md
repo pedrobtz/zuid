@@ -207,7 +207,7 @@ round-trips every format exactly.
 | | zuid |
 | --- | --- |
 | Role | R API; later a provider (§14) |
-| R prefix | `id_` |
+| R prefix | `id_` for functions of an identifier; generators bare (D25) |
 | Info function | `zuid_info()` |
 | Root condition class | `zuid_error` |
 | Internal C prefix | `zuid_` |
@@ -324,23 +324,23 @@ id_convert(x, to, ...)
 #   uuid <-> typeid <-> upid; xid <-> objectid; ulid <-> uuid
 
 # generation
-id_uuid(n = 1, version = 7, namespace = NULL, name = NULL,
+uuid(n = 1, version = 7, namespace = NULL, name = NULL,
         node = NULL, random = NULL, time = NULL)
-id_ulid(n = 1, random = NULL, time = NULL)
-id_typeid(n = 1, prefix, random = NULL, time = NULL)
-id_upid(n = 1, prefix, random = NULL, time = NULL)
-id_scru128(n = 1, random = NULL, time = NULL)
-id_scru64(n = 1, node, node_bits, time = NULL)
-id_ksuid(n = 1, random = NULL, time = NULL)
-id_xid(n = 1, machine = NULL, process = NULL, time = NULL)
-id_objectid(n = 1, process = NULL, time = NULL)
-id_snowflake(n = 1, layout, worker, time = NULL)
-id_nanoid(n = 1, size = 21, alphabet = NULL, random = NULL)
-id_cid(x, codec = "raw", hash = "sha2-256", version = 1L)
+ulid(n = 1, random = NULL, time = NULL)
+typeid(n = 1, prefix, random = NULL, time = NULL)
+upid(n = 1, prefix, random = NULL, time = NULL)
+scru128(n = 1, random = NULL, time = NULL)
+scru64(n = 1, node, node_bits, time = NULL)
+ksuid(n = 1, random = NULL, time = NULL)
+xid(n = 1, machine = NULL, process = NULL, time = NULL)
+objectid(n = 1, process = NULL, time = NULL)
+snowflake(n = 1, layout, worker, time = NULL)
+nanoid(n = 1, size = 21, alphabet = NULL, random = NULL)
+cid(x, codec = "raw", hash = "sha2-256", version = 1L)
 #   content identifier of bytes or files; needs zucrypt
-id_sqids(numbers, alphabet = NULL, min_length = 0, blocklist = NULL)
-id_nil()
-id_max()
+sqids(numbers, alphabet = NULL, min_length = 0, blocklist = NULL)
+uuid_nil()
+uuid_max()
 
 # layouts
 id_layout(name, epoch = NULL)
@@ -684,7 +684,7 @@ passes them in. `time` is a `POSIXct` or millisecond double recycled to
   `"x500"`) and `name`, hashed through `zucrypt::crypt_hash()`, erroring
   with `zuid_dependency_error` when `zucrypt` is absent. `version = 8`:
   the caller's 122 bits through `random`, with version and variant bits
-  set. `id_nil()` and `id_max()` are the two constants.
+  set. `uuid_nil()` and `uuid_max()` are the two constants.
 - **ULID.** 48 bits of milliseconds and 80 random bits, monotonic (§6.7).
 - **TypeID.** A version 7 UUID under `prefix`, validated against the
   prefix grammar.
@@ -719,13 +719,13 @@ passes them in. `time` is a `POSIXct` or millisecond double recycled to
   uniform as a 64-symbol one. The random bytes requested are the
   reference's estimate and the generator draws more if rejection eats
   them, which is the one place a generator asks for entropy twice.
-- **CID.** `id_cid(x, codec, hash, version)` hashes raw vectors or files
+- **CID.** `cid(x, codec, hash, version)` hashes raw vectors or files
   through `zucrypt` (SHA-256 by default; `zucrypt`'s other digests by
   multicodec name) and wraps the digest as a version 1 CID in lowercase
   base32, or a version 0 when `version = 0L`, `codec = "dag-pb"` and
   `hash = "sha2-256"`. It is the one generator that needs no clock and
   no entropy.
-- **Sqids** is an encoding: `id_sqids(numbers)` takes integers, doubles
+- **Sqids** is an encoding: `sqids(numbers)` takes integers, doubles
   below 2⁵³ or `zuint` `uint64`, applies the blocklist (D8), increments
   the offset and retries as the specification says, errors with
   `zuid_encode_error` when the alphabet is exhausted, and pads to
@@ -989,14 +989,14 @@ with the baseline run in Stage 0 before any `zuid` code exists.
 | Operation, 10⁶ elements | Target |
 | --- | --- |
 | `id_parse()` of UUID strings | under 150 ms; within 1.5× of `uuid` |
-| `id_uuid(version = 7)` | under 100 ms; within 1.5× of `uuid` |
-| `id_ulid()` | under 100 ms; faster than `ulid` |
+| `uuid(version = 7)` | under 100 ms; within 1.5× of `uuid` |
+| `ulid()` | under 100 ms; faster than `ulid` |
 | `id_format(form = "base62")` | under 300 ms |
 | `id_format(form = "words")` | under 200 ms |
 | `id_parse()` of KSUID strings | under 600 ms (base62 over 160 bits) |
 | `id_detect()` of mixed strings | under 300 ms |
 | `id_fields()` | under 400 ms |
-| `id_sqids()` of single integers | under 500 ms including the blocklist |
+| `sqids()` of single integers | under 500 ms including the blocklist |
 | `id_bytes()`, `id_from_bytes()` | under 50 ms each |
 
 The `uuid` rows compare against `uuid::UUIDparse()` and
@@ -1110,7 +1110,7 @@ full profile and records the dates.
   `NA` with candidates rather than picking one. The maintainer's rule
   that a hint must be possible because some strings match several
   formats; the class split is how the RFC makes "some" precise.
-- **D11 (C).** `id_uuid()` defaults to version 7, not 4, because a new
+- **D11 (C).** `uuid()` defaults to version 7, not 4, because a new
   identifier in 2026 should sort by time, RFC 9562 recommends it for new
   systems, and version 4 is one argument away.
 - **D12 (C).** XID's machine id is three random bytes per session, not
@@ -1119,14 +1119,14 @@ full profile and records the dates.
   (distinct per host with overwhelming probability) without either. The
   `machine` argument restores the reference's behaviour for a caller
   who hashes the host name through `zucrypt`.
-- **D13 (C).** `id_snowflake()` requires `layout` and `worker`, and
-  `id_scru64()` requires `node` and `node_bits`. There is no safe default
+- **D13 (C).** `snowflake()` requires `layout` and `worker`, and
+  `scru64()` requires `node` and `node_bits`. There is no safe default
   for any of them, and a default of zero would make two machines collide
   by construction.
 - **D14 (C).** The R prefix is `id_`, the condition root `zuid_error`,
   the internal C prefix `zuid_`, and `zid_` is reserved for the header
   of §14. `id_` is short enough to read at a call site and no family
-  package uses it.
+  package uses it. D25 narrows the prefix to functions of an identifier.
 - **D15 (C).** Performance targets (§10) are measured and recorded but do
   not gate v0.1.0; the API and the oracles do.
 - **D16 (M).** The package is a complete UUID core with two rings in
@@ -1164,7 +1164,7 @@ full profile and records the dates.
   (D6). Monotonicity across calls (§6.7) holds for calls that read the
   clock or the entropy source. The maintainer set this on 2026-10-24, on
   the critical review's question (#35).
-- **D23 (M).** `id_snowflake()` takes `rollback = c("error", "reset")`, as
+- **D23 (M).** `snowflake()` takes `rollback = c("error", "reset")`, as
   SCRU does (D18), and its state is one per layout (parts, epoch, unit),
   shared by every node value; SCRU64's is one per node and size. Both
   were per call before, which repeated values when calls alternated
@@ -1175,6 +1175,15 @@ full profile and records the dates.
   guessing one. "Never raises on input" (§8) is about values; a missing
   format with nothing to detect it from is the caller's to give. The
   maintainer set this on 2026-10-24 (#36).
+- **D25 (M).** A generator is named after its format, without a prefix:
+  `uuid()`, `ulid()`, `typeid()`, `upid()`, `scru128()`, `scru64()`,
+  `ksuid()`, `xid()`, `objectid()`, `snowflake()`, `nanoid()`, `sqids()`
+  and, later, `cid()`. The `id_` prefix names the object a function takes,
+  an identifier, so it stays on `id_parse()`, `id_fields()`, `id_format()`
+  and the rest. The UUID constants are `uuid_nil()` and `uuid_max()`, as
+  bare `max()` would mask base R. The format names are the ones users
+  know; masking `ulid::ulid()` is accepted, as `zuid::ulid()` resolves
+  it. The maintainer set this on 2026-11-05.
 
 ## 14. Later versions, in the order they are expected
 
@@ -1258,6 +1267,6 @@ The printing format of a `zuid` vector and of a layout; whether
 `id_formats()` includes custom layouts registered in the session; the
 wording of condition messages beyond their classes; the exact set of
 Snowflake-family layouts beyond the five named; which of `zucrypt`'s
-digests `id_cid()` accepts beyond SHA-256; whether `id_nanoid()` exposes
+digests `cid()` accepts beyond SHA-256; whether `nanoid()` exposes
 the reference's `customRandom` hook as an R function; and the articles'
 second examples.

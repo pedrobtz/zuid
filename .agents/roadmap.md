@@ -15,7 +15,7 @@ Scope narrowed 2026-10-24 by the maintainer: v0.1.0 has no interface with
 other `zu*` packages. `zuarrow`, `zuint`, `zucrypt` and `zutempo` are not in
 `Suggests`, and everything that needs them moves to After 0.1.0: Arrow and
 DuckDB interchange (§6.9), `id_integer()`, `id_time(class = "zutempo")`,
-name-based UUID versions 3 and 5, `id_cid()` generation, and Sqids numbers
+name-based UUID versions 3 and 5, `cid()` generation, and Sqids numbers
 of 2⁵³ or more. Parsing, fields and validation of every format are
 unaffected. Design §12's Arrow criterion does not apply to v0.1.0.
 
@@ -104,7 +104,7 @@ fields and time, through the descriptor table every later format extends.
 - The hex forms of §6.5 in `id_format()`; `id_bytes()`, `id_from_bytes()`.
 - `id_fields()`, `id_time()` (`POSIXct` and `ms`), `id_version()` for every
   UUID version;
-  `id_nil()`, `id_max()`.
+  `uuid_nil()`, `uuid_max()`.
 - The condition classes of §8 that these raise.
 
 **Exit criteria.**
@@ -136,7 +136,7 @@ forms); §8.
 **CI.** `full — first operating-system code: entropy and clock sources with
 Windows-only paths (BCryptGenRandom, GetSystemTimePreciseAsFileTime).`
 
-**Goal.** `id_uuid()` generates every version except the name-based 3 and 5,
+**Goal.** `uuid()` generates every version except the name-based 3 and 5,
 with monotonic version 7, from operating-system entropy.
 
 **Work.**
@@ -145,7 +145,7 @@ with monotonic version 7, from operating-system entropy.
   `BCryptGenRandom`) and the clock, read once in the R entry point (D5, D6).
 - `src/zuid_gen.c`: pure generators for versions 1, 4, 6, 7 and 8.
 - The monotonic version 7 counter and its per-session state (§6.7).
-- `id_uuid(version = 3)` and `version = 5` raise a classed error saying
+- `uuid(version = 3)` and `version = 5` raise a classed error saying
   name-based generation comes after 0.1.0. Parsing them is Stage 1's.
 - `zuid_entropy_error`, `zuid_clock_error`.
 
@@ -230,8 +230,8 @@ and convert to and from UUIDs.
 **Work.**
 
 - Descriptors and format code for `ulid`, `typeid`, `upid`.
-- `id_ulid()` with monotonic overflow (`zuid_overflow_error`), `id_typeid()`,
-  `id_upid()`.
+- `ulid()` with monotonic overflow (`zuid_overflow_error`), `typeid()`,
+  `upid()`.
 - `id_convert()` for `uuid`, `typeid`, `upid` and `ulid`;
   `zuid_convert_error`.
 
@@ -249,7 +249,7 @@ and convert to and from UUIDs.
   comes through `id_convert(x, "typeid", prefix = )`.
 - `id_convert(x, to, prefix = NULL)` names its one extra argument instead of
   taking `...`.
-- `id_upid()` rejects a prefix outside the UPID alphabet with
+- `upid()` rejects a prefix outside the UPID alphabet with
   `zuid_type_error`, where the reference silently turns it into `zzzz`.
 - UPID has no published test vectors. The oracle is the Python reference,
   `upid` 0.3.1, over random bytes, plus the README's example.
@@ -270,8 +270,8 @@ fields and generate.
 **Work.**
 
 - Descriptors and format code for `scru128`, `scru64`, `ksuid`.
-- `id_scru128()` with the rollback rule of D18, `id_scru64()` requiring
-  `node` and `node_bits` (D13), `id_ksuid()`.
+- `scru128()` with the rollback rule of D18, `scru64()` requiring
+  `node` and `node_bits` (D13), `ksuid()`.
 
 **Exit criteria.**
 
@@ -285,12 +285,12 @@ fields and generate.
 - SCRU64's node and counter fields need `node_bits`, which is a layout
   (§6.8, Stage 6). Until then `id_fields()` reads its time only, and
   `id_parse()` and `id_from_bytes()` take a SCRU64 without a layout.
-- `id_scru64()` takes `random` (3 bytes per value, the counter's seed), as
+- `scru64()` takes `random` (3 bytes per value, the counter's seed), as
   D6 needs and the API sketch omits.
 - A SCRU64 counter overflow advances the tick, as the specification and its
   reference recommend, rather than waiting for it (§6.7): waiting would read
   the clock inside the generator (D6).
-- `id_scru128()` and `id_scru64()` both take `rollback = c("error",
+- `scru128()` and `scru64()` both take `rollback = c("error",
   "reset")`, D18's rule for SCRU128 applied to SCRU64 as well, whose
   reference has the same two modes.
 - A KSUID above its maximum fails `syntax`, not only `structure`, as ULID's
@@ -314,7 +314,7 @@ read fields and generate.
 - Descriptors and format code for `xid`, `objectid`, `snowflake`.
 - `id_layout()` with the built-in layouts and custom ones as data;
   `zuid_layout_error`.
-- `id_xid()` (D12), `id_objectid()`, `id_snowflake()` requiring `layout` and
+- `xid()` (D12), `objectid()`, `snowflake()` requiring `layout` and
   `worker` (D13); `id_convert()` between `xid` and `objectid`.
 
 **Exit criteria.**
@@ -331,8 +331,8 @@ read fields and generate.
   a clock rollback; only the clock's own readings are.
 - `zuid.clock_tolerance` is in seconds, 0.01 by default, like the other
   tolerance options, rather than in milliseconds.
-- `id_snowflake()` has no `random`: the sequence starts at zero each tick,
-  as Twitter's does. `id_xid()` and `id_objectid()` take `random` (D6).
+- `snowflake()` has no `random`: the sequence starts at zero each tick,
+  as Twitter's does. `xid()` and `objectid()` take `random` (D6).
 - A layout's parts are at most 53 bits each, so that every field reads
   exactly as a double, and a layout has one to six node fields.
 - The SCRU64 layout is optional, so a SCRU64 still parses without one;
@@ -356,7 +356,7 @@ validate; NanoID and Sqids generate.
 
 - `nanoid`, `cuid2` (validation only), `sqids`, `cid` (parsing and fields
   only) descriptors and code.
-- `id_nanoid()` with mask-and-step sampling; `id_sqids()` with the blocklist
+- `nanoid()` with mask-and-step sampling; `sqids()` with the blocklist
   on by default (D8), for numbers below 2⁵³; `zuid_encode_error`.
 
 **Exit criteria.**
@@ -369,9 +369,9 @@ validate; NanoID and Sqids generate.
 
 - `id_parse()` and `id_valid()` gain `alphabet` and `min_length`, after
   `strict`, which the maintainer chose over a parameters object; with a
-  `blocklist` from `id_sqids()` they travel as vector attributes, as
+  `blocklist` from `sqids()` they travel as vector attributes, as
   `layout` does.
-- `id_nanoid()` follows NanoID 6.0.2's `customRandom()`, a cutoff-and-modulo
+- `nanoid()` follows NanoID 6.0.2's `customRandom()`, a cutoff-and-modulo
   sampler, not mask-and-step: the reference changed in 6.0.0, and D21
   follows the reference. Its default alphabet is in 6.x's order.
 - NanoID, Cuid2 and Sqids have no bytes, so `id_bytes()` and
@@ -380,7 +380,7 @@ validate; NanoID and Sqids generate.
   version 0.
 - CID text is read in 17 multibases, those of js-multiformats' basics less
   base2, base8, base10, base32z, base58flickr, base256emoji and identity.
-- `id_sqids()` takes a numeric vector (one Sqid per number) or a list (one
+- `sqids()` takes a numeric vector (one Sqid per number) or a list (one
   per element). Numbers above 2^53 - 1 are `zuid_encode_error` until zuint.
 - NanoID's oracle 13 is a chi-squared test over 10^6 symbols with a 1e-6
   threshold, plus the reference's `customRandom` vectors.
@@ -449,7 +449,7 @@ when the evidence allows, and report ambiguity otherwise.
 - Most §10 targets are missed, recorded with their causes in
   `benchmarks.md`: creating 10⁶ R strings alone takes about 680 ms on the
   benchmark machine. Two hot spots the first run showed were fixed in this
-  stage (`id_detect()` 8884 → 2915 ms, `id_sqids()` 12249 → 2786 ms),
+  stage (`id_detect()` 8884 → 2915 ms, `sqids()` 12249 → 2786 ms),
   including `id_valid()` no longer building text it discards.
 - The harness needs no `ZUID_STANDALONE` code: the codec files include no R
   headers, so the fuzz build excludes the R-facing files instead
@@ -540,7 +540,7 @@ when the evidence allows, and report ambiguity otherwise.
   suggestions (#50, #51, #59). The remaining suggestions, questions and
   notes stay open for after 0.1.0. Three fixes needed decisions, which the
   maintainer took and the design records as D22 (pure calls with `time`
-  and `random`), D23 (`id_snowflake(rollback =)`, per-layout and per-node
+  and `random`), D23 (`snowflake(rollback =)`, per-layout and per-node
   state) and D24 (`id_parse()` without a format needs an element).
 - Three C guards are not reached by tests, with the reason in
   `tests/testthat/test-c-guards.R`: a string longer than R allows, a raw
@@ -563,7 +563,7 @@ maintainer on 2026-10-24 so v0.1.0 stands alone:
 - `id_integer()` through `zuint`, and Sqids numbers of 2⁵³ or more as
   `uint64`.
 - `id_time(class = "zutempo")`, and design §15 Q3 with it.
-- Name-based UUID versions 3 and 5, and `id_cid()` generation, through
+- Name-based UUID versions 3 and 5, and `cid()` generation, through
   `zucrypt`.
 
 Then design §14, in the order expected:

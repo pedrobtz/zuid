@@ -32,7 +32,7 @@ test_that("a custom layout is data and must add up", {
     sequence = 12
   )
   expect_identical(l$name, "custom")
-  x <- id_snowflake(2, l, 5, time = 1000)
+  x <- snowflake(2, l, 5, time = 1000)
   expect_identical(id_fields(x)$node, rep("worker=5", 2))
   bad <- function(...) expect_error(id_layout(...), class = "zuid_layout_error")
   bad(
