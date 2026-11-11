@@ -84,11 +84,11 @@ given both `time` and `random` is a pure function of its arguments.
 ``` r
 scru128(2)
 #> <zuid_scru128[2]>
-#> [1] 03h6qcofswy5485qklaibxvz3 03h6qcofswy5485qklavnk5ar
+#> [1] 03h7uxvib9a8zl3mwqclsasia 03h7uxvib9a8zl3mwqf8c96vr
 scru64(2, node = 42, node_bits = 8)
 #> <zuid_scru64[2]>
-#> [1] 0w5mw8q466nf 0w5mw8q466ng
+#> [1] 0w5xbks6y41m 0w5xbks6y41n
 ksuid(2)
 #> <zuid_ksuid[2]>
-#> [1] 3LjVkFwaDB7eaY5z3Gm3EVopjkU 3LjVkBWArfoAWwitIngP8jheeqf
+#> [1] 3LyBQB6XuJ2QOlZYiLQH3tJsM9u 3LyBQDkjr6LFum36C8O66kgulc6
 ```

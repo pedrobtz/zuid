@@ -42,60 +42,69 @@
 <!-- markdownlint-disable-next-line MD013 -->
 <p>This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.</p>
 <div class="section level2">
+<h2 id="shared-conventions">Shared conventions<a class="anchor" aria-label="anchor" href="#shared-conventions"></a></h2>
+<p>The portfolio’s shared rules are synced into <code>.claude/shared/</code> from <code>pedrobtz/packages:claude/shared/</code>. Never edit them here. Where this file and a shared file disagree, this file wins for this package.</p>
+<p>@.claude/shared/workflow.md @.claude/shared/r-package.md @.claude/shared/ci.md @.claude/shared/correctness.md @.claude/shared/assurance.md</p>
+</div>
+<div class="section level2">
 <h2 id="what-this-is">What this is<a class="anchor" aria-label="anchor" href="#what-this-is"></a></h2>
-<p><code>zuid</code> is a complete UUID implementation for R with two rings around it. The core is RFC 9562 in full: versions 1 to 8, nil and max, name-based and monotonic generation, every RFC text form. The first ring re-encodes the same bytes (Crockford base32, base36, base58, base62, base64url, Base62sort and Base64sort, any alphabet, Proquint, Niceware words). The second ring is the kindred formats: ULID, TypeID, UPID, SCRU128, SCRU64, KSUID, Snowflake and Sonyflake, XID, ObjectId, NanoID, Cuid2, Sqids and CID. Generators are named after their format (<code><a href="reference/uuid.html">uuid()</a></code>, <code><a href="reference/ulid.html">ulid()</a></code>), and one <code>id_</code> vocabulary detects, parses, validates, reads fields and time, and converts across all of them. No <code>Imports</code> and no vendored code. v0.1.0 has no interface with other <code>zu*</code> packages: Arrow interchange (<code>zuarrow</code>), integers (<code>zuint</code>), name-based UUIDs and CID generation (<code>zucrypt</code>) and exact instants (<code>zutempo</code>) come after it, as <code>Suggests</code>. It is not a hashing package, not a random number generator, not a database driver, and in v0.1.0 not a password generator.</p>
-<p>The specification is <a href=".agents/design.html"><code>.agents/design.md</code></a>, adopted from <a href="https://github.com/pedrobtz/packages/blob/main/rfcs/started/0043-zuid-identifiers-beyond-uuid.md" class="external-link">RFC 0043</a>. It outranks this file: <code>CLAUDE.md</code> orients, the design doc decides.</p>
+<p><code>zuid</code> is a complete UUID implementation for R with two rings around it. The core is RFC 9562 in full: versions 1 to 8, nil and max, name-based and monotonic generation, every RFC text form. The first ring re-encodes the same bytes (Crockford base32, base36, base58, base62, base64url, Base62sort and Base64sort, any alphabet, Proquint, Niceware words). The second ring is the kindred formats: ULID, TypeID, UPID, SCRU128, SCRU64, KSUID, Snowflake and Sonyflake, XID, ObjectId, NanoID, Cuid2, Sqids and CID. Generators are named after their format (<code><a href="reference/uuid.html">uuid()</a></code>, <code><a href="reference/ulid.html">ulid()</a></code>), and one <code>id_</code> vocabulary detects, parses, validates, reads fields and time, and converts across all of them.</p>
+<p>No <code>Imports</code> and no vendored code. v0.1.0 has no interface with other <code>zu*</code> packages: Arrow interchange (<code>zuarrow</code>), integers (<code>zuint</code>), name-based UUIDs and CID generation (<code>zucrypt</code>) and exact instants (<code>zutempo</code>) come after it, as <code>Suggests</code>. It is not a hashing package, not a random number generator, not a database driver, and in v0.1.0 not a password generator.</p>
+<p>The specification is <a href=".agents/design.html"><code>.agents/design.md</code></a>, adopted from <a href="https://github.com/pedrobtz/packages/blob/main/rfcs/started/0043-zuid-identifiers-beyond-uuid.md" class="external-link">RFC 0043</a>. It outranks this file: <code>CLAUDE.md</code> orients, the design doc decides. The roadmap is <a href=".agents/roadmap.html"><code>.agents/roadmap.md</code></a>; its “After 0.1.0” section lists what was deferred, and why.</p>
 </div>
 <div class="section level2">
 <h2 id="current-state">Current state<a class="anchor" aria-label="anchor" href="#current-state"></a></h2>
-<p>Scaffolded 2026-10-24 with <code>create-pkg.sh</code>; no functionality yet. The roadmap in <code>.agents/roadmap.md</code> takes it to v0.1.0.</p>
+<p>Verified 2026-11-11. All twelve roadmap stages (0 to 11) are merged, and v0.1.0 was submitted to CRAN on 2026-11-06 (<code>CRAN-SUBMISSION</code>); it is in the incoming queue. Every format above parses, validates and reads its fields. Not in v0.1.0, by the maintainer’s 2026-10-24 scope cut: name-based UUID versions 3 and 5, <code>cid()</code> generation, Cuid2 generation, <code>id_integer()</code>, <code>id_time(class = "zutempo")</code>, Sqids numbers of 2⁵³ or more, and Arrow and DuckDB interchange.</p>
+<p>The design’s speed targets (§10) are a record, not a gate (D15). <code>.agents/benchmarks.md</code> holds the measurements; most targets are not met, and creating 10⁶ R strings alone takes about 680 ms on the benchmark machine.</p>
 </div>
 <div class="section level2">
-<h2 id="stage-tracking">Stage tracking<a class="anchor" aria-label="anchor" href="#stage-tracking"></a></h2>
-<p>Progress toward the next version is tracked as GitHub sub-issues, so the parent issue shows a progress bar such as “6 of 7”.</p>
-<ul><li>
-<strong>One parent issue per target version</strong>, titled with the bare version, for example <code>v0.1.0</code>. <code>v0.1.0</code> issue: created by <code>pkg-roadmap</code>.</li>
-<li>
-<strong>One sub-issue per roadmap stage</strong>, titled as the roadmap titles it, for example <code>Stage 3 — R interface</code>, and linking to that section. The number of stages is whatever the roadmap has; there is no fixed scale.</li>
-<li>
-<strong>Every tracking issue carries the <code>stage</code> label</strong>, so it can be told apart from bug and feature issues and left out of open-issue counts.</li>
-<li>
-<strong>Close a stage by merging its pull request.</strong> Put <code>Closes #&lt;n&gt;</code> in the body of the stage’s pull request. Never close a stage whose exit criteria are not met; record a deviation in the roadmap first.</li>
-<li>
-<strong>The roadmap stays authoritative.</strong> The issues record which stages are done, not what a stage requires. Adding, removing or renaming a stage means editing the roadmap and the sub-issues in the same change.</li>
-<li>
-<strong>Each stage has a CI tier, <code>quick</code> or <code>full</code>.</strong> The roadmap sets it, and <code>quick</code> is the default. See Continuous integration for what each means. The second-to-last stage, <code>Full CI</code>, runs the full set and fixes what it finds before <code>v0.1.0 readiness</code>.</li>
-<li>Close the parent issue when CRAN accepts the version and it is tagged. Opening a parent issue implies at least one stage sub-issue; a parent with no sub-issues shows no progress on the board.</li>
-</ul></div>
-<div class="section level2">
-<h2 id="versioning">Versioning<a class="anchor" aria-label="anchor" href="#versioning"></a></h2>
-<p>A new package develops at <code>0.0.0.9000</code> and targets <code>0.1.0</code> for its first CRAN release. Set <code>Version: 0.1.0</code> and the matching <code>NEWS.md</code> heading when the package enters <code>Pre-flight</code>. Bump to <code>0.1.0.9000</code> only after CRAN accepts it, never before: a <code>.9000</code> version above an unreleased <code>0.1.0</code> heading is wrong.</p>
-<p>Until the first release the R API may change freely. Sibling packages can Until the first release the R API may change freely. Sibling packages can still depend on this one before CRAN does, through <code>Remotes:</code> or <code>LinkingTo:</code>. The design names consumers that will call the R functions (<code>zucbor</code>, <code>zumsgpack</code>, <code>qio</code>, <code>zujson</code>, <code>mdbx</code>, <code>dastash</code>, <code>zudedup</code>, <code>openlineage</code>); a C API for them is a later version, not v0.1.0. A package that others wait on should reach CRAN first.</p>
+<h2 id="versions-and-dependents">Versions and dependents<a class="anchor" aria-label="anchor" href="#versions-and-dependents"></a></h2>
+<p>The current version’s parent issue is <a href="https://github.com/pedrobtz/zuid/issues/2" class="external-link">#2</a> for <code>v0.1.0</code>; the CRAN-submission issue is <a href="https://github.com/pedrobtz/zuid/issues/15" class="external-link">#15</a>. Sibling packages that depend on this one before CRAN does: none. The design names consumers that will call the R functions (<code>zucbor</code>, <code>zumsgpack</code>, <code>qio</code>, <code>zujson</code>, <code>mdbx</code>, <code>dastash</code>, <code>zudedup</code>, <code>openlineage</code>). A C API for them, <code>inst/include/zuid.h</code>, is a later version, not v0.1.0.</p>
 </div>
 <div class="section level2">
 <h2 id="commands">Commands<a class="anchor" aria-label="anchor" href="#commands"></a></h2>
-<p>Run from the package root.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'devtools::load_all()'</span>                <span class="co"># compile src/ and load</span></span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'devtools::document()'</span>                <span class="co"># roxygen -&gt; NAMESPACE, man/</span></span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'devtools::test()'</span>                    <span class="co"># full testthat suite</span></span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'devtools::test(filter = "&lt;name&gt;")'</span>   <span class="co"># one test file</span></span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'devtools::test(shuffle = TRUE)'</span>      <span class="co"># order independence</span></span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'devtools::check()'</span>                   <span class="co"># R CMD check</span></span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="ex">air</span> format .                                     <span class="co"># format R sources</span></span></code></pre></div>
-</div>
+<p>Maintainer tooling under <code>tools/</code>, run from the package root. None of what these need is a package dependency.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="ex">tools/gen-tables</span>            <span class="co"># regenerate the Niceware and Sqids tables</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="ex">tools/gen-tables</span> <span class="at">--check</span>    <span class="co"># verify only; exit 1 if a written file differs</span></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="ex">tools/gen-fixtures</span>          <span class="co"># encodings, UPID, SCRU128, SCRU64 oracles (Python)</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="ex">node</span> tools/gen-js-fixtures.mjs   <span class="co"># Sqids and CID oracles (JavaScript)</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="ex">tools/gen-determinism</span>       <span class="co"># rewrite tests/testthat/fixtures/determinism.txt</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="ex">tools/run-benchmarks</span>        <span class="co"># design §10 timings, as rows for benchmarks.md</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="ex">tools/run-benchmarks</span> baseline    <span class="co"># the uuid and ulid baselines only</span></span></code></pre></div>
+<ul><li>
+<code>tools/gen-tables</code> needs R 4.5 or later (<code><a href="https://rdrr.io/r/tools/sha256sum.html" class="external-link">tools::sha256sum</a></code>) and <code>yaml</code>. It writes <code>R/sysdata.rda</code>, <code>src/zuid_tables.h</code> and <code>src/zuid_tables.c</code>.</li>
+<li>
+<code>tools/gen-fixtures</code> runs in a virtual environment holding exactly the Python versions pinned in <code>tools/fixture-sources.yaml</code>; its docstring has the <code>pip install</code> line. <code>tools/gen-js-fixtures.mjs</code> reads <code>ZUID_NODE_MODULES</code>; its header has the <code>npm install</code> line.</li>
+<li>
+<code>tools/gen-determinism</code> regenerates zuid’s own output. Run it only for a change that is meant to alter generated values, and review the diff line by line.</li>
+<li>
+<code>tools/run-benchmarks</code> needs <code>bench</code>, <code>uuid</code> and <code>ulid</code>.</li>
+</ul></div>
 <div class="section level2">
 <h2 id="architecture">Architecture<a class="anchor" aria-label="anchor" href="#architecture"></a></h2>
-<p>To be written as stages land; see <code>.agents/design.md</code> §4 for the planned five layers. The scaffold set up C through <code>usethis::use_c()</code>: <code>src/zuid.c</code> is an empty stub and <code>R/zuid-package.R</code> carries the <code>@useDynLib</code>.</p>
+<p>Five layers (design §4):</p>
+<ol style="list-style-type: decimal"><li>
+<strong>Format descriptors</strong>, <code>src/zuid_formats.c</code> and <code>src/zuid_formats.h</code>. One static record per format. The R surface reaches every format through this table, so a new format is a new row and a new <code>zuid_fmt_*.c</code>, never a new entry point. Snowflake layouts and SCRU64 node sizes are descriptors built at run time from <code><a href="reference/id_layout.html">id_layout()</a></code>.</li>
+<li>
+<strong>Encodings</strong>, <code>src/zuid_enc*.c</code>. Codecs over bytes of any length. A UUID text form other than the hex ones is the 16-byte case of one of these.</li>
+<li>
+<strong>Formats</strong>, <code>src/zuid_fmt_*.c</code>, plus <code>src/zuid_sqids.c</code> and <code>src/zuid_cid.c</code>. Parse, validate and fields over the descriptor.</li>
+<li>
+<strong>Generators</strong>, <code>src/zuid_gen.c</code>. Pure functions of <code>(n, time, random bytes, node)</code> plus the monotonic state they are handed. <code>src/zuid_entropy.c</code> reads the clock and the operating system’s entropy source, for the R entry points only. Per-session monotonic state is one static struct, reset by <code>zuid_c_reset_state</code>.</li>
+<li>
+<strong>The R surface</strong>, <code>R/</code> and the R-facing C files <code>src/zuid_r*.c</code>. Vectorisation happens in C: one loop per operation, filling parallel output vectors that R assembles once.</li>
+</ol><p>Everything except <code>src/zuid_r*.c</code> and <code>src/zuid_init.c</code> is plain C11 with no R headers. That split is what lets the fuzz workflow build the codecs without R (<code>tools/fuzz/harness.c</code>, <code>-DZUID_STANDALONE</code>).</p>
+<p><code>src/zuid_tables.c</code> (about 66,000 lines) and <code>src/zuid_tables.h</code> are generated by <code>tools/gen-tables</code>. Never edit them by hand.</p>
+<p>The <code>vctrs</code> methods in <code>R/zzz.R</code> are registered only when <code>vctrs</code> is loaded, so zuid vectors combine in tibbles without <code>vctrs</code> being a dependency. <code>vctrs</code> double-dispatches on the first class, so each format registers its own pair.</p>
 </div>
 <div class="section level2">
 <h2 id="invariants-that-are-easy-to-break">Invariants that are easy to break<a class="anchor" aria-label="anchor" href="#invariants-that-are-easy-to-break"></a></h2>
-<p>These are fixed by the design before any code exists.</p>
 <ul><li>
 <strong>No <code>Imports</code>.</strong> After 0.1.0 other <code>zu*</code> packages become <code>Suggests</code>, checked with <code><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace()</a></code>; a missing one raises <code>zuid_dependency_error</code>. In v0.1.0 no <code>zu*</code> package is referenced at all.</li>
 <li>
 <strong>Entropy comes from the operating system, never R’s RNG</strong> (D5). An identifier must not change when a script calls <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code>. Tests that need fixed output pass <code>random</code> in.</li>
 <li>
-<strong>Generators are pure functions of <code>(n, time, random, node)</code></strong> (D6). The clock and entropy are read once in the R entry point. Reading them inside a generator makes the fuzz target and the cross-platform byte-identity tests impossible.</li>
+<strong>Generators are pure functions of <code>(n, time, random, node)</code></strong> (D6). The clock and entropy are read once in the R entry point. Reading them inside a generator makes the fuzz target and the cross-platform byte-identity tests impossible. A call given both <code>time</code> and <code>random</code> leaves the session’s monotonic state alone.</li>
 <li>
 <strong>128 bits do not make a UUID</strong> (D3, D9). <code><a href="reference/id_format.html">id_from_bytes()</a></code> has no default format, and only <code>uuid</code> exports to Arrow as <code>arrow.uuid</code>; every other format uses <code>zuid.&lt;format&gt;</code>. A ULID arriving as <code>arrow.uuid</code> is the bug this prevents.</li>
 <li>
@@ -103,102 +112,48 @@
 <li>
 <strong>Inspection never raises on input.</strong> <code><a href="reference/id_detect.html">id_detect()</a></code>, <code><a href="reference/id_parse.html">id_valid()</a></code>, <code><a href="reference/id_fields.html">id_fields()</a></code>, <code><a href="reference/id_fields.html">id_time()</a></code> and <code>id_parse(strict = FALSE)</code> return <code>NA</code>.</li>
 <li>
-<strong>The only place a <code>CHARSXP</code> is made from bytes is one function</strong> in <code>src/zuid_r.c</code>, and the shared object exports <code>R_init_zuid</code> only.</li>
+<strong>The only place a <code>CHARSXP</code> is made from bytes is one function</strong> in <code>src/zuid_r.c</code>, so encoding and length rules live in one place.</li>
 <li>
-<strong>No vendored code</strong> (D7). The Sqids blocklist and the Niceware word list are generated tables with source, date and SHA-256 in <code>tools/fixture-sources.yaml</code>.</li>
+<strong>The shared object exports <code>R_init_zuid</code> only.</strong> <code>src/Makevars</code> passes <code>$(C_VISIBILITY)</code> to hide every <code>zuid_*</code> symbol, and <code>test-abi.R</code> checks the installed object. Internal native symbols use the <code>zuid_</code> prefix, and <code>.Call</code> entry points <code>zuid_c_</code>.</li>
+<li>
+<strong>The codec files include no R headers.</strong> Adding one breaks the fuzz build, which compiles every <code>src/*.c</code> except the R-facing files.</li>
+<li>
+<strong>No vendored code</strong> (D7). The Sqids blocklist and the Niceware word list are generated tables with source, date and SHA-256 in <code>tools/fixture-sources.yaml</code>, and their authors are listed as <code>cph</code> in <code>DESCRIPTION</code> and in <code>inst/COPYRIGHTS</code>.</li>
+<li>
+<strong>TypeID’s fixtures stay out of the tarball.</strong> They are Apache-2.0, so <code>.Rbuildignore</code> excludes <code>tests/testthat/fixtures/typeid</code>, and the tests that read them skip on CRAN and when the files are absent.</li>
 </ul></div>
 <div class="section level2">
-<h2 id="testing-conventions">Testing conventions<a class="anchor" aria-label="anchor" href="#testing-conventions"></a></h2>
+<h2 id="testing">Testing<a class="anchor" aria-label="anchor" href="#testing"></a></h2>
+<p>The oracles are the thirteen of <code>.agents/design.md</code> §7: RFC 9562 Appendices A and B, TypeID’s <code>valid.yml</code> and <code>invalid.yml</code>, and the ULID, UPID, SCRU, KSUID, XID, Sqids, Proquint, Niceware and CID reference vectors, among others. They are stored under <code>tests/testthat/fixtures/</code> at the commits and versions pinned in <code>tools/fixture-sources.yaml</code>, and written by the <code>tools/gen-*</code> scripts above.</p>
+<p><code>fixtures/determinism.txt</code> is zuid’s own output, not an oracle. It guards that every platform produces the same bytes; the oracle tests check that the bytes are right.</p>
+<p>Helpers in <code>tests/testthat/helper-*.R</code>:</p>
 <ul><li>
-<strong>Self-sufficient.</strong> Every test builds its own inputs inside the <code>test_that()</code> block. No file-scope objects.</li>
+<code>helper-abi.R</code>: the symbol audit, after zucrypt’s. It is a helper so that testthat’s parallel workers see it too.</li>
 <li>
-<strong>Self-contained.</strong> Global state goes through <code>withr::local_*()</code>, randomised input through <code><a href="https://withr.r-lib.org/reference/with_seed.html" class="external-link">withr::local_seed()</a></code>. Tests write only under <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code>.</li>
+<code>helper-class.R</code>: three parsed UUIDs, the last missing.</li>
 <li>
-<strong>Assert on condition classes, never message text.</strong> Use <code>expect_error(..., class = "&lt;pkg&gt;_&lt;kind&gt;_error")</code>. Wording belongs in snapshot tests.</li>
+<code>helper-detect.R</code>: every collision design §6.2 names, as a table of string, hint, layout, expected format and candidates.</li>
 <li>
-<strong>Order independence.</strong> <code>devtools::test(shuffle = TRUE)</code> is part of the definition of done.</li>
+<code>helper-determinism.R</code>: every generator and encoding on fixed inputs, as the lines of <code>determinism.txt</code>.</li>
 <li>
-<strong>Borrow a conformance suite before writing one.</strong> Mainstream implementations in Python, Java, Go or Node usually ship a test corpus. Use it as an oracle rather than inventing cases by hand. This package’s oracles are the thirteen of <code>.agents/design.md</code> §7 (RFC 9562 Appendix A, TypeID’s <code>valid.yml</code> and <code>invalid.yml</code>, the ULID, SCRU, KSUID, XID, Sqids, Proquint, Niceware and CID reference vectors, and others), stored under <code>tests/testthat/fixtures/</code> at commits pinned in <code>tools/fixture-sources.yaml</code>. None exist yet.</li>
+<code>helper-enc.R</code>: the Go and Python encoding oracle.</li>
 <li>
-<strong>Helpers live in <code>tests/testthat/helper-*.R</code>.</strong> None yet.</li>
+<code>helper-formats.R</code>: a small reader for TypeID’s YAML fixtures, since zuid has no YAML dependency.</li>
 <li>
-<strong>Keep the suite inside the CRAN time budget.</strong> No suite yet.</li>
-</ul></div>
-<div class="section level2">
-<h2 id="definition-of-done">Definition of done<a class="anchor" aria-label="anchor" href="#definition-of-done"></a></h2>
-<p><code>devtools::document()</code> and <code>devtools::check()</code> clean, meaning 0 errors, 0 warnings and 0 notes. The one allowed note is “New submission” before the first release. <code>devtools::test(shuffle = TRUE)</code> green. CI green at the change’s tier: the quick profile for a <code>quick</code> roadmap stage or an ordinary pull request, the full profile for a <code>full</code> stage, <code>Full CI</code>, and every release. A user-facing change also needs a test, roxygen documentation and a <code>NEWS.md</code> entry.</p>
-</div>
-<div class="section level2">
-<h2 id="releasing-to-cran">Releasing to CRAN<a class="anchor" aria-label="anchor" href="#releasing-to-cran"></a></h2>
-<ul><li>
-<strong>CI is the pre-submission check.</strong> The <code>pedrobtz/r-actions</code> R CMD check runs <code>--as-cran</code> on the CRAN-like runners and containers, and it replaces win-builder, the macOS builder and R-hub. None of them is a release step, and <code>cran-comments.md</code> lists the CI legs as its test environments.</li>
+<code>helper-gen.R</code>: <code>local_fresh_state()</code>, which resets the per-session generation state for a test and again after it, and <code>hex_raw()</code>.</li>
 <li>
-<strong>Entering <code>Pre-flight</code>.</strong> The roadmap’s feature stages are done, the version is set as in Versioning, <code>NEWS.md</code> and <code>cran-comments.md</code> are written, and CI is green. Only submission work remains.</li>
-<li>
-<strong>Before submitting,</strong> run <code>pkg-critical-review</code> once the roadmap is implemented and fix what it files, then <code>pkg-cran-review</code>, and resolve every finding. Both skills are in <code>pedrobtz/r-skills</code>.</li>
-<li>
-<strong>The pretest is automated and does not read <code>cran-comments.md</code>.</strong> A NOTE that is explained but not fixed gets the upload archived. Fix the NOTE, as under Vendored native code, instead of justifying it.</li>
-<li>
-<strong>Commit <code>CRAN-SUBMISSION</code> after submitting.</strong> It is in <code>.Rbuildignore</code>, not <code>.gitignore</code>. Pushing it to <code>main</code> runs <code>cran-release.yml</code>, which tags the submitted commit with the bare version, <code>0.1.0</code> (no <code>v</code>), publishes the GitHub release and opens the <code>0.1.0.9000</code> bump pull request. Merge the bump only after CRAN accepts.</li>
-<li>
-<strong>After acceptance,</strong> <code>pkg-post-cran</code> closes the version’s parent issue and moves the board card.</li>
-</ul></div>
-<div class="section level2">
-<h2 id="editing-rules">Editing rules<a class="anchor" aria-label="anchor" href="#editing-rules"></a></h2>
-<ul><li>roxygen comments are the source. Never edit <code>man/</code> or <code>NAMESPACE</code> by hand.</li>
-<li>Edit <code>README.Rmd</code>, not the generated <code>README.md</code>.</li>
-<li>Keep prose simple and short. One idea per sentence.</li>
-<li>Wrap roxygen text at 80 characters and run <code>air format .</code> on R sources.</li>
-<li>Use <code>lower_snake_case</code>, and prefix internal native symbols with <code>&lt;pkg&gt;_</code>.</li>
-<li>Keep hard runtime dependencies at zero unless a recorded design decision says otherwise.</li>
-<li>Export and document public functions. Do not create roxygen topics for internal ones.</li>
+<code>helper-uuid.R</code>: the RFC 9562 test vectors.</li>
 </ul></div>
 <div class="section level2">
 <h2 id="continuous-integration">Continuous integration<a class="anchor" aria-label="anchor" href="#continuous-integration"></a></h2>
-<p>Workflows come from <code>pedrobtz/r-actions</code>. Call those reusable workflows instead of writing bespoke ones, and pin a released tag rather than <code>main</code>. Pin a workflow that holds a write token, such as <code>coverage.yml</code>, to a commit, with the tag in a comment. The <code>R-CMD-check</code> workflow must call <code>r-cmd-check.yml</code>, because a hand-rolled one does not count as the pre-submission check. This package calls <code>r-cmd-check.yml</code>, <code>coverage.yml</code> and <code>cran-release.yml</code>; the pkgdown site is built by a local <code>pkgdown.yaml</code>.</p>
-<p>Small edits get a small run. The shared workflows look at the files a pull request changes, compared with its merge base:</p>
+<p>The package calls r-actions’ <code>r-cmd-check.yml</code>, <code>coverage.yml</code> and <code>cran-release.yml</code>, <code>fuzz.yml</code> from <code>fuzz.yaml</code>, and from <code>native-checks.yaml</code> the sanitizers, valgrind, LTO, gctorture, rchk, analyzers and cran-special workflows. The pkgdown site is built by a local <code>pkgdown.yaml</code>.</p>
+<p>Deliberate deviations from <code>.claude/shared/ci.md</code>:</p>
 <ul><li>
-<strong>Markdown only</strong>, such as <code>README.md</code>, <code>NEWS.md</code> or <code>cran-comments.md</code>, skips every check. Only coverage and the pkgdown site run.</li>
+<strong>A push to <code>main</code> runs the full profile.</strong> The callers pass <code>quick</code> only for a pull request without <code>full-ci</code>, not <code>profile: auto</code>. Don’t wait on the full run a merge starts; a failure only it shows goes on an issue with the run link.</li>
 <li>
-<strong><code>DESCRIPTION</code> or <code>README.Rmd</code> as well</strong>, and nothing else, adds one R CMD check on Ubuntu R-release.</li>
+<strong><code>R-CMD-check.yaml</code> adds Windows R-devel</strong>, CRAN’s r-devel-windows-x86_64 flavour, and the NOSUGGESTS and NOLD flavours, in the full profile only.</li>
 <li>
-<strong>Any other file</strong> runs everything.</li>
-</ul><p>So put a README or <code>DESCRIPTION</code> touch-up in its own pull request. Once a pull request changes code, every later push to it runs every workflow.</p>
-<div class="section level3">
-<h3 id="quick-by-default-full-by-exception">Quick by default, full by exception<a class="anchor" aria-label="anchor" href="#quick-by-default-full-by-exception"></a></h3>
-<p>The full profile is slow. gctorture at step 20 alone has taken 36 to 107 minutes on sibling packages. Waiting on it between roadmap stages was the main thing slowing roadmaps down, so:</p>
-<ul><li>
-<strong>Pull requests run the quick profile.</strong> It should finish in under five minutes. If it doesn’t, raise gctorture’s <code>quick-step</code> or trim <code>quick-containers</code> in the caller workflows; never cut the full profile.</li>
-<li>
-<strong>A <code>full</code> roadmap stage takes the <code>full-ci</code> label</strong> and merges only on a green full run. The roadmap gives the reason in the stage’s <code>**CI.**</code> line, for example first compiled code, a <code>PROTECT</code> or finalizer change, a vendored library, or a Windows-only path.</li>
-<li>
-<strong>Don’t wait on the full run a merge starts</strong> on the default branch, and cancel older full runs it supersedes. A failure that only the full set shows goes on the <code>Full CI</code> stage issue as a comment with the run link, and is fixed there. A failure the quick profile also shows is fixed now.</li>
-<li>
-<strong><code>Full CI</code> and <code>v0.1.0 readiness</code> wait</strong> for a green full run on their merge commit, and the release commit always needs one.</li>
-<li>Locally, run <code>gctorture(TRUE)</code> on the code a C change touches when it is cheap; the full run is the authority.</li>
-</ul></div>
-</div>
-<div class="section level2">
-<h2 id="commits-and-pull-requests">Commits and pull requests<a class="anchor" aria-label="anchor" href="#commits-and-pull-requests"></a></h2>
-<p>Short, imperative, sentence-case commit subjects, optionally scoped. Keep each commit focused and do not sweep in unrelated files. A pull request explains the user-visible outcome and the rationale, links related issues, lists the checks that were run and the tests that were skipped, and flags platform-sensitive or vendored changes. Performance claims need evidence.</p>
-<p>Never commit or push to the default branch. Work on a branch, open a pull request, and leave it for review. Do not merge a pull request unless you are told to.</p>
-<p>When you find a defect, in this package or in an upstream tool, open an issue for it rather than only working around it.</p>
-</div>
-<div class="section level2">
-<h2 id="working-with-skills">Working with skills<a class="anchor" aria-label="anchor" href="#working-with-skills"></a></h2>
-<p>The portfolio’s workflow skills live in <code>pedrobtz/r-skills</code> (<code>pkg-init</code>, <code>pkg-roadmap</code>, <code>pkg-implement</code>, <code>pkg-critical-review</code>, <code>pkg-cran-review</code>, <code>pkg-post-cran</code>, <code>pkg-readme</code>); the general process skills are <a href="https://github.com/obra/superpowers" class="external-link">Superpowers</a>. <code>building-a-package.md</code> in <code>pedrobtz/packages</code> walks through them in order. Both sets defer to this file where they overlap, so the settlements are recorded here.</p>
-<ul><li>
-<strong>One design.</strong> The specification is <code>.agents/design.md</code>, adopted from the package’s RFC in <code>pedrobtz/packages/rfcs</code>. A package with an adopted design is past <code>brainstorming</code>; a design change goes through the RFC, not a new spec. Superpowers’ default <code>docs/superpowers/specs/</code> is not used.</li>
-<li>
-<strong>Plans at two levels.</strong> <code>.agents/roadmap.md</code> holds the stages, one mergeable pull request each, with exit criteria and a CI tier (<code>pkg-roadmap</code>). Inside a stage, <code>writing-plans</code> breaks the work into tasks of one test cycle each, saved as <code>.agents/plans/stage-&lt;n&gt;.md</code>. The roadmap stays authoritative; a plan is scratch and is not kept in sync.</li>
-<li>
-<strong>Build and merge.</strong> <code>pkg-implement</code> runs the stage loop: branch <code>stage-&lt;n&gt;-&lt;slug&gt;</code> from the stage issue, implement the plan with <code>test-driven-development</code> (<code>Rscript -e 'devtools::test(filter = "&lt;name&gt;")'</code> is the red/green command), open the pull request, merge on green at the stage’s CI tier. The confirmation the user gives at the start of that loop is the “told to merge” that Commits and pull requests requires, so the <code>finishing-a-development-branch</code> menu is not presented for stage pull requests. Any other pull request still waits for review.</li>
-<li>
-<strong>Failures and claims.</strong> A failing check or test goes through <code>systematic-debugging</code> before a fix. “Green”, “done” and “ready for CRAN” are claimed only after <code>verification-before-completion</code>: run the command, read the output.</li>
-<li>
-<strong>Review.</strong> <code>requesting-code-review</code> gates tasks inside a stage. <code>pkg-critical-review</code> reviews the whole package once the roadmap is implemented, with Posit’s reviewers, and files issues. CRAN’s reviewer email and GitHub review threads go through <code>receiving-code-review</code>.</li>
-<li>
-<strong>Keep scratch out of the tarball.</strong> <code>R CMD build</code> reads <code>.Rbuildignore</code>, not <code>.gitignore</code>. It must list <code>^\.agents$</code>, <code>^\.superpowers$</code> (the Superpowers task ledger), <code>^\.worktrees$</code> (if git worktrees are kept in the package directory; a sibling directory avoids the question), <code>^\.claude$</code>, <code>^CLAUDE\.md$</code>, <code>^AGENTS\.md$</code>, <code>^CRAN-SUBMISSION$</code> and <code>^cran-comments\.md$</code>. A stray top-level file is a NOTE, and the pretest archives on NOTEs.</li>
+<strong>Fuzzing runs on every pull request</strong>: two minutes, and an hour nightly and under <code>full-ci</code>. The seed corpus is <code>tools/fuzz/corpus</code>, drawn from the oracle fixtures, and the dictionary is <code>tools/fuzz/zuid.dict</code>. Every broken round trip aborts, which libFuzzer reports as a crash.</li>
 </ul></div>
 </div>
 
