@@ -5,15 +5,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Shared conventions
 
-The portfolio's shared rules are synced into `.claude/shared/` from
-`pedrobtz/packages:claude/shared/`. Never edit them here. Where this file and
-a shared file disagree, this file wins for this package.
+<!-- r-skills: shared-rules -->
 
-@.claude/shared/workflow.md
-@.claude/shared/r-package.md
-@.claude/shared/ci.md
-@.claude/shared/correctness.md
-@.claude/shared/assurance.md
+The portfolio's shared rules (`workflow`, `r-package`, `ci`, `native-code`,
+`correctness`, `assurance`) come from the
+[r-skills](https://github.com/pedrobtz/r-skills) plugin's `rules/`, loaded at
+session start because of the marker above. Never copy them here. Where this
+file and a shared rule disagree, this file wins for this package. Cloud
+sessions do not load the plugin and run without them.
 
 ## What this is
 
@@ -197,7 +196,7 @@ The package calls r-actions' `r-cmd-check.yml`, `coverage.yml` and
 analyzers and cran-special workflows. The pkgdown site is built by a local
 `pkgdown.yaml`.
 
-Deliberate deviations from `.claude/shared/ci.md`:
+Deliberate deviations from the shared `ci.md` rules:
 
 - **A push to `main` runs the full profile.** The callers pass `quick` only
   for a pull request without `full-ci`, not `profile: auto`. Don't wait on
