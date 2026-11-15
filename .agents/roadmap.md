@@ -1,10 +1,23 @@
 # zuid: roadmap
 
-Status: draft 2026-10-24. Implements [design.md](design.md).
-Target: v0.1.0, the first CRAN release.
+Status: draft 2026-10-24; re-planned 2026-11-15 for v0.1.1. Implements
+[design.md](design.md).
+Target: v0.1.0, the first CRAN release (Stages 0 to 11, done), then
+v0.1.1, which fixes what the 2026-11-15 assurance pass and bug hunt found
+(Stages 12 to 18).
 Tracking: [v0.1.0 (#2)](https://github.com/pedrobtz/zuid/issues/2), with one
 sub-issue per stage;
 [CRAN-submission (#15)](https://github.com/pedrobtz/zuid/issues/15).
+v0.1.1: [v0.1.1 (#118)](https://github.com/pedrobtz/zuid/issues/118), with one
+sub-issue per stage from Stage 12;
+[CRAN-submission 0.1.1 (#126)](https://github.com/pedrobtz/zuid/issues/126).
+
+The v0.1.1 re-plan (2026-11-15) comes from
+[`.agents/assurance.md`](assurance.md) and
+[`reviews/2026-11-15-bug-hunt.md`](reviews/2026-11-15-bug-hunt.md). Work
+starts at `0.1.0.9000` once CRAN accepts 0.1.0. If CRAN sends 0.1.0 back
+first, Stage 12 goes into the resubmission instead (see Stage 12). The
+design changes are D26 to D32.
 
 Follows design §11, with two portfolio changes. Design Stage 10 is split into
 `Full CI` and `v0.1.0 readiness`, so there are twelve stages, not the eleven
@@ -35,6 +48,13 @@ unaffected. Design §12's Arrow criterion does not apply to v0.1.0.
 | 9 | [Fuzzing and benchmarks](#stage-9--fuzzing-and-benchmarks) | quick | [#12](https://github.com/pedrobtz/zuid/issues/12) | [#26](https://github.com/pedrobtz/zuid/pull/26) | 2026-10-24 |
 | 10 | [Full CI](#stage-10--full-ci) | full | [#13](https://github.com/pedrobtz/zuid/issues/13) | [#27](https://github.com/pedrobtz/zuid/pull/27) | 2026-10-24 |
 | 11 | [v0.1.0 readiness](#stage-11--v010-readiness) | full | [#14](https://github.com/pedrobtz/zuid/issues/14) | [#72](https://github.com/pedrobtz/zuid/pull/72) | 2026-10-25 |
+| 12 | [Generator state](#stage-12--generator-state) | full | [#119](https://github.com/pedrobtz/zuid/issues/119) | | |
+| 13 | [One check on every route](#stage-13--one-check-on-every-route) | full | [#120](https://github.com/pedrobtz/zuid/issues/120) | | |
+| 14 | [The vector class](#stage-14--the-vector-class) | quick | [#121](https://github.com/pedrobtz/zuid/issues/121) | | |
+| 15 | [Assurance](#stage-15--assurance) | quick | [#122](https://github.com/pedrobtz/zuid/issues/122) | | |
+| 16 | [Full CI](#stage-16--full-ci) | full | [#123](https://github.com/pedrobtz/zuid/issues/123) | | |
+| 17 | [v0.1.1 readiness](#stage-17--v011-readiness) | full | [#124](https://github.com/pedrobtz/zuid/issues/124) | | |
+| 18 | [Review](#stage-18--review) | full | [#125](https://github.com/pedrobtz/zuid/issues/125) | | |
 
 ## Stage 0 — Package identity
 
@@ -552,6 +572,248 @@ when the evidence allows, and report ambiguity otherwise.
   deploys the site; `urlchecker::url_check()` is otherwise clean.
 
 **Design.** §2 (README and articles); §12; D8.
+
+## Stage 12 — Generator state
+
+**Issue.** [#119](https://github.com/pedrobtz/zuid/issues/119), sub-issue of [v0.1.1](https://github.com/pedrobtz/zuid/issues/118).
+
+**CI.** `full — changes the C state every generator shares, and the fork
+path exists on Unix only, so the platform legs and sanitizers must see it`.
+
+**Goal.** No generator repeats a value or goes backwards because of
+process, table or counter state. Fixes #88, #109, #101, #89, #90, #102 and
+#116. These are the two high-severity findings and the four medium ones
+behind them. If CRAN returns 0.1.0, this stage is the resubmission's
+content.
+
+**Work.**
+- D26: a process-id check on every static in `src/zuid_r_gen.c` and
+  `src/zuid_r_layout.c`, resetting all state on a change.
+- D27: last clock reading and last emitted time kept apart in the v7,
+  v1/v6 and SCRU64 generators of `src/zuid_gen.c`; tolerance options
+  clamped in R before the C conversion.
+- D28: growable SCRU64 and Snowflake state tables; layout comparison
+  field by field.
+- Documentation of §6.7's per-process rule under the generators.
+
+**Tests.**
+- Fork: a warm parent, then two `parallel::mclapply()` children at a frozen
+  `time`, for every generator. No value is repeated across the children.
+  Skipped on Windows. In `tests/testthat/test-fork.R`.
+- Overflow is not a rollback: one call of 4× the per-tick counter capacity
+  at a frozen `time`, at tolerance 0 and at the default, for v7, v1, v6,
+  ULID, SCRU128 and SCRU64 (`node_bits` 23 and 8). Values strictly
+  increase and no `zuid_clock_error` is raised. For SCRU64 the values are
+  compared with the Python `scru64` 1.0.2 generator fed the same inputs (a
+  new `tools/gen-fixtures` table). In `tests/testthat/test-monotonic.R`.
+- Tables: 15, 16, 17 and 40 other layouts and nodes between two calls at a
+  frozen `time`; the second value is greater. In `test-snowflake.R` and
+  `test-scru64.R`.
+- Tolerances: each option at `Inf`, `.Machine$double.xmax` and 2⁴⁰ ms
+  behaves as unlimited, and 2⁴⁰ − 1 ms still bounds. In
+  `test-uuid-generate.R` and `test-snowflake.R`.
+- Layout identity: two equal layouts built by different routes share one
+  sequence. In `test-layout.R`.
+
+**Exit criteria.**
+- Every `**Tests.**` line exists and was seen to fail on `df17861`. Each
+  hunt trigger in `reviews/2026-11-15-bug-hunt-probes/` (`h3.R`, and
+  `h1.R`'s fork case) now passes.
+- A full-profile run green on the pull request, including the ASan and
+  valgrind legs.
+- `.agents/assurance.md` rows for the two state tables and the generator
+  time state name their tests.
+
+**Design.** D26, D27 and D28 in [§13](design.md#13-decisions);
+[§6.7](design.md#67-monotonicity).
+
+## Stage 13 — One check on every route
+
+**Issue.** [#120](https://github.com/pedrobtz/zuid/issues/120), sub-issue of [v0.1.1](https://github.com/pedrobtz/zuid/issues/118).
+
+**CI.** `full — changes the C validation of untrusted input in the decoders,
+so ASan, valgrind and the fuzz harness must run on it`.
+
+**Goal.** Every route that makes a zuid value, or decodes bytes, checks what
+`id_parse()` checks. Fixes #103, #104, #110, #97 and #113, and closes the
+gap #95.
+
+**Work.**
+- D29: structure checks in `zuid_c_from_bytes`; the 2¹⁶-byte cap and the
+  ASCII rule in `zuid_c_decode`; one separator rule for words and Proquint
+  on both paths.
+- #104: `uuid_strict()` checks the variant itself.
+- D31: Cuid2 structure takes `isCuid()`'s leading letter.
+- The fuzz harness gains the new checks as oracles: `id_from_bytes` of
+  bytes then `id_parse` of the text must agree.
+
+**Tests.**
+- `id_from_bytes()`: for every fixed-width format, all-zero, all-one,
+  maximum, maximum + 1 and reserved bytes. Either bytes in equal bytes
+  out, or `NA` where `id_parse()` of the text is `NA`. SCRU64's maximum
+  is checked against the Python `scru64` range error. In
+  `tests/testthat/test-bytes.R`.
+- TypeID strict: for every version nibble and variant, `id_valid(typeid,
+  "strict")` equals `id_valid(its UUID, "strict")`. In `test-typeid.R`.
+- `id_decode()` cap: decoded sizes of 65535, 65536 and 65537 bytes, in
+  hex, base64url and base58, and `width` at the same values. In
+  `test-encode.R`.
+- Words and Proquint: decode and `id_parse(form =)` agree on accept and
+  reject over non-ASCII, digits, en dashes and long separators. In
+  `test-encode.R`.
+- Cuid2: `isCuid()` from `@paralleldrive/cuid2` 3.3.0 over generated ids
+  and boundary strings (lengths 1, 2, 32, 33; case; a leading digit). Made
+  by `tools/gen-js-fixtures.mjs` and pinned in `tools/fixture-sources.yaml`.
+  In `test-cuid2.R`.
+
+**Exit criteria.**
+- Every `**Tests.**` line exists, compares against its oracle, and was
+  seen to fail on `df17861`.
+- A full-profile run and an hour of fuzzing (`full-ci`) green on the
+  pull request.
+- Assurance rows "Cuid2, validate" and the decode limit name their tests;
+  #95 and #97 are closed.
+
+**Design.** D29 and D31 in [§13](design.md#13-decisions);
+[§6.3](design.md#63-validation-levels), [§6.5](design.md#65-text-encodings-and-bytes),
+[§6.10](design.md#610-determinism-and-limits).
+
+## Stage 14 — The vector class
+
+**Issue.** [#121](https://github.com/pedrobtz/zuid/issues/121), sub-issue of [v0.1.1](https://github.com/pedrobtz/zuid/issues/118).
+
+**CI.** `quick`. Plain R in `R/`.
+
+**Goal.** A zuid vector behaves the same through base R, vctrs and dplyr,
+and every argument is checked with a classed error. Fixes #105, #106, #107,
+#108, #111, #112, #114 and #115.
+
+**Work.**
+- D30: `vec_proxy_order` and `vec_proxy_compare` per format; `Ops.zuid`
+  refuses numbers, factors and mismatched parameters; `mtfrm.zuid`, so
+  `match()` and `%in%` use the canonical form.
+- D32: `blocklist` in `id_parse()` and `id_valid()`.
+- `c()` keeps names; `typeid(0, prefix)` and `id_convert()` of a
+  zero-length vector give length 0.
+- `is_whole()` rejects non-finite values; `NULL` and an out-of-range `na`
+  attribute are `zuid_type_error`.
+- `id_layout()` field names and widths are validated.
+- #114: the layout epoch printed from integer milliseconds; the `"hex"`
+  form documentation corrected; error text independent of `OutDec` and
+  `scipen`; the `nanoid()` and `uuid(7)` argument documentation.
+
+**Tests.**
+- Ordering: `vctrs::vec_order(x)` equals `order(x)` for every format, on
+  values whose text and byte orders differ (Snowflake, mixed case,
+  TypeID). In `test-class.R`, under `skip_if_not_installed("vctrs")`.
+- Comparison: `==`, `match()` and `%in%` agree with each other on
+  uppercase, compact and urn text, and are `zuid_type_error` for numbers,
+  factors and other layouts. The results are identical under
+  `options(scipen = -5, OutDec = ",")`. In `test-class.R`.
+- Names: through `c()`, compared with the same operation on a character
+  vector. In `test-class.R`.
+- `n = 0` through every generator and every `id_convert()` target: length
+  0 and the right class. In `test-convert.R`.
+- Sqids: for each of `alphabet`, `min_length` and `blocklist`, `sqids(...)`
+  written to text and parsed back gives the same vector. In
+  `test-sqids.R`.
+- Numeric arguments: a table over every numeric argument at `NA`, `NULL`,
+  `Inf`, `-Inf`, `NaN` and length 0, expecting `zuid_type_error`. In
+  `test-c-guards.R`.
+- Layout display: `format()` of a layout whose epoch ends in each digit 0
+  to 9 ms shows that digit. In `test-layout.R`.
+
+**Exit criteria.**
+- Every `**Tests.**` line exists and was seen to fail on `df17861`.
+- `R CMD check` green on the quick profile; `NEWS.md` names the `==`
+  change, which is user-visible.
+
+**Design.** D30 and D32 in [§13](design.md#13-decisions);
+[§5](design.md#5-public-r-api-v010-shape).
+
+## Stage 15 — Assurance
+
+**Issue.** [#122](https://github.com/pedrobtz/zuid/issues/122), sub-issue of [v0.1.1](https://github.com/pedrobtz/zuid/issues/118).
+
+**CI.** `quick`. It adds scheduled workflows and tests, and no package
+code.
+
+**Goal.** No `gap #` left in `.agents/assurance.md`. Closes #91, #92, #93,
+#94, #96, #98 and #99.
+
+**Work.**
+- `alloc-failure.yml` on the schedule (#91), and the decision on Sqids'
+  out-of-memory result, which should raise.
+- `mutation.yml` over the standalone codec build, with `encodings.csv`
+  rows as the vectors (#92). The survivors are read and filed.
+- A `reach-floor` in `fuzz.yaml`, a few points under the current reach
+  (#93).
+- Tests for the remaining straddles: argument bounds (#96), every
+  generator's time range (#98), the stack-to-heap switches (#99).
+- A Sonyflake fixture from `sonyflake-py` (#94).
+
+**Tests.**
+- Sonyflake: `(id, time, sequence, machine)` rows from `sonyflake-py`'s
+  `decompose`, compared in both directions. In `test-snowflake.R`.
+- Bounds: each limit of #96 at `limit − 1`, `limit` and `limit + 1`,
+  through R and C. In `test-c-guards.R`.
+- Time ranges: every generator at its minimum and maximum, one unit
+  inside each and one unit outside each. In `test-strict-time.R`.
+- Buffer switches: hex at 255, 256 and 257 characters; base58 and base62
+  at 255, 256 and 257 bytes; a Sqid of 511, 512 and 513 characters with
+  a blocked word at the end. In `test-encode.R` and `test-sqids.R`.
+
+**Exit criteria.**
+- `assurance.yml` green with no `gap #` rows.
+- Mutation survivors and the reach gap list read, with each missing
+  oracle filed.
+- Each new test seen to fail once on a deliberately broken build.
+
+**Design.** [§7](design.md#7-the-oracles), [§9](design.md#9-testing).
+
+## Stage 16 — Full CI
+
+**Issue.** [#123](https://github.com/pedrobtz/zuid/issues/123), sub-issue of [v0.1.1](https://github.com/pedrobtz/zuid/issues/118).
+
+**CI.** `full`.
+
+**Goal.** The full r-actions profile and step-20 gctorture are green on the
+v0.1.1 code. #84 (the r-universe WebAssembly build) is fixed or recorded
+as a known limit.
+
+**Exit criteria.** A full-profile run green on the pull request. A
+dispatched one green on the merge commit. A dispatched step-20 gctorture
+run green on the pull request's last commit.
+
+## Stage 17 — v0.1.1 readiness
+
+**Issue.** [#124](https://github.com/pedrobtz/zuid/issues/124), sub-issue of [v0.1.1](https://github.com/pedrobtz/zuid/issues/118).
+
+**CI.** `full`.
+
+**Work.** `Version: 0.1.1`, with a `NEWS.md` section listing every fix by
+issue. `cran-comments.md` for an update, with the r-actions legs as test
+environments. `urlchecker::url_check()` and
+`spelling::spell_check_package()` clean.
+
+**Exit criteria.** A full-profile run green on the merge commit.
+
+## Stage 18 — Review
+
+**Issue.** [#125](https://github.com/pedrobtz/zuid/issues/125), sub-issue of [v0.1.1](https://github.com/pedrobtz/zuid/issues/118). No pull request closes it.
+
+**CI.** `full`.
+
+**Work.**
+1. `pkg-critical-review`, with its blocking and required findings as
+   sub-issues of this issue, fixed in one pull request.
+2. A second bug hunt (`pkg-bug-hunt`) on the release candidate, sliced
+   the same way, so the result can be compared with 2026-11-15.
+3. `pkg-cran-review` on the code to be submitted.
+
+**Exit criteria.** Every blocking and required review issue closed. The
+`pkg-cran-review` table clean. A full-profile run green on the default
+branch, whose head becomes the release commit.
 
 ## After 0.1.0
 

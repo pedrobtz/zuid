@@ -1189,6 +1189,49 @@ full profile and records the dates.
   know; masking `ulid::ulid()` is accepted, as `zuid::ulid()` resolves
   it. The maintainer set this on 2026-11-05.
 
+The decisions below are for v0.1.1, from the 2026-11-15 assurance pass and
+bug hunt (`.agents/reviews/2026-11-15-bug-hunt.md`). The maintainer approved
+them on 2026-11-15, choosing for D28 to grow the tables rather than evict,
+for D30 to refuse numbers rather than compare them exactly, and for D31 to
+follow `isCuid()`.
+
+- **D26 (M).** Generator state is per process, not per session. Every
+  static that a generator keeps records the process id it was made in.
+  When the id differs, every state resets as on load, including the v1
+  clock sequence and node and the ObjectId per-process value. A forked
+  child then draws its own state, as pymongo re-draws ObjectId's value.
+  The guard does nothing on Windows, which has no `fork()`. (#88, #109)
+- **D27 (M).** A rollback is measured against the last clock reading, not
+  the last emitted time. A generator that advances its own timestamp on
+  counter overflow (v7, v1/v6, SCRU64) keeps the two apart, as Snowflake
+  already does. A tolerance option of 2⁴⁰ ms (about 35 years) or more means
+  "unlimited". It is clamped before any conversion to an integer type.
+  (#101, #102)
+- **D28 (M).** Per-node and per-layout state tables grow as needed and
+  never drop a slot, so no count of nodes or layouts in a session weakens
+  §6.7. Layouts are compared field by field, never by `memcmp`. (#89,
+  #90, #116)
+- **D29 (M).** Every route that makes a zuid value checks what
+  `id_parse()` checks at its default level. `id_from_bytes()` gives `NA`
+  for bytes the format's structure refuses: SCRU64 at 36¹² or above, a
+  set sign bit, reserved timestamps, and a malformed CID. `id_decode()`
+  shares §6.10's 2¹⁶-byte cap and the ASCII rule with `id_encode()` and
+  `id_parse()`. (#97, #103, #110)
+- **D30 (M).** Comparison is defined only between zuid vectors of one
+  format and its parameters (layout, alphabet, `min_length`, blocklist),
+  and between a zuid vector and character text. Text is parsed as `c()`
+  parses it. Numbers, factors and other formats are `zuid_type_error`, as
+  they are for `c()` and `[<-`. `match()` and `%in%` use the same
+  canonical form as `==`, and vctrs orders by the same key as `xtfrm()`.
+  (#105, #106)
+- **D31 (M).** Cuid2's structure level is the reference's `isCuid()`, with
+  a leading letter. The syntax level keeps today's looser rule.
+  Documentation then matches D21's rule of following the mainstream
+  implementation. (#113)
+- **D32 (M).** `id_parse()` and `id_valid()` take `blocklist` beside
+  `alphabet` and `min_length`, so every Sqids parameter has a route from
+  text. (#108)
+
 ## 14. Later versions, in the order they are expected
 
 - **A C API**: `inst/include/zuid.h` with `zid_parse()`, `zid_format()`,
