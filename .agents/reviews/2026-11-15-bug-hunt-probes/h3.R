@@ -1,0 +1,12 @@
+.libPaths(c(Sys.getenv("ZLIB"), .libPaths())); library(zuid)
+r <- function(lbl, expr) { v <- tryCatch(expr, error = function(e) paste("ERROR", class(e)[1], conditionMessage(e))); cat(lbl, ": "); print(v) }
+objectid(1); k <- parallel::mclapply(1:4, function(i) as.character(objectid(1000)), mc.cores = 4)
+r("F1 objectid dups", sum(duplicated(unlist(k))))
+uuid(1, 1); k <- parallel::mclapply(1:4, function(i) as.character(uuid(50000, 1)), mc.cores = 4)
+r("F1 v1 dups", sum(duplicated(unlist(k))))
+r("F2 scru64(100)", length(scru64(100, node = 1, node_bits = 23)))
+r("F2 scru64 reset uniq", length(unique(as.character(scru64(200, node = 2, node_bits = 23, rollback = "reset")))))
+options(zuid.rollback_tolerance = 0); x <- as.character(uuid(20000)); r("F2 v7 tol0 sorted", !is.unsorted(x, strictly = TRUE))
+r("F2 v1 tol0 dups", sum(duplicated(as.character(uuid(40000, 1)))))
+options(zuid.rollback_tolerance = 10, zuid.clock_tolerance = Inf)
+r("F4 snowflake Inf", snowflake(1, id_layout("twitter"), list(datacenter = 1, worker = 1)))
