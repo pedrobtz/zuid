@@ -41,7 +41,7 @@ A list with elements:
 ``` r
 zuid_info()
 #> $version
-#> [1] ‘0.1.0’
+#> [1] ‘0.1.0.9000’
 #> 
 #> $tables
 #>             table                  repo
@@ -62,7 +62,7 @@ zuid_info()
 #> [1] 1.645558e+12
 #> 
 #> $state$uuid7_counter
-#> [1] 73
+#> [1] 285
 #> 
 #> $state$uuid1_last_ticks
 #> [1] NA
