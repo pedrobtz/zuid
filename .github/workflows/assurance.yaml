@@ -1,0 +1,16 @@
+# Holds .agents/assurance.md to the portfolio's assurance standard: every
+# required check has a row, every `done` names a workflow that runs it, and
+# every gap names an issue.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+name: assurance
+
+permissions:
+  contents: read
+
+jobs:
+  assurance:
+    uses: pedrobtz/r-actions/.github/workflows/assurance.yml@v1
