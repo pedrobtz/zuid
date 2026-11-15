@@ -1,0 +1,10 @@
+.libPaths(c(Sys.getenv("ZLIB"), .libPaths())); library(zuid)
+r <- function(lbl, expr) { v <- tryCatch(expr, error = function(e) paste("ERROR", class(e)[1])); cat(lbl, ": "); print(v) }
+r("T2 typeid strict", id_valid("a_7zzzzzzzzzfzzgzzzzzzzzzzzz", "typeid", level = "strict"))
+r("T2 uuid of it", as.character(id_convert(id_parse("a_7zzzzzzzzzfzzgzzzzzzzzzzzz", "typeid", level = "syntax"), "uuid")))
+r("T2 uuid strict", id_valid("ffffffff-ffff-7fff-0fff-ffffffffffff", "uuid", level = "strict"))
+r("T4 cuid2", id_valid(c("1a", "11", "4jypitsbhh"), "cuid2"))
+b <- id_decode(strrep("ab", 70000), "hex")[[1]]; r("T5 len", length(b)); r("T5 encode", id_encode(b, "hex"))
+r("T6 words é", id_decode("é", "words")); r("T6 proquint 1lusab", id_decode("1lusab", "proquint"))
+u <- uuid(1); p <- id_format(u, "proquint"); p2 <- gsub("-", "–", p)
+r("T6 dash", list(lengths(id_decode(p2, "proquint")), as.character(id_parse(p2, "uuid", form = "proquint"))))

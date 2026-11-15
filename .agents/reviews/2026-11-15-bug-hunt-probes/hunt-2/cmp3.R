@@ -1,0 +1,13 @@
+source("pre.R")
+d <- read.delim("cases3.tsv", header=FALSE, col.names=c("hex","ref","tag"), stringsAsFactors=FALSE, colClasses="character", na.strings=character(), quote="")
+unhex <- function(h) vapply(h, function(z) { if (!nzchar(z)) return(""); r <- as.raw(strtoi(substring(z, seq(1,nchar(z),2), seq(2,nchar(z),2)), 16L)); rawToChar(r) }, "", USE.NAMES=FALSE)
+d$text <- unhex(d$hex)
+x <- id_parse(d$text, "cid", level="syntax")
+b <- id_bytes(x)
+got <- vapply(b, function(v) if (is.null(v)) "NA" else paste(sprintf("%02x", as.integer(v)), collapse=""), "")
+dis <- which(got != d$ref)
+cat(nrow(d), "cases;", sum(d$ref!="NA"), "ref-valid;", sum(got!="NA"), "zuid-valid;", length(dis), "disagreements\n")
+u <- d[dis,]; u$got <- got[dis]; u$kind <- ifelse(u$ref=="NA","zuid-accepts", ifelse(u$got=="NA","zuid-rejects","differ"))
+print(table(u$kind, substr(u$text,1,1)))
+for (k in unique(u$kind)) { cat("--",k,"\n"); z <- u[u$kind==k,]; z <- z[!duplicated(substr(z$text,1,1)),]; for (i in seq_len(min(nrow(z),25))) cat(encodeString(substr(z$text[i],1,100)), " ref=", substr(z$ref[i],1,40), " got=", substr(z$got[i],1,40), "\n") }
+saveRDS(u, "dis3.rds")
